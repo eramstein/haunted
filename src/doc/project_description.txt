@@ -1,0 +1,33 @@
+This is a game/simulation aiming at exploring agent systems capabilities.
+
+The setting is 6 NPCs living together in a large haunted mansion. 
+The player is a ghost haunting the mansion, who can see the whole game state but has limited impact on the simulation (whisper to NPCs, make small physical alterations to the world).
+There is no predefined goal for the player, just having fun with the simulation. 
+
+The simulation is split into 2 main "modules":
+- Game logic. This is the "hard logic" part of the game state and the simulation.
+  Similar to something like Dwarf Fortress or Rimworld, but very simplified
+  (few NPCs and items, space is modelled as a few discrete locations, no pathfinding, etc...)
+  It consists of a large State object, modelling the physical apects of the world and the quantifiable aspects of NPCs (e.g. hunger level),
+  and a bunch of functions to mutate that state.
+  It runs on a setInterval, 1 second IRL is 1 minute in game.
+- Narration builder. This is natural language prose written by LLMs.
+  It includes world locations descriptions, events and NPC interactions, goals, memories and opinions.
+  Some of it is stored in the main game state object alongside the game logic data (e.g. current goals of a NPC),
+  the rest is stored in a Vector Database to be retreived when pertinent.
+
+The interesting part is to explore how these 2 facets can interact.
+- Inject game logic state into LLM text generation. 
+  e.g. when 2 NPCs chat, the system prompt is created dynamically and injects relevant info about the current simulation state.
+- LLMs don't only generate prose, but also return structured info that update the simulation state
+  e.g. after 2 NPCs chat, some of the NPC quantified state is updated. 
+       The LLM returns structured and quantified input on how to update a character.socialNeeds object properties.
+- LLMs use tool calling to trigger game logic functions. e.g. a NPC decides to go to a location or start a task.
+- "gamify" LLM outputs. e.g. 
+  -> a NPC setGoal prompt creates a quest for the player, with a narrative part (prose like "Joe wants to get richer") and a logic part (a tool that checks the game state and returns whether the goal is achieved, e.g. !!joe.money > N)
+  -> game logic checks when the quest is achieved, when it happens call a LLM to add narration on how the NPC reacts to it
+  -> player gets rewarded with resources used to influence narration, e.g. "mana points"
+  -> player calls LLM with prose description of what changes ("a crocodile appears in the basement" or "Joe now thinks Bob is super funny")
+  -> LLM arbiters whether this is game breaking or not, and if doable then how much resource it costs (g on how much the alteration is)
+  -> LLM calls tool to update game state (e.g. spawnCreature("crododile"), updateNpcOpinion("bob", "joe", "friendliness", +5))
+

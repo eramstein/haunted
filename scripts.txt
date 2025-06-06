@@ -1,0 +1,2 @@
+ollama start
+chroma run --path ./chroma

@@ -1,0 +1,18 @@
+{
+  "rules": [
+    {
+      "name": "Use Svelte 5 syntax",
+      "description": "When working with Svelte files, prefer Svelte 5 syntax including runes like $derived, $state, $effect, etc. over the older $: reactive declarations.",
+      "pattern": "**/*.svelte",
+      "instructions": [
+        "Use $derived instead of $: for computed values",
+        "Use $state for reactive state variables",
+        "Use $effect for side effects",
+        "Use $props for component props",
+        "Use $inspect for debugging",
+        "Use $template for template literals",
+        "Use $signal for fine-grained reactivity"
+      ]
+    }
+  ]
+}

@@ -29,6 +29,11 @@
     gap: 1rem;
   }
 
+  .date {
+    color: #888;
+    font-size: 0.9rem;
+  }
+
   .character-portrait {
     width: 400px;
     height: 400px;

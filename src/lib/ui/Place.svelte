@@ -1,11 +1,10 @@
 <script lang="ts">
   import { gs, uiState } from '../_state';
-  import { getTime } from '../sim';
   import { getCharacterImage, getPlaceImage } from './_helpers';
 
-  const viewedPlace = $derived(gs.places[uiState.currentPlace]);
+  const viewedPlace = $derived(uiState.selectedPlace || gs.places[0]);
   const presentCharacters = $derived(
-    gs.characters.filter((character) => character.place === uiState.currentPlace)
+    gs.characters.filter((character) => character.place === uiState.selectedPlace?.index)
   );
 </script>
 

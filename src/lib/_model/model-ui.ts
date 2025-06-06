@@ -2,7 +2,6 @@ import type { Character, Place } from './model-sim';
 
 export type UiState = {
   currentView: UiView;
-  currentPlace: number;
   simulationSpeed: number;
   isPaused: boolean;
   selectedPlace: Place | null;

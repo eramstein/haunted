@@ -6,7 +6,7 @@
   import { uiState } from '../_state/state-ui.svelte';
 
   const mapImage = $derived(getMapImage('mansion'));
-  const debug = $state(false);
+  const debug = false;
 
   let imageSize = $state(0);
   let imageLeft = $state(0);
@@ -155,7 +155,9 @@
     left: 50%;
     transform: translate(-50%, -50%);
     display: flex;
-    gap: 2px;
+    gap: 5px;
+    flex-wrap: wrap;
+    width: 200px;
   }
 
   .character-portrait {

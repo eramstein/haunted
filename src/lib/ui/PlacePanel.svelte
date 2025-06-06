@@ -27,6 +27,11 @@
     gap: 1rem;
   }
 
+  .date {
+    color: #888;
+    font-size: 0.9rem;
+  }
+
   h2 {
     margin: 0;
     font-size: 1.5rem;
@@ -57,7 +62,7 @@
     width: 400px;
     height: 400px;
     background-repeat: no-repeat;
-    background-size: contain;
+    background-size: cover;
     background-position: center center;
   }
 </style>

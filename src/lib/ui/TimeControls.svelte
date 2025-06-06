@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { getTime, togglePause, setSpeed } from '../sim/time';
+  import { togglePause, setSpeed } from '../sim/time';
   import { uiState } from '../_state/state-ui.svelte';
+  import { formatGameDate } from './_helpers/date.svelte';
 
   let speed = $derived(uiState.simulationSpeed);
 
@@ -25,7 +26,7 @@
 
 <div class="controls">
   <div class="clock">
-    {getTime().toLocaleString().slice(0, 16)}
+    {formatGameDate()}
   </div>
 
   <div class="buttons">
@@ -51,10 +52,9 @@
   .controls {
     background: rgba(0, 0, 0, 0.7);
     border-radius: 0.5rem;
-    padding: 0.5rem 1.5rem 0.5rem 0.5rem;
+    padding: 0 1rem 0.5rem 0.5rem;
     flex-direction: column;
     display: flex;
-    gap: 0.5rem;
     color: #fff;
   }
 

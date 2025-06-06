@@ -1,4 +1,5 @@
 import { loadStateFromLocalStorage, saveStateToLocalStorage, gs } from '../../_state';
+import { togglePause } from '../../sim/time';
 
 export function handleKeybinds(event: KeyboardEvent) {
   if (event.key === 'F4') {
@@ -13,5 +14,8 @@ export function handleKeybinds(event: KeyboardEvent) {
     event.preventDefault();
     saveStateToLocalStorage();
     console.log('State saved to localStorage');
+  } else if (event.key === ' ') {
+    event.preventDefault();
+    togglePause();
   }
 }

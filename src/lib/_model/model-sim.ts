@@ -9,7 +9,7 @@ export interface State {
 
 export interface Time {
   startDate: Date;
-  ellapsedTime: number;
+  ellapsedTime: number; // in minutes since startDate
 }
 
 export interface Place {

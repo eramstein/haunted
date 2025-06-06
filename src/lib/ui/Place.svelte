@@ -13,9 +13,6 @@
   class="place-container"
   style="background-image: url({getPlaceImage(viewedPlace.image || viewedPlace.name)})"
 >
-  <div class="clock">
-    {getTime().toLocaleString().slice(0, 16)}
-  </div>
   <div class="characters">
     {#each presentCharacters as character (character.key)}
       <div
@@ -32,15 +29,6 @@
     width: 100%;
     height: 100vh;
     background-size: cover;
-  }
-  .clock {
-    position: absolute;
-    background-color: #eee;
-    border: 1px solid #ccc;
-    text-align: center;
-    padding: 2px 20px;
-    top: 60px;
-    left: 10px;
   }
   .characters {
     position: absolute;

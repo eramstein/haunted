@@ -11,7 +11,8 @@
         "Use $props for component props",
         "Use $inspect for debugging",
         "Use $template for template literals",
-        "Use $signal for fine-grained reactivity"
+        "Use $signal for fine-grained reactivity",
+        "Use onclick instead of on:click for event handlers"
       ]
     }
   ]

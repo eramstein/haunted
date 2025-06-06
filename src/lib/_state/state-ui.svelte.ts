@@ -5,4 +5,6 @@ export const uiState: UiState = $state({
   currentPlace: 0,
   simulationSpeed: 1, // 1 second IRL = 1 minute in sim
   isPaused: true,
+  selectedPlace: null,
+  selectedCharacter: null,
 });

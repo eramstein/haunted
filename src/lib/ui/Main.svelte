@@ -5,6 +5,7 @@
   import TimeControls from './TimeControls.svelte';
   import ViewControls from './ViewControls.svelte';
   import MansionMap from './MansionMap.svelte';
+  import SidePanel from './SidePanel.svelte';
 </script>
 
 <div class="main">
@@ -20,6 +21,7 @@
       <MansionMap />
     {/if}
   </div>
+  <SidePanel />
 </div>
 
 <style>

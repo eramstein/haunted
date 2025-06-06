@@ -17,6 +17,14 @@ export interface Place {
   name: string;
   description: string;
   image?: string;
+  position: Position;
+}
+
+export interface Position {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
 export interface Character {

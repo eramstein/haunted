@@ -8,6 +8,9 @@ export function loadImages() {
   images.places = import.meta.glob('../../../assets/images/places/*.png', {
     eager: true,
   }) as Record<string, { default: string }>;
+  images.maps = import.meta.glob('../../../assets/images/maps/*.png', {
+    eager: true,
+  }) as Record<string, { default: string }>;
 }
 
 export function getCharacterImage(characterId: string) {
@@ -16,4 +19,8 @@ export function getCharacterImage(characterId: string) {
 
 export function getPlaceImage(placeId: string) {
   return images.places?.[`../../../assets/images/places/${placeId}.png`]?.default;
+}
+
+export function getMapImage(mapId: string) {
+  return images.maps?.[`../../../assets/images/maps/${mapId}.png`]?.default;
 }

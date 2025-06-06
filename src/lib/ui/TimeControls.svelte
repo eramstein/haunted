@@ -49,56 +49,65 @@
 
 <style>
   .controls {
-    position: absolute;
-    background-color: #eee;
-    border: 1px solid #ccc;
-    padding: 8px;
-    top: 10px;
-    left: 10px;
-    z-index: 1;
-    display: flex;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 0.5rem;
+    padding: 0.5rem 1.5rem 0.5rem 0.5rem;
     flex-direction: column;
-    gap: 8px;
+    display: flex;
+    gap: 0.5rem;
+    color: #fff;
   }
 
   .clock {
     text-align: center;
     font-weight: bold;
+    padding: 0.5rem 0;
   }
 
   .buttons {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 0.75rem;
   }
 
   .buttons button {
-    width: 40px;
+    width: 2rem;
+    text-align: center;
   }
 
   .pause-btn {
-    padding: 4px 8px;
+    padding: 0.5rem;
     cursor: pointer;
-    background: #fff;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    background: transparent;
+    border: none;
+    border-radius: 0.25rem;
+    color: #fff;
+    transition: all 0.2s ease;
+  }
+
+  .pause-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
   }
 
   .speed-control {
     display: flex;
-    gap: 8px;
+    gap: 0.5rem;
   }
 
   .speed-btn {
-    padding: 4px 8px;
     cursor: pointer;
-    background: #fff;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    background: transparent;
+    border: none;
+    border-radius: 0.25rem;
+    color: #fff;
+    transition: all 0.2s ease;
+  }
+
+  .speed-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
   }
 
   .speed-btn.active {
-    background: #e0e0e0;
-    border-color: #999;
+    background: rgba(255, 255, 255, 0.2);
   }
 </style>

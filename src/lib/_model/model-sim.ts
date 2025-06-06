@@ -1,5 +1,3 @@
-import type { ActionType } from '../_config';
-
 export interface State {
   time: Time;
   places: Place[];

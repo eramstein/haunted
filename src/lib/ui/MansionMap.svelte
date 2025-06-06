@@ -1,11 +1,75 @@
 <script lang="ts">
   import { getMapImage } from './_helpers/images.svelte';
+  import { gs } from '../_state';
+  import type { Place, Position } from '../_model';
 
   const mapImage = $derived(getMapImage('mansion'));
+  const debug = $state(false);
+
+  let imageSize = $state(0);
+  let imageLeft = $state(0);
+
+  let selectedPlace: Place | null = $state(null);
+
+  function updateImageDimensions(img: HTMLImageElement) {
+    const rect = img.getBoundingClientRect();
+    // the container is 100% of the width, the image is centered
+    const fullWidth = rect.width;
+    imageSize = rect.height;
+    imageLeft = (fullWidth - imageSize) / 2;
+  }
+
+  function logClickedPosition(event: MouseEvent) {
+    if (!debug) return;
+    const rect = (event.currentTarget as HTMLImageElement).getBoundingClientRect();
+    const x = ((event.clientX - rect.left - imageLeft) / imageSize) * 100;
+    const y = ((event.clientY - rect.top) / imageSize) * 100;
+    console.log(`Clicked position: x=${x.toFixed(2)}%, y=${y.toFixed(2)}%`);
+  }
+
+  function getPlaceCoordinates(position: Position) {
+    return {
+      left: `${imageLeft + (position.x * imageSize) / 100}px`,
+      top: `${(position.y * imageSize) / 100}px`,
+      width: `${(position.width * imageSize) / 100}px`,
+      height: `${(position.height * imageSize) / 100}px`,
+    };
+  }
+
+  function onPlaceClick(place: Place) {
+    if (selectedPlace?.index === place.index) {
+      selectedPlace = null;
+    } else {
+      selectedPlace = place;
+    }
+  }
 </script>
 
 <div class="mansion-map">
-  <img src={mapImage} alt="Mansion Map" class="map-background" />
+  <div class="map-container">
+    <img
+      src={mapImage}
+      class="map-background"
+      onload={(e) => updateImageDimensions(e.currentTarget as HTMLImageElement)}
+      onclick={logClickedPosition}
+    />
+    {#each gs.places as place}
+      {@const coords = getPlaceCoordinates(place.position)}
+      <div
+        class="place-overlay"
+        class:visible={debug || selectedPlace?.index === place.index}
+        style:left={coords.left}
+        style:top={coords.top}
+        style:width={coords.width}
+        style:height={coords.height}
+        onclick={() => onPlaceClick(place)}
+      >
+        {#if debug}
+          <div class="place-name">{place.name}</div>
+        {/if}
+      </div>
+    {/each}
+  </div>
 </div>
 
 <style>
@@ -18,6 +82,12 @@
     align-items: center;
   }
 
+  .map-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
   .map-background {
     width: 100%;
     height: 100%;
@@ -26,5 +96,31 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+  }
+
+  .place-overlay {
+    position: absolute;
+    border: 2px solid rgba(255, 255, 255, 0);
+    background-color: rgba(0, 0, 0, 0);
+    cursor: pointer;
+  }
+
+  .place-overlay.visible {
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+
+  .place-overlay.visible:hover {
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+
+  .place-name {
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    text-shadow: 1px 1px 2px black;
+    opacity: 1;
   }
 </style>

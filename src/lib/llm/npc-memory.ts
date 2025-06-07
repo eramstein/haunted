@@ -6,14 +6,14 @@ import type { Memory } from '../_model';
 export async function initNpcMemory() {
   gs.characters.forEach(async (character) => {
     const collection = await vectorDatabaseClient.getOrCreateCollection({
-      name: character.key,
+      name: character.id,
     });
     await collection.upsert({
       documents: character.llm.initialMemories,
       metadatas: character.llm.initialMemories.map(() => ({
         memory_type: 'foundation_memory',
       })),
-      ids: character.llm.initialMemories.map((_, i) => character.key + ' memory ' + i),
+      ids: character.llm.initialMemories.map((_, i) => character.id + ' memory ' + i),
     });
   });
   console.log('NPCs memory initalized');

@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Character } from '../_model';
   import { gs } from '../_state';
+  import { formatMinutes } from './_helpers/date.svelte';
   import { getCharacterImage } from './_helpers/images.svelte';
 
   let props = $props<{
@@ -13,11 +14,23 @@
   <div class="character-details">
     <div
       class="character-portrait"
-      style="background-image: url({getCharacterImage(props.character.key)})"
+      style="background-image: url({getCharacterImage(props.character.id)})"
     ></div>
     <div class="detail-item">
       <span class="label">Location:</span>
       <span class="value">{gs.places[props.character.place].name}</span>
+    </div>
+    <div class="detail-item">
+      <span class="label">Food:</span>
+      <span class="value">
+        {formatMinutes(gs.time.ellapsedTime - props.character.needs.food.lastMeal)}
+      </span>
+    </div>
+    <div class="detail-item">
+      <span class="label">Sleep:</span>
+      <span class="value">
+        {formatMinutes(gs.time.ellapsedTime - props.character.needs.sleep.lastSleep)}
+      </span>
     </div>
   </div>
 </div>

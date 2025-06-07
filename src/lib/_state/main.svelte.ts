@@ -1,4 +1,5 @@
-import type { State } from '../_model/model-sim';
+import { type State } from '../_model/model-sim';
+import { createNewSimState } from './initialize';
 import { initialState } from './state-sim.svelte';
 
 const LOCAL_STORAGE_KEY = 'hauntedMansionState';
@@ -16,7 +17,7 @@ export const saveStateToLocalStorage = (): void => {
 export const loadStateFromLocalStorage = (): State | null => {
   try {
     const savedState = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (!savedState) return null;
+    if (!savedState) return createNewSimState();
 
     const parsedState: State = JSON.parse(savedState);
 

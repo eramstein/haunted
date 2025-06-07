@@ -1,7 +1,7 @@
-import type { Character } from '@/lib/_model/model-sim';
+import type { CharacterBase } from '@/lib/_model/model-sim';
 
-export const NPC_EMMA: Omit<Character, 'index'> = {
-  key: 'emma',
+export const NPC_EMMA: CharacterBase = {
+  id: 'emma',
   name: 'Emma',
   place: 0,
   llm: {

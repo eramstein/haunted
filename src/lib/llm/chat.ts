@@ -3,7 +3,7 @@ import type { Character } from '../_model';
 
 async function summarizeChat(chatHistory: string, character: string) {
   const prompt = `
-    Summarize all interactions between these characters into 2-3 sentences, focusing on key events (e.g., game outcomes, social moments, plans). Output only the summary text.
+    Summarize all interactions between these characters into 2-3 sentences, focusing on id events (e.g., game outcomes, social moments, plans). Output only the summary text.
     Test to summarize: ${chatHistory}
   `;
   const memory = await llmService.chat({

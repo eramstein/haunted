@@ -17,3 +17,9 @@ export function formatGameDate(): string {
 
   return `${dayOfWeek}, ${ordinal(day)} ${month} ${hours}:${minutes}`;
 }
+
+export function formatMinutes(minutes: number) {
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = Math.floor(minutes % 60);
+  return `${hours}h ${remainingMinutes}m`;
+}

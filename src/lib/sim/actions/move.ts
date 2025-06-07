@@ -15,5 +15,5 @@ export function moveTool(
 
 export function move(character: Character, place: Place) {
   character.place = place?.index || 0;
-  console.log('move', character.key, place.name);
+  console.log('move', character.id, place.name);
 }

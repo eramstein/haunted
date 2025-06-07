@@ -17,7 +17,7 @@ export async function generateMemories(chatTranscript: string): Promise<Memory[]
     role: 'system',
     content: `
     Summarize the provided chat history into ${memoryCount}-${memoryCount + 1} distinct memories, each focusing on a specific event or topic (e.g., game outcome, social interaction, card trade, future plans). For each memory:
-      1. Generate a concise summary (2-4 sentences) capturing the key details.
+      1. Generate a concise summary (2-4 sentences) capturing the id details.
       2. Provide metadata in JSON format with the following required fields:
         - interaction_type: One of ["game_session", "tournament", "card_trade", "social_event", "conversation"].
         - relationship_status: One of ["friend", "rival", "neutral", "romantic_interest"].

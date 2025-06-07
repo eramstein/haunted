@@ -13,7 +13,7 @@ async function getToolsFromText(message: string) {
   };
   const query = {
     role: 'user',
-    content: `This is the key information to select the tool, give it priority: ${message}. ${memoryPrompt}`,
+    content: `This is the id information to select the tool, give it priority: ${message}. ${memoryPrompt}`,
   };
   const response = await llmService.chat({
     messages: [systemMessage, query],

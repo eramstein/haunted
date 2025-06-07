@@ -55,7 +55,7 @@
   function onCharacterClick(event: MouseEvent, character: Character) {
     event.stopPropagation();
     uiState.selectedPlace = null;
-    if (uiState.selectedCharacter?.key === character.key) {
+    if (uiState.selectedCharacter?.id === character.id) {
       uiState.selectedCharacter = null;
     } else {
       uiState.selectedCharacter = character;
@@ -92,9 +92,9 @@
           <div class="place-name">{place.name}</div>
         {/if}
         <div class="characters">
-          {#each characters as character (character.key)}
+          {#each characters as character (character.id)}
             <img
-              src={getCharacterImage(character.key)}
+              src={getCharacterImage(character.id)}
               class="character-portrait"
               onclick={(e) => onCharacterClick(e, character)}
             />

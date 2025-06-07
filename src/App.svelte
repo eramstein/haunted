@@ -13,6 +13,7 @@
 
     // Load saved game state if it exists
     const loadedState = loadStateFromLocalStorage();
+    console.log(loadedState);
     if (loadedState) {
       console.log('Game state loaded from localStorage');
     }

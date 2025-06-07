@@ -1,4 +1,4 @@
-import type { Place, Position } from '@/lib/_model/model-sim';
+import type { PlaceBase, Position } from '@/lib/_model/model-sim';
 import { NPCS } from '../npcs';
 
 const roomPositions: Record<string, Position> = {
@@ -10,7 +10,13 @@ const roomPositions: Record<string, Position> = {
   lise: { x: 51, y: 7, width: 70 - 51, height: 27 - 7 },
 };
 
-const PLACES_BASE: Omit<Place, 'index'>[] = [
+export const PLACES: PlaceBase[] = [
+  {
+    name: 'Living room',
+    description: 'A very large living room with a big TV, a sofa and a coffee table.',
+    image: 'living_room',
+    position: { x: 52, y: 28.6, width: 70 - 52, height: 56.6 - 28.6 },
+  },
   {
     name: 'Kitchen',
     description: 'A large kitchen with an oven and a fridge.',
@@ -22,12 +28,6 @@ const PLACES_BASE: Omit<Place, 'index'>[] = [
     description: 'A large dining room with a big table and 6 chairs.',
     image: 'dining_room',
     position: { x: 18.37, y: 22.7, width: 35.4 - 18.5, height: 39.7 - 22.7 },
-  },
-  {
-    name: 'Living room',
-    description: 'A very large living room with a big TV, a sofa and a coffee table.',
-    image: 'living_room',
-    position: { x: 52, y: 28.6, width: 70 - 52, height: 56.6 - 28.6 },
   },
   {
     name: 'Gaming room',
@@ -63,15 +63,10 @@ const PLACES_BASE: Omit<Place, 'index'>[] = [
 ];
 
 Object.values(NPCS).forEach((npc) => {
-  PLACES_BASE.push({
+  PLACES.push({
     name: `${npc.name}'s room`,
     description: `${npc.name}'s room, basic bedroom with a bed, a desk, a chair and a closet.`,
-    image: `${npc.key}_room`,
-    position: roomPositions[npc.key],
+    image: `${npc.id}_room`,
+    position: roomPositions[npc.id],
   });
 });
-
-export const PLACES = PLACES_BASE.map((p, i) => ({
-  index: i,
-  ...p,
-}));

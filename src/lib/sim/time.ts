@@ -7,8 +7,11 @@ export function passTime(duration: number) {
   }
 }
 
-export function getTime() {
-  return new Date(gs.time.startDate.getTime() + gs.time.ellapsedTime * 60 * 1000);
+export function getTime(ellapsedTime: number | null = null) {
+  if (ellapsedTime === null) {
+    ellapsedTime = gs.time.ellapsedTime;
+  }
+  return new Date(gs.time.startDate.getTime() + ellapsedTime * 60 * 1000);
 }
 
 export function togglePause() {

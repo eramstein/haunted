@@ -57,7 +57,7 @@ export interface LLMService {
   getMessage(response: ChatResponse | MistralChatResponse): string;
   getStreamChunk(response: ChatResponse | MistralStreamChunk): string;
   getTools(response: ChatResponse | MistralChatResponse): ToolCall[];
-  getToolArguments(response: { [key: string]: any } | string): Record<string, any>;
+  getToolArguments(response: { [id: string]: any } | string): Record<string, any>;
 }
 
 export class OllamaService implements LLMService {

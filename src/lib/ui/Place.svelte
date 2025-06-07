@@ -2,9 +2,9 @@
   import { gs, uiState } from '../_state';
   import { getCharacterImage, getPlaceImage } from './_helpers';
 
-  const viewedPlace = $derived(uiState.selectedPlace || gs.places[0]);
+  const viewedPlace = $derived(gs.places[gs.player.place] || gs.places[0]);
   const presentCharacters = $derived(
-    gs.characters.filter((character) => character.place === uiState.selectedPlace?.index)
+    gs.characters.filter((character) => character.place === gs.player.place)
   );
 </script>
 
@@ -17,6 +17,9 @@
       <div
         style="background-image: url({getCharacterImage(character.key)})"
         class="character"
+        onclick={() => {
+          uiState.selectedCharacter = character;
+        }}
       ></div>
     {/each}
   </div>
@@ -34,6 +37,8 @@
     bottom: 100px;
     left: 50px;
     display: flex;
+    flex-wrap: wrap;
+    width: 100vh;
     gap: 20px;
   }
   .character {

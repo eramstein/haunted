@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getMapImage } from './_helpers/images.svelte';
   import { gs } from '../_state';
-  import type { Character, Place, Position } from '../_model';
+  import { UiView, type Character, type Place, type Position } from '../_model';
   import { getCharacterImage } from './_helpers/images.svelte';
   import { uiState } from '../_state/state-ui.svelte';
 
@@ -45,6 +45,13 @@
     }
   }
 
+  function onPlaceDoubleClick(place: Place) {
+    uiState.selectedPlace = null;
+    uiState.selectedCharacter = null;
+    uiState.currentView = UiView.Place;
+    gs.player.place = place.index;
+  }
+
   function onCharacterClick(event: MouseEvent, character: Character) {
     event.stopPropagation();
     uiState.selectedPlace = null;
@@ -79,6 +86,7 @@
         style:width={coords.width}
         style:height={coords.height}
         onclick={() => onPlaceClick(place)}
+        ondblclick={() => onPlaceDoubleClick(place)}
       >
         {#if debug}
           <div class="place-name">{place.name}</div>
@@ -121,6 +129,8 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   .place-overlay {
@@ -169,6 +179,8 @@
     object-fit: cover;
     background-color: rgba(0, 0, 0, 0.2);
     padding: 2px;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   .place-overlay.visible .character-portrait {

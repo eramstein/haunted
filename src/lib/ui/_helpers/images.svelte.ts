@@ -16,12 +16,13 @@ export function loadImages() {
   }) as Record<string, { default: string }>;
 }
 
-export function getCharacterImage(characterId: string) {
-  return images.characters?.[`../../../assets/images/characters/${characterId}.png`]?.default;
+export function getCharacterImage(characterName: string) {
+  return images.characters?.[`../../../assets/images/characters/${characterName.toLowerCase()}.png`]
+    ?.default;
 }
 
-export function getPlaceImage(placeId: string) {
-  return images.places?.[`../../../assets/images/places/${placeId}.png`]?.default;
+export function getPlaceImage(placeImage: string) {
+  return images.places?.[`../../../assets/images/places/${placeImage}.png`]?.default;
 }
 
 export function getMapImage(mapId: string) {

@@ -1,4 +1,4 @@
-import type { PlaceBase, Position } from '@/lib/_model/model-sim';
+import type { Place, Position } from '@/lib/_model/model-sim';
 import { NPCS } from '../npcs';
 
 const roomPositions: Record<string, Position> = {
@@ -10,7 +10,7 @@ const roomPositions: Record<string, Position> = {
   lise: { x: 51, y: 7, width: 70 - 51, height: 27 - 7 },
 };
 
-export const PLACES: PlaceBase[] = [
+export const PLACES: Omit<Place, 'id'>[] = [
   {
     name: 'Living room',
     description: 'A very large living room with a big TV, a sofa and a coffee table.',
@@ -66,7 +66,7 @@ Object.values(NPCS).forEach((npc) => {
   PLACES.push({
     name: `${npc.name}'s room`,
     description: `${npc.name}'s room, basic bedroom with a bed, a desk, a chair and a closet.`,
-    image: `${npc.id}_room`,
-    position: roomPositions[npc.id],
+    image: `${npc.name.toLowerCase()}_room`,
+    position: roomPositions[npc.name.toLowerCase()],
   });
 });

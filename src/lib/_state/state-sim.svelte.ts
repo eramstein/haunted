@@ -1,34 +1,22 @@
-import {
-  type CharacterBase,
-  type Character,
-  type State,
-  type PlaceBase,
-  type Place,
-} from '../_model/model-sim';
+import { type CharacterBase, type Character, type State, type Place } from '../_model/model-sim';
 import { PLACES } from '@/data/world/places';
 import { NPCS } from '@/data/npcs';
-
-// Initialize places array
-const places = PLACES.map(initPlace);
-
-// Create a Map for O(1) place lookups - initialized once since places are static
-export const placesMap = new Map<string, Place>(places.map((place) => [place.id, place]));
 
 export const initialState: State = {
   time: {
     startDate: new Date(),
     ellapsedTime: 0,
   },
-  places,
+  places: PLACES.map(initPlace),
   characters: NPCS.map(initCharacter),
   player: {
-    place: 'place-0',
+    place: 0, // Default to first place
   },
   items: {},
   itemIndices: {
     byType: {},
-    byOwner: {},
-    byLocation: {},
+    byOwnerId: {},
+    byLocationId: {},
     byTypeAndOwner: {},
   },
 };
@@ -36,6 +24,8 @@ export const initialState: State = {
 function initCharacter(character: CharacterBase, index: number): Character {
   return {
     ...character,
+    id: index,
+    place: 0, // Default to first place
     activity: null,
     objective: null,
     needs: {
@@ -49,9 +39,9 @@ function initCharacter(character: CharacterBase, index: number): Character {
   };
 }
 
-function initPlace(place: PlaceBase, index: number): Place {
+function initPlace(place: Omit<Place, 'id'>, index: number): Place {
   return {
     ...place,
-    id: 'place-' + index,
+    id: index,
   };
 }

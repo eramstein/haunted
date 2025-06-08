@@ -5,14 +5,14 @@ import { addItem } from '../sim/items';
 
 export function createNewSimState(): State {
   // add some initial items
-  const kitchen = initialState.places.find((p) => p.name === 'Kitchen');
+  const kitchen = initialState.places.findIndex((p) => p.name === 'Kitchen');
   if (kitchen) {
-    initialState.characters.forEach((c) => {
+    initialState.characters.forEach((c, charIndex) => {
       addItem({
         type: ItemType.Meal,
         description: 'A sandwich',
-        ownerId: c.id,
-        locationId: kitchen.id,
+        owner: charIndex,
+        location: kitchen,
       });
     });
   } else {

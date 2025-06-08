@@ -1,16 +1,16 @@
 <script lang="ts">
-  import { gs, uiState, placesMap } from '../_state';
+  import { gs, uiState } from '../_state';
   import { getCharacterImage, getPlaceImage, getItemIcon, getItemIconPosition } from './_helpers';
   import { getItemsByLocation } from '../sim/items';
 
-  const viewedPlace = $derived(placesMap.get(gs.player.place) || gs.places[0]);
+  const viewedPlace = $derived(gs.places[gs.player.place] || gs.places[0]);
   const presentCharacters = $derived(
     gs.characters.filter((character) => character.place === gs.player.place)
   );
   const presentItems = $derived(getItemsByLocation(viewedPlace.id));
 
-  function getOwnerName(ownerId: string) {
-    const owner = gs.characters.find((char) => char.id === ownerId);
+  function getOwnerName(ownerId: number) {
+    const owner = gs.characters[ownerId];
     return owner?.name || 'Unknown';
   }
 </script>
@@ -22,7 +22,7 @@
   <div class="characters">
     {#each presentCharacters as character (character.id)}
       <div
-        style="background-image: url({getCharacterImage(character.id)})"
+        style="background-image: url({getCharacterImage(character.name)})"
         class="character"
         onclick={() => {
           uiState.selectedCharacter = character;
@@ -49,7 +49,7 @@
           <div class="item-description">
             {item.description}
           </div>
-          <div class="item-owner">{getOwnerName(item.ownerId)}</div>
+          <div class="item-owner">{getOwnerName(item.owner)}</div>
         </div>
       </div>
     {/each}

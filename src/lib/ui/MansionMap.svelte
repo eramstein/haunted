@@ -62,7 +62,7 @@
     }
   }
 
-  function getCharactersInPlace(placeId: string) {
+  function getCharactersInPlace(placeId: number) {
     return gs.characters.filter((char) => char.place === placeId);
   }
 </script>
@@ -94,7 +94,7 @@
         <div class="characters">
           {#each characters as character (character.id)}
             <img
-              src={getCharacterImage(character.id)}
+              src={getCharacterImage(character.name)}
               class="character-portrait"
               onclick={(e) => onCharacterClick(e, character)}
             />

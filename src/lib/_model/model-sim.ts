@@ -14,15 +14,12 @@ export interface Time {
   ellapsedTime: number; // in minutes since startDate
 }
 
-export interface PlaceBase {
+export interface Place {
+  id: number;
   name: string;
   description: string;
   image?: string;
   position: Position;
-}
-
-export interface Place extends PlaceBase {
-  id: string;
 }
 
 export interface Position {
@@ -33,9 +30,7 @@ export interface Position {
 }
 
 export interface CharacterBase {
-  id: string;
   name: string;
-  place: string;
   llm: {
     systemPrompt: string;
     personalityTraits: string[];
@@ -44,16 +39,18 @@ export interface CharacterBase {
 }
 
 export interface Character extends CharacterBase {
+  id: number;
+  place: number;
+  activity: Activity | null;
+  objective: Objective | null;
   needs: {
     food: {
-      lastMeal: number; // State.time ellapsedTime
+      lastMeal: number;
     };
     sleep: {
-      lastSleep: number; // State.time in minutes
+      lastSleep: number;
     };
   };
-  activity: Activity | null; // what the character is doing (e.g. cooking)
-  objective: Objective | null; // what the character is currently trying to achieve (e.g. have a meal) -> sets activity
 }
 
 export interface Memory {
@@ -62,29 +59,29 @@ export interface Memory {
 }
 
 export interface Player {
-  place: string;
+  place: number;
 }
 
 export interface Item {
   id: string;
   type: ItemType;
   description: string;
-  ownerId: string;
-  locationId: string;
+  owner: number;
+  location: number;
 }
 
 // de-normalized indices for fast lookup
 export interface ItemIndices {
   byType: Partial<Record<ItemType, string[]>>;
-  byOwner: Record<string, string[]>;
-  byLocation: Record<string, string[]>;
+  byOwnerId: Record<number, string[]>;
+  byLocationId: Record<number, string[]>;
   byTypeAndOwner: Record<string, string[]>;
 }
 
 export interface Activity {
   type: ActivityType;
   progress: number;
-  targetId: string | null; // id of the target place or item
+  targetId: any | null; // could be anything based on the activity type
 }
 
 export interface Objective {

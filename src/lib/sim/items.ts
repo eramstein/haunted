@@ -22,19 +22,19 @@ export function addItem(item: Omit<Item, 'id'>): Item {
   gs.itemIndices.byType[item.type]!.push(id);
 
   // Update owner index
-  if (!gs.itemIndices.byOwner[item.ownerId]) {
-    gs.itemIndices.byOwner[item.ownerId] = [];
+  if (!gs.itemIndices.byOwnerId[item.owner]) {
+    gs.itemIndices.byOwnerId[item.owner] = [];
   }
-  gs.itemIndices.byOwner[item.ownerId].push(id);
+  gs.itemIndices.byOwnerId[item.owner].push(id);
 
   // Update location index
-  if (!gs.itemIndices.byLocation[item.locationId]) {
-    gs.itemIndices.byLocation[item.locationId] = [];
+  if (!gs.itemIndices.byLocationId[item.location]) {
+    gs.itemIndices.byLocationId[item.location] = [];
   }
-  gs.itemIndices.byLocation[item.locationId].push(id);
+  gs.itemIndices.byLocationId[item.location].push(id);
 
   // Update type-owner index
-  const typeOwnerKey = `${item.type}-${item.ownerId}`;
+  const typeOwnerKey = `${item.type}-${item.owner}`;
   if (!gs.itemIndices.byTypeAndOwner[typeOwnerKey]) {
     gs.itemIndices.byTypeAndOwner[typeOwnerKey] = [];
   }
@@ -53,17 +53,17 @@ export function removeItem(itemId: string) {
       (id) => id !== itemId
     );
   }
-  if (gs.itemIndices.byOwner[item.ownerId]) {
-    gs.itemIndices.byOwner[item.ownerId] = gs.itemIndices.byOwner[item.ownerId].filter(
+  if (gs.itemIndices.byOwnerId[item.owner]) {
+    gs.itemIndices.byOwnerId[item.owner] = gs.itemIndices.byOwnerId[item.owner].filter(
       (id) => id !== itemId
     );
   }
-  if (gs.itemIndices.byLocation[item.locationId]) {
-    gs.itemIndices.byLocation[item.locationId] = gs.itemIndices.byLocation[item.locationId].filter(
+  if (gs.itemIndices.byLocationId[item.location]) {
+    gs.itemIndices.byLocationId[item.location] = gs.itemIndices.byLocationId[item.location].filter(
       (id) => id !== itemId
     );
   }
-  const typeOwnerKey = `${item.type}-${item.ownerId}`;
+  const typeOwnerKey = `${item.type}-${item.owner}`;
   if (gs.itemIndices.byTypeAndOwner[typeOwnerKey]) {
     gs.itemIndices.byTypeAndOwner[typeOwnerKey] = gs.itemIndices.byTypeAndOwner[
       typeOwnerKey
@@ -74,38 +74,38 @@ export function removeItem(itemId: string) {
   delete gs.items[itemId];
 }
 
-export function moveItem(itemId: string, newLocationId: string) {
+export function moveItem(itemId: string, newLocationId: number) {
   const item = gs.items[itemId];
   if (!item) return;
 
   // Remove from old location index
-  if (gs.itemIndices.byLocation[item.locationId]) {
-    gs.itemIndices.byLocation[item.locationId] = gs.itemIndices.byLocation[item.locationId].filter(
+  if (gs.itemIndices.byLocationId[item.location]) {
+    gs.itemIndices.byLocationId[item.location] = gs.itemIndices.byLocationId[item.location].filter(
       (id) => id !== itemId
     );
   }
 
   // Update item location
-  item.locationId = newLocationId;
+  item.location = newLocationId;
 
   // Add to new location index
-  if (!gs.itemIndices.byLocation[newLocationId]) {
-    gs.itemIndices.byLocation[newLocationId] = [];
+  if (!gs.itemIndices.byLocationId[newLocationId]) {
+    gs.itemIndices.byLocationId[newLocationId] = [];
   }
-  gs.itemIndices.byLocation[newLocationId].push(itemId);
+  gs.itemIndices.byLocationId[newLocationId].push(itemId);
 }
 
-export function transferItem(itemId: string, newOwnerId: string) {
+export function transferItem(itemId: string, newOwnerId: number) {
   const item = gs.items[itemId];
   if (!item) return;
 
   // Remove from old owner indices
-  if (gs.itemIndices.byOwner[item.ownerId]) {
-    gs.itemIndices.byOwner[item.ownerId] = gs.itemIndices.byOwner[item.ownerId].filter(
+  if (gs.itemIndices.byOwnerId[item.owner]) {
+    gs.itemIndices.byOwnerId[item.owner] = gs.itemIndices.byOwnerId[item.owner].filter(
       (id) => id !== itemId
     );
   }
-  const oldTypeOwnerKey = `${item.type}-${item.ownerId}`;
+  const oldTypeOwnerKey = `${item.type}-${item.owner}`;
   if (gs.itemIndices.byTypeAndOwner[oldTypeOwnerKey]) {
     gs.itemIndices.byTypeAndOwner[oldTypeOwnerKey] = gs.itemIndices.byTypeAndOwner[
       oldTypeOwnerKey
@@ -113,13 +113,13 @@ export function transferItem(itemId: string, newOwnerId: string) {
   }
 
   // Update item owner
-  item.ownerId = newOwnerId;
+  item.owner = newOwnerId;
 
   // Add to new owner indices
-  if (!gs.itemIndices.byOwner[newOwnerId]) {
-    gs.itemIndices.byOwner[newOwnerId] = [];
+  if (!gs.itemIndices.byOwnerId[newOwnerId]) {
+    gs.itemIndices.byOwnerId[newOwnerId] = [];
   }
-  gs.itemIndices.byOwner[newOwnerId].push(itemId);
+  gs.itemIndices.byOwnerId[newOwnerId].push(itemId);
 
   const newTypeOwnerKey = `${item.type}-${newOwnerId}`;
   if (!gs.itemIndices.byTypeAndOwner[newTypeOwnerKey]) {
@@ -133,17 +133,17 @@ export function getItemsByType(type: ItemType): Item[] {
   return itemIds.map((id) => gs.items[id]);
 }
 
-export function getItemsByOwner(ownerId: string): Item[] {
-  const itemIds = gs.itemIndices.byOwner[ownerId] || [];
+export function getItemsByOwner(ownerId: number): Item[] {
+  const itemIds = gs.itemIndices.byOwnerId[ownerId] || [];
   return itemIds.map((id) => gs.items[id]);
 }
 
-export function getItemsByLocation(locationId: string): Item[] {
-  const itemIds = gs.itemIndices.byLocation[locationId] || [];
+export function getItemsByLocation(locationId: number): Item[] {
+  const itemIds = gs.itemIndices.byLocationId[locationId] || [];
   return itemIds.map((id) => gs.items[id]);
 }
 
-export function getItemsByTypeAndOwner(type: ItemType, ownerId: string): Item[] {
+export function getItemsByTypeAndOwner(type: ItemType, ownerId: number): Item[] {
   const typeOwnerKey = `${type}-${ownerId}`;
   const itemIds = gs.itemIndices.byTypeAndOwner[typeOwnerKey] || [];
   return itemIds.map((id) => gs.items[id]);

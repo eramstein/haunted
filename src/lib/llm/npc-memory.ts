@@ -6,7 +6,7 @@ import type { Memory } from '../_model';
 export async function initNpcMemory() {
   gs.characters.forEach(async (character) => {
     const collection = await vectorDatabaseClient.getOrCreateCollection({
-      name: character.id,
+      name: character.name.toLowerCase(),
     });
     await collection.upsert({
       documents: character.llm.initialMemories,

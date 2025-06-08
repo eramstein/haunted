@@ -10,8 +10,6 @@
   let props = $props<{
     character: Character;
   }>();
-
-  const place = $derived(gs.places.find((place) => place.id === props.character.place));
 </script>
 
 <div class="character-panel">
@@ -19,11 +17,11 @@
   <div class="character-details">
     <div
       class="character-portrait"
-      style="background-image: url({getCharacterImage(props.character.id)})"
+      style="background-image: url({getCharacterImage(props.character.name)})"
     ></div>
     <div class="detail-item">
       <span class="label">Location:</span>
-      <span class="value">{place?.name}</span>
+      <span class="value">{gs.places[props.character.place]?.name}</span>
     </div>
     <div class="detail-item">
       <span class="label">Food:</span>

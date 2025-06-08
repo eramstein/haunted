@@ -27,11 +27,6 @@
     gap: 1rem;
   }
 
-  .date {
-    color: #888;
-    font-size: 0.9rem;
-  }
-
   h2 {
     margin: 0;
     font-size: 1.5rem;
@@ -47,11 +42,6 @@
   .detail-item {
     display: flex;
     gap: 0.5rem;
-  }
-
-  .label {
-    color: #888;
-    min-width: 80px;
   }
 
   .value {

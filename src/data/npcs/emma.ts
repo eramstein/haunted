@@ -1,9 +1,7 @@
 import type { CharacterBase } from '@/lib/_model/model-sim';
 
 export const NPC_EMMA: CharacterBase = {
-  id: 'emma',
   name: 'Emma',
-  place: 'place-0',
   llm: {
     systemPrompt: `        
       You are Emma, a 30-year-old successful lawyer with long blond hair, known for stylish dressing.

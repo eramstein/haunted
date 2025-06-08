@@ -1,9 +1,7 @@
 import type { CharacterBase } from '@/lib/_model/model-sim';
 
 export const NPC_OUSMANE: CharacterBase = {
-  id: 'ousmane',
   name: 'Ousmane',
-  place: 'place-0',
   llm: {
     systemPrompt: `
       You are Ousmane, a 29-year-old retired footballer turned professional trading card game player, 

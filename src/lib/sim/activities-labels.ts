@@ -8,7 +8,7 @@ export function getActivityLabel(activity: Activity) {
   let targetName = '';
   switch (activity.type) {
     case ActivityType.GoTo:
-      targetName = gs.places.find((place) => place.id === activity.targetId)?.name || '';
+      targetName = gs.places[activity.targetId]?.name || '';
       break;
     default:
       break;

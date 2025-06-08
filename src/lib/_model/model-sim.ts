@@ -80,7 +80,7 @@ export interface ItemIndices {
 
 export interface Activity {
   type: ActivityType;
-  progress: number;
+  progress: number; // 0-100
   targetId: any | null; // could be anything based on the activity type
 }
 

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { send, receive } from './_transitions/crossfade';
+
   import { getMapImage } from './_helpers/images.svelte';
   import { gs } from '../_state';
   import { UiView, type Character, type Place, type Position } from '../_model';
@@ -97,6 +99,8 @@
               src={getCharacterImage(character.name)}
               class="character-portrait"
               onclick={(e) => onCharacterClick(e, character)}
+              in:receive={{ key: character.id }}
+              out:send={{ key: character.id }}
             />
           {/each}
         </div>

@@ -1,6 +1,6 @@
 import type { Character } from '../_model/model-sim';
-import { ObjectiveType } from '../_model/model-sim.enums';
-import { setHaveMealTask } from './actions';
+import { ActivityType, ObjectiveType } from '../_model/model-sim.enums';
+import { move, setHaveMealTask } from './actions';
 
 export function workOnActivities(characters: Character[]) {
   characters.forEach(workOnActivity);
@@ -10,7 +10,10 @@ function workOnActivity(character: Character) {
   if (character.activity === null) {
     setActivityFromObjective(character);
   } else {
-    character.activity.progress += 1;
+    progressActivity(character);
+    if (character.activity.progress >= 100) {
+      finishActivity(character);
+    }
   }
 }
 
@@ -22,4 +25,18 @@ function setActivityFromObjective(character: Character) {
     default:
       break;
   }
+}
+
+function progressActivity(character: Character) {
+  switch (character.activity!.type) {
+    case ActivityType.GoTo:
+      move(character);
+      break;
+    default:
+      break;
+  }
+}
+
+function finishActivity(character: Character) {
+  character.activity = null;
 }

@@ -1,10 +1,15 @@
 import type { Character, Item } from '@/lib/_model/model-sim';
-import { getItemsByTypeAndOwner } from '../items';
+import { getItemsByTypeAndOwner, removeItem } from '../items';
 import { ActivityType, ItemType } from '@/lib/_model/model-sim.enums';
+import { config } from '@/lib/_config/config';
 import { gs } from '@/lib/_state';
 
-export function eat(character: Character, foodItem: Item) {
-  console.log('eat', character.id, foodItem.id);
+export function eat(character: Character) {
+  character.activity!.progress += config.actionSpeed.eat;
+  if (character.activity!.progress >= 100) {
+    character.needs.food.lastMeal = gs.time.ellapsedTime;
+    removeItem(character.activity!.targetId);
+  }
 }
 
 export function setHaveMealTask(character: Character) {

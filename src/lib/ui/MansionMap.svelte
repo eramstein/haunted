@@ -171,6 +171,7 @@
     display: flex;
     gap: 5px;
     flex-wrap: wrap;
+    justify-content: center;
     width: 200px;
   }
 

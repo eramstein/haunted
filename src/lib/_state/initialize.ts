@@ -8,12 +8,14 @@ export function createNewSimState(): State {
   const kitchen = initialState.places.findIndex((p) => p.name === 'Kitchen');
   if (kitchen) {
     initialState.characters.forEach((c, charIndex) => {
-      addItem({
-        type: ItemType.Meal,
-        description: 'A sandwich',
-        owner: charIndex,
-        location: kitchen,
-      });
+      Array.from({ length: 2 }, () =>
+        addItem({
+          type: ItemType.Meal,
+          description: 'A sandwich',
+          owner: charIndex,
+          location: kitchen,
+        })
+      );
     });
   } else {
     throw new Error('Kitchen not found for initial items');

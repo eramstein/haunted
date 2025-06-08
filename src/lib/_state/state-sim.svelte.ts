@@ -33,7 +33,7 @@ function initCharacter(character: CharacterBase, index: number): Character {
         lastMeal: -360,
       },
       sleep: {
-        lastSleep: -360,
+        lastSleep: -760,
       },
     },
   };

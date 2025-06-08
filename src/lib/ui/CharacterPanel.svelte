@@ -43,7 +43,11 @@
     </div>
     <div class="detail-item">
       <span class="label">Activity:</span>
-      <span class="value">{getActivityLabel(props.character.activity)}</span>
+      <span class="value">
+        {getActivityLabel(props.character.activity)} - {Math.round(
+          props.character.activity?.progress || 0
+        )}%
+      </span>
     </div>
   </div>
 </div>

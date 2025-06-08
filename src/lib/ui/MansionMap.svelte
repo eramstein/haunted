@@ -4,7 +4,7 @@
   import { getMapImage } from './_helpers/images.svelte';
   import { gs } from '../_state';
   import { UiView, type Character, type Place, type Position } from '../_model';
-  import { getCharacterImage } from './_helpers/images.svelte';
+  import { getCharacterImage, getIconSheet, getActionIconPosition } from './_helpers/images.svelte';
   import { uiState } from '../_state/state-ui.svelte';
 
   const mapImage = $derived(getMapImage('mansion'));
@@ -95,13 +95,23 @@
         {/if}
         <div class="characters">
           {#each characters as character (character.id)}
-            <img
-              src={getCharacterImage(character.name)}
-              class="character-portrait"
-              onclick={(e) => onCharacterClick(e, character)}
-              in:receive={{ key: character.id }}
-              out:send={{ key: character.id }}
-            />
+            <div class="character-container">
+              <img
+                src={getCharacterImage(character.name)}
+                class="character-portrait"
+                onclick={(e) => onCharacterClick(e, character)}
+                in:receive={{ key: character.id }}
+                out:send={{ key: character.id }}
+              />
+              {#if character.activity}
+                <div
+                  class="activity-icon"
+                  style="background-image: url({getIconSheet(
+                    'actions'
+                  )}); background-position: {getActionIconPosition(character.activity.type, 20)}"
+                ></div>
+              {/if}
+            </div>
           {/each}
         </div>
       </div>
@@ -175,6 +185,10 @@
     width: 200px;
   }
 
+  .character-container {
+    position: relative;
+  }
+
   .character-portrait {
     width: 50px;
     height: 50px;
@@ -186,6 +200,19 @@
     padding: 2px;
     user-select: none;
     -webkit-user-select: none;
+  }
+
+  .activity-icon {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    width: 20px;
+    height: 20px;
+    background-repeat: no-repeat;
+    background-size: 200px 20px; /* 10 sprite sheets */
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    border-radius: 2px;
+    background-color: rgba(255, 255, 255);
   }
 
   .place-overlay.visible .character-portrait {

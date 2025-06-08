@@ -1,6 +1,12 @@
 <script lang="ts">
   import { gs, uiState } from '../_state';
-  import { getCharacterImage, getPlaceImage, getItemIcon, getItemIconPosition } from './_helpers';
+  import {
+    getCharacterImage,
+    getPlaceImage,
+    getIconSheet,
+    getActionIconPosition,
+    getItemIconPosition,
+  } from './_helpers';
   import { getItemsByLocation } from '../sim/items';
 
   const viewedPlace = $derived(gs.places[gs.player.place] || gs.places[0]);
@@ -21,13 +27,23 @@
 >
   <div class="characters">
     {#each presentCharacters as character (character.id)}
-      <div
-        style="background-image: url({getCharacterImage(character.name)})"
-        class="character"
-        onclick={() => {
-          uiState.selectedCharacter = character;
-        }}
-      ></div>
+      <div class="character-container">
+        <div
+          style="background-image: url({getCharacterImage(character.name)})"
+          class="character"
+          onclick={() => {
+            uiState.selectedCharacter = character;
+          }}
+        ></div>
+        {#if character.activity}
+          <div
+            class="activity-icon"
+            style="background-image: url({getIconSheet(
+              'actions'
+            )}); background-position: {getActionIconPosition(character.activity.type)}"
+          ></div>
+        {/if}
+      </div>
     {/each}
   </div>
 
@@ -40,9 +56,9 @@
         }}
       >
         <div
-          class="item-icon"
-          style="background-image: url({getItemIcon(
-            item.type
+          class="action-icon"
+          style="background-image: url({getIconSheet(
+            'item-types'
           )}); background-position: {getItemIconPosition(item.type)}"
         ></div>
         <div class="item-info">
@@ -72,9 +88,14 @@
     width: 100vh;
     gap: 20px;
   }
-  .character {
+  .character-container {
+    position: relative;
     width: 270px;
     height: 270px;
+  }
+  .character {
+    width: 100%;
+    height: 100%;
     background-repeat: no-repeat;
     background-size: contain;
     background-position: center center;
@@ -105,7 +126,7 @@
     background: rgba(0, 0, 0, 0.9);
     border-color: rgba(255, 255, 255, 0.5);
   }
-  .item-icon {
+  .action-icon {
     width: 32px;
     height: 32px;
     background-repeat: no-repeat;
@@ -125,5 +146,17 @@
   .item-owner {
     color: rgba(255, 255, 255, 0.7);
     font-size: 12px;
+  }
+  .activity-icon {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    width: 32px;
+    height: 32px;
+    background-repeat: no-repeat;
+    background-size: auto 100%;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.5);
   }
 </style>

@@ -29,8 +29,8 @@ export function getMapImage(mapId: string) {
   return images.maps?.[`../../../assets/images/maps/${mapId}.png`]?.default;
 }
 
-export function getItemIcon(type: string) {
-  return images.icons?.['../../../assets/images/icons/icons.png']?.default;
+export function getIconSheet(type: string) {
+  return images.icons?.[`../../../assets/images/icons/${type}.png`]?.default;
 }
 
 export function getItemIconPosition(type: string) {
@@ -39,9 +39,23 @@ export function getItemIconPosition(type: string) {
     FoodIngredient: 0,
     Meal: 4,
     Drink: 3,
-    // Add more types as needed
   };
 
   const position = typePositions[type] || 0;
   return `-${position * 32}px 0`;
+}
+
+export function getActionIconPosition(type: string, size: number = 32) {
+  // Map of item types to their position in the sprite sheet
+  const typePositions: Record<string, number> = {
+    eat: 5,
+    sleep: 9,
+    goTo: 0,
+    cook: 1,
+  };
+
+  const position = typePositions[type] || 0;
+  // For 16px display, we need to scale the position by 16/32 = 0.5
+  const scale = size / 32;
+  return `-${position * 32 * scale}px 0`;
 }

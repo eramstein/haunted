@@ -38,7 +38,7 @@
 
   function onPlaceClick(place: Place) {
     uiState.selectedCharacter = null;
-    if (uiState.selectedPlace?.index === place.index) {
+    if (uiState.selectedPlace?.id === place.id) {
       uiState.selectedPlace = null;
     } else {
       uiState.selectedPlace = place;
@@ -49,7 +49,7 @@
     uiState.selectedPlace = null;
     uiState.selectedCharacter = null;
     uiState.currentView = UiView.Place;
-    gs.player.place = place.index;
+    gs.player.place = place.id;
   }
 
   function onCharacterClick(event: MouseEvent, character: Character) {
@@ -62,8 +62,8 @@
     }
   }
 
-  function getCharactersInPlace(placeIndex: number) {
-    return gs.characters.filter((char) => char.place === placeIndex);
+  function getCharactersInPlace(placeId: string) {
+    return gs.characters.filter((char) => char.place === placeId);
   }
 </script>
 
@@ -77,10 +77,10 @@
     />
     {#each gs.places as place}
       {@const coords = getPlaceCoordinates(place.position)}
-      {@const characters = getCharactersInPlace(place.index)}
+      {@const characters = getCharactersInPlace(place.id)}
       <div
         class="place-overlay"
-        class:visible={debug || uiState.selectedPlace?.index === place.index}
+        class:visible={debug || uiState.selectedPlace?.id === place.id}
         style:left={coords.left}
         style:top={coords.top}
         style:width={coords.width}

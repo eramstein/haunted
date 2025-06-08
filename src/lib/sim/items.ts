@@ -1,4 +1,5 @@
-import type { Item, ItemType, ItemIndices } from '../_model/model-sim';
+import type { Item } from '../_model/model-sim';
+import { ItemType } from '../_model/model-sim.enums';
 import { gs } from '../_state';
 
 function generateUniqueId(): string {
@@ -73,7 +74,7 @@ export function removeItem(itemId: string) {
   delete gs.items[itemId];
 }
 
-export function moveItem(itemId: string, newLocationId: number) {
+export function moveItem(itemId: string, newLocationId: string) {
   const item = gs.items[itemId];
   if (!item) return;
 
@@ -137,7 +138,7 @@ export function getItemsByOwner(ownerId: string): Item[] {
   return itemIds.map((id) => gs.items[id]);
 }
 
-export function getItemsByLocation(locationId: number): Item[] {
+export function getItemsByLocation(locationId: string): Item[] {
   const itemIds = gs.itemIndices.byLocation[locationId] || [];
   return itemIds.map((id) => gs.items[id]);
 }

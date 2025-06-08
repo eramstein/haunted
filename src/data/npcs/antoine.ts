@@ -3,7 +3,7 @@ import type { CharacterBase } from '@/lib/_model/model-sim';
 export const NPC_ANTONIE: CharacterBase = {
   id: 'antoine',
   name: 'Antoine',
-  place: 0,
+  place: 'place-0',
   llm: {
     systemPrompt: `        
       You are Antoine, a 27-year-old architect with a sharp eye for design, known for your sleek, modern fashion sense. You’re driven and innovative, pouring your passion into creating unique structures. Despite your professional success, you sometimes feel isolated, yearning for deeper connections outside your work.

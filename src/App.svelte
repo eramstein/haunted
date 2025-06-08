@@ -18,15 +18,15 @@
       console.log('Game state loaded from localStorage');
     }
 
-    // Start the simulation loop
-    let lastTime = performance.now();
-    function simulationLoop(currentTime: number) {
-      const deltaTime = (currentTime - lastTime) / 1000; // Convert to seconds
-      lastTime = currentTime;
-      passTime(deltaTime);
-      requestAnimationFrame(simulationLoop);
-    }
-    requestAnimationFrame(simulationLoop);
+    // Start the simulation loop with setInterval
+    // Check every 100ms for time progression
+    const simulationInterval = setInterval(() => {
+      passTime(0.1); // Pass 100ms worth of time
+    }, 100);
+
+    onDestroy(() => {
+      clearInterval(simulationInterval);
+    });
   });
 
   onDestroy(() => {

@@ -6,4 +6,5 @@ export const uiState: UiState = $state({
   isPaused: true,
   selectedPlace: null,
   selectedCharacter: null,
+  selectedItem: null,
 });

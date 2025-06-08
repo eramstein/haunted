@@ -1,4 +1,5 @@
-import { ItemType, type State } from '../_model/model-sim';
+import type { State } from '../_model/model-sim';
+import { ItemType } from '../_model/model-sim.enums';
 import { initialState } from './state-sim.svelte';
 import { addItem } from '../sim/items';
 
@@ -11,7 +12,7 @@ export function createNewSimState(): State {
         type: ItemType.Meal,
         description: 'A sandwich',
         ownerId: c.id,
-        locationId: kitchen.index,
+        locationId: kitchen.id,
       });
     });
   } else {

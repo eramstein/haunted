@@ -1,3 +1,5 @@
+import type { ActivityType, ItemType, ObjectiveType } from './model-sim.enums';
+
 export interface State {
   time: Time;
   places: Place[];
@@ -20,7 +22,7 @@ export interface PlaceBase {
 }
 
 export interface Place extends PlaceBase {
-  index: number;
+  id: string;
 }
 
 export interface Position {
@@ -33,7 +35,7 @@ export interface Position {
 export interface CharacterBase {
   id: string;
   name: string;
-  place: number;
+  place: string;
   llm: {
     systemPrompt: string;
     personalityTraits: string[];
@@ -42,7 +44,6 @@ export interface CharacterBase {
 }
 
 export interface Character extends CharacterBase {
-  index: number;
   needs: {
     food: {
       lastMeal: number; // State.time ellapsedTime
@@ -51,6 +52,8 @@ export interface Character extends CharacterBase {
       lastSleep: number; // State.time in minutes
     };
   };
+  activity: Activity | null; // what the character is doing (e.g. cooking)
+  objective: Objective | null; // what the character is currently trying to achieve (e.g. have a meal) -> sets activity
 }
 
 export interface Memory {
@@ -58,22 +61,8 @@ export interface Memory {
   metadata: Record<string, string>;
 }
 
-export interface ActionTypeDefinition {
-  fn: ActionEffect;
-  duration: number;
-  description: string;
-}
-
-export type ActionEffect = (character: Character, args: any) => void;
-
 export interface Player {
-  place: number;
-}
-
-export enum ItemType {
-  FoodIngredient = 'FoodIngredient',
-  Meal = 'Meal',
-  Drink = 'Drink',
+  place: string;
 }
 
 export interface Item {
@@ -81,13 +70,23 @@ export interface Item {
   type: ItemType;
   description: string;
   ownerId: string;
-  locationId: number;
+  locationId: string;
 }
 
 // de-normalized indices for fast lookup
 export interface ItemIndices {
   byType: Partial<Record<ItemType, string[]>>;
   byOwner: Record<string, string[]>;
-  byLocation: Record<number, string[]>;
+  byLocation: Record<string, string[]>;
   byTypeAndOwner: Record<string, string[]>;
+}
+
+export interface Activity {
+  type: ActivityType;
+  progress: number;
+  targetId: string | null; // id of the target place or item
+}
+
+export interface Objective {
+  type: ObjectiveType;
 }

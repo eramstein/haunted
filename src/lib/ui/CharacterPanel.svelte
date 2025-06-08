@@ -1,12 +1,17 @@
 <script lang="ts">
+  import { LABELS_OBJECTIVE_TYPES } from '../_config/labels';
   import type { Character } from '../_model';
+  import { ObjectiveType } from '../_model/model-sim.enums';
   import { gs } from '../_state';
+  import { getActivityLabel } from '../sim/activities-labels';
   import { formatMinutes } from './_helpers/date.svelte';
   import { getCharacterImage } from './_helpers/images.svelte';
 
   let props = $props<{
     character: Character;
   }>();
+
+  const place = $derived(gs.places.find((place) => place.id === props.character.place));
 </script>
 
 <div class="character-panel">
@@ -18,7 +23,7 @@
     ></div>
     <div class="detail-item">
       <span class="label">Location:</span>
-      <span class="value">{gs.places[props.character.place].name}</span>
+      <span class="value">{place?.name}</span>
     </div>
     <div class="detail-item">
       <span class="label">Food:</span>
@@ -32,6 +37,16 @@
         {formatMinutes(gs.time.ellapsedTime - props.character.needs.sleep.lastSleep)}
       </span>
     </div>
+    <div class="detail-item">
+      <span class="label">Objective:</span>
+      <span class="value">
+        {LABELS_OBJECTIVE_TYPES[props.character.objective?.type as ObjectiveType]}
+      </span>
+    </div>
+    <div class="detail-item">
+      <span class="label">Activity:</span>
+      <span class="value">{getActivityLabel(props.character.activity)}</span>
+    </div>
   </div>
 </div>
 
@@ -40,11 +55,6 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
-  }
-
-  .date {
-    color: #888;
-    font-size: 0.9rem;
   }
 
   .character-portrait {

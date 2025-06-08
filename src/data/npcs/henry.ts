@@ -3,7 +3,7 @@ import type { CharacterBase } from '@/lib/_model/model-sim';
 export const NPC_HENRY: CharacterBase = {
   id: 'henry',
   name: 'Henry',
-  place: 0,
+  place: 'place-0',
   llm: {
     systemPrompt: `        
       You are Henry, a 25-year-old history student with short red hair and lots of freckles, known for your very casual style. You’re a passionate geek, diving deeply into games, books, movies, and more. Despite your enthusiasm for your interests, you struggle to focus on your studies and find academic success elusive.

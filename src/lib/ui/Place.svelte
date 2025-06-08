@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { gs, uiState } from '../_state';
+  import { gs, uiState, placesMap } from '../_state';
   import { getCharacterImage, getPlaceImage, getItemIcon, getItemIconPosition } from './_helpers';
   import { getItemsByLocation } from '../sim/items';
 
-  const viewedPlace = $derived(gs.places[gs.player.place] || gs.places[0]);
+  const viewedPlace = $derived(placesMap.get(gs.player.place) || gs.places[0]);
   const presentCharacters = $derived(
     gs.characters.filter((character) => character.place === gs.player.place)
   );
-  const presentItems = $derived(getItemsByLocation(viewedPlace.index));
+  const presentItems = $derived(getItemsByLocation(viewedPlace.id));
 
   function getOwnerName(ownerId: string) {
     const owner = gs.characters.find((char) => char.id === ownerId);

@@ -1,19 +1,12 @@
 import type { Place, Character } from '@/lib/_model/model-sim';
-import { gs } from '@/lib/_state';
-
-export function moveTool(
-  character: Character,
-  param: {
-    destinationPlace: string;
-  }
-) {
-  const place = gs.places.find((p) => p.name === param.destinationPlace);
-  if (place) {
-    move(character, place);
-  }
-}
+import { placesMap } from '@/lib/_state';
 
 export function move(character: Character, place: Place) {
-  character.place = place?.index || 0;
+  if (!place || !placesMap.has(place.id)) {
+    character.place = 'place-0';
+    console.log('move', character.id, 'to default place');
+    return;
+  }
+  character.place = place.id;
   console.log('move', character.id, place.name);
 }

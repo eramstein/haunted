@@ -1,29 +1,50 @@
-import { gs } from '../_state';
-import type { Tool } from 'ollama';
-import { ActionType } from '../_config';
-import { ACTION_TYPES } from '../sim/action-types';
+import { type ToolCall } from 'ollama';
+import { getTools } from './tools-defintitions';
+import { queryWorldsMemory } from './world';
+import { llmService } from './llm-service';
+import { ToolType } from './tools-defintitions';
 
-const goTo: () => Tool = () => {
-  return {
-    type: 'function',
-    function: {
-      name: ActionType.GoTo,
-      description: ACTION_TYPES[ActionType.GoTo].description,
-      parameters: {
-        type: 'object',
-        required: ['destinationPlace'],
-        properties: {
-          destinationPlace: {
-            type: 'string',
-            description: 'The place where the person is going to',
-            enum: gs.places.map((p) => p.name),
-          },
-        },
-      },
-    },
+async function getToolsFromText(message: string) {
+  const memoryPrompt = await queryWorldsMemory(message);
+  console.log('getToolsFromText memoryPrompt', message, memoryPrompt);
+  const systemMessage = {
+    role: 'system',
+    content: `You are a tool selection assistant. Your task is to carefully analyze the user's intent and select the most appropriate tool among those presented.`,
   };
-};
+  const query = {
+    role: 'user',
+    content: `This is the id information to select the tool, give it priority: ${message}. ${memoryPrompt}`,
+  };
+  const response = await llmService.chat({
+    messages: [systemMessage, query],
+    tools: getTools(),
+    options: {
+      temperature: 0.1, // Lower temperature for more deterministic responses
+    },
+  });
+  console.log('getToolsFromText tools response', response);
+  return response;
+}
 
-export function getTools(): Tool[] {
-  return [goTo].map((f) => f());
+export async function getToolCallsFromText(actionText: string): Promise<{
+  toolType: ToolType;
+  args: Record<string, any>;
+}> {
+  const llmResponse = await getToolsFromText(actionText);
+  const toolCalls = llmService.getTools(llmResponse);
+  console.log('getToolCallsFromText toolCalls', toolCalls);
+  if (toolCalls === undefined || toolCalls.length === 0) {
+    console.log('No tool found');
+    return {
+      toolType: ToolType.None,
+      args: {},
+    };
+  }
+  const tool = (toolCalls as ToolCall[])[0];
+  const toolType = tool.function.name as ToolType;
+  const args = llmService.getToolArguments(tool.function.arguments);
+  return {
+    toolType,
+    args,
+  };
 }

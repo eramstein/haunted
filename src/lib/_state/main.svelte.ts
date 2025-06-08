@@ -1,6 +1,6 @@
 import { type State } from '../_model/model-sim';
 import { createNewSimState } from './initialize';
-import { initialState } from './state-sim.svelte';
+import { initialState, placesMap } from './state-sim.svelte';
 
 const LOCAL_STORAGE_KEY = 'hauntedMansionState';
 
@@ -26,6 +26,12 @@ export const loadStateFromLocalStorage = (): State | null => {
 
     // Update the current state with the loaded data in a way that triggers reactivity
     Object.assign(gs, parsedState);
+
+    // Ensure placesMap stays in sync with loaded places
+    placesMap.clear();
+    gs.places.forEach((place) => {
+      placesMap.set(place.id, place);
+    });
 
     return gs;
   } catch (error) {

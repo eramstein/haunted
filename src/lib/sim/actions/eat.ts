@@ -17,7 +17,6 @@ export function setHaveMealTask(character: Character) {
   const meals = getItemsByTypeAndOwner(ItemType.Meal, character.id);
   if (meals.length === 0) {
     // TODO
-    console.log(character.name, 'no meals');
     return;
   } else {
     // is there a meal in the place?

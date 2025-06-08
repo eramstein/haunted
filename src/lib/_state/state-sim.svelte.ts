@@ -6,6 +6,8 @@ export const initialState: State = {
   time: {
     startDate: new Date(),
     ellapsedTime: 0,
+    lightLevel: 1,
+    dateString: '12:00',
   },
   places: PLACES.map(initPlace),
   characters: NPCS.map(initCharacter),

@@ -77,6 +77,7 @@
       onload={(e) => updateImageDimensions(e.currentTarget as HTMLImageElement)}
       onclick={logClickedPosition}
     />
+    <div class="night-overlay" style="opacity: {1 - gs.time.lightLevel}"></div>
     {#each gs.places as place}
       {@const coords = getPlaceCoordinates(place.position)}
       {@const characters = getCharactersInPlace(place.id)}
@@ -218,5 +219,16 @@
   .place-overlay.visible .character-portrait {
     border-color: rgba(255, 255, 255, 1);
     box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+  }
+
+  .night-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    pointer-events: none;
+    transition: opacity 1s ease-in-out;
   }
 </style>

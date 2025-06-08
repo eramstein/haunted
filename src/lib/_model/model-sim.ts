@@ -12,6 +12,8 @@ export interface State {
 export interface Time {
   startDate: Date;
   ellapsedTime: number; // in minutes since startDate
+  lightLevel: number; // 0-1
+  dateString: string;
 }
 
 export interface Place {

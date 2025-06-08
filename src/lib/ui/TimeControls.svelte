@@ -1,7 +1,7 @@
 <script lang="ts">
   import { togglePause, setSpeed } from '../sim/time';
   import { uiState } from '../_state/state-ui.svelte';
-  import { formatGameDate } from './_helpers/date.svelte';
+  import { gs } from '../_state';
 
   let speed = $derived(uiState.simulationSpeed);
 
@@ -26,7 +26,7 @@
 
 <div class="controls">
   <div class="clock">
-    {formatGameDate()}
+    {gs.time.dateString}
   </div>
 
   <div class="buttons">

@@ -1,4 +1,4 @@
-import type { Character } from '../_model/model-sim';
+import type { Activity, Character } from '../_model/model-sim';
 import { ActivityType, ObjectiveType } from '../_model/model-sim.enums';
 import { cook, eat, setHaveMealTask } from './actions/eat';
 import { sleep, setRestTask } from './actions/sleep';
@@ -34,18 +34,19 @@ function setActivityFromObjective(character: Character) {
 }
 
 function progressActivity(character: Character) {
-  switch (character.activity!.type) {
+  if (!character.activity) return;
+  switch (character.activity.type) {
     case ActivityType.GoTo:
-      move(character);
+      move(character, character.activity as Activity<ActivityType.GoTo>);
       break;
     case ActivityType.Eat:
-      eat(character);
+      eat(character, character.activity as Activity<ActivityType.Eat>);
       break;
     case ActivityType.Sleep:
-      sleep(character);
+      sleep(character, character.activity as Activity<ActivityType.Sleep>);
       break;
     case ActivityType.Cook:
-      cook(character);
+      cook(character, character.activity as Activity<ActivityType.Cook>);
       break;
     default:
       break;

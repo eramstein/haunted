@@ -1,30 +1,36 @@
-import type { Character, Item } from '@/lib/_model/model-sim';
+import type { Activity, Character, Item } from '@/lib/_model/model-sim';
 import { addItem, getItemsByTypeAndOwner, removeItem } from '../items';
 import { ActivityType, ItemType } from '@/lib/_model/model-sim.enums';
 import { config } from '@/lib/_config/config';
 import { gs } from '@/lib/_state';
 
-export function eat(character: Character) {
-  character.activity!.progress += config.actionSpeed.eat;
-  if (character.activity!.progress >= 100) {
+export function eat(character: Character, activity: Activity<ActivityType.Eat>) {
+  activity.progress += config.actionSpeed.eat;
+  if (activity.progress >= 100) {
     character.needs.food.lastMeal = gs.time.ellapsedTime;
-    removeItem(character.activity!.targetId);
+    if (activity.type === ActivityType.Eat) {
+      const targetId = activity.target as string;
+      removeItem(targetId);
+    }
   }
 }
 
-export function cook(character: Character) {
-  character.activity!.progress += config.actionSpeed.cook;
-  const ingredients = gs.items[character.activity!.targetId];
-  if (character.activity!.progress >= 100) {
-    // remove ingredient
-    removeItem(character.activity!.targetId);
-    // create meal
-    addItem({
-      type: ItemType.Meal,
-      description: 'Cooked ' + ingredients.description,
-      owner: character.id,
-      location: character.place,
-    });
+export function cook(character: Character, activity: Activity<ActivityType.Cook>) {
+  activity.progress += config.actionSpeed.cook;
+  if (activity.type === ActivityType.Cook) {
+    const target = activity.target as string[];
+    const ingredients = gs.items[target[0]];
+    if (activity.progress >= 100) {
+      // remove ingredient
+      removeItem(target[0]);
+      // create meal
+      addItem({
+        type: ItemType.Meal,
+        description: 'Cooked ' + ingredients.description,
+        owner: character.id,
+        location: character.place,
+      });
+    }
   }
 }
 
@@ -41,13 +47,13 @@ export function setHaveMealTask(character: Character) {
       character.activity = {
         type: ActivityType.Cook,
         progress: 0,
-        targetId: ingredientsInPlace[0].id,
+        target: [ingredientsInPlace[0].id],
       };
     } else {
       character.activity = {
         type: ActivityType.GoTo,
         progress: 0,
-        targetId: ingredients[0].location,
+        target: ingredients[0].location,
       };
     }
     return;
@@ -56,14 +62,18 @@ export function setHaveMealTask(character: Character) {
     const mealInPlace = meals.find((meal) => meal.location === character.place);
     // if yes, eat it
     if (mealInPlace) {
-      character.activity = { type: ActivityType.Eat, progress: 0, targetId: mealInPlace.id };
+      character.activity = {
+        type: ActivityType.Eat,
+        progress: 0,
+        target: mealInPlace.id,
+      };
     }
     // if no, pick up a meal
     else {
       character.activity = {
         type: ActivityType.GoTo,
         progress: 0,
-        targetId: meals[0].location,
+        target: meals[0].location,
       };
     }
   }

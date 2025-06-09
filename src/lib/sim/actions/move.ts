@@ -1,10 +1,10 @@
-import type { Place, Character } from '@/lib/_model/model-sim';
-import { gs } from '@/lib/_state';
+import type { Character, Activity } from '@/lib/_model/model-sim';
 import { config } from '@/lib/_config/config';
+import { ActivityType } from '@/lib/_model/model-sim.enums';
 
-export function move(character: Character) {
-  character.activity!.progress += config.actionSpeed.goTo;
-  if (character.activity!.progress >= 100) {
-    character.place = character.activity?.targetId || 0;
+export function move(character: Character, activity: Activity<ActivityType.GoTo>) {
+  activity.progress += config.actionSpeed.goTo;
+  if (activity.progress >= 100) {
+    character.place = activity.target;
   }
 }

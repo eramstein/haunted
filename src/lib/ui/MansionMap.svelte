@@ -6,6 +6,7 @@
   import { UiView, type Character, type Place, type Position } from '../_model';
   import { getCharacterImage, getIconSheet, getActionIconPosition } from './_helpers/images.svelte';
   import { uiState } from '../_state/state-ui.svelte';
+  import ActivityIcon from './ActivityIcon.svelte';
 
   const mapImage = $derived(getMapImage('mansion'));
   const debug = false;
@@ -105,12 +106,12 @@
                 out:send={{ key: character.id }}
               />
               {#if character.activity}
-                <div
-                  class="activity-icon"
-                  style="background-image: url({getIconSheet(
-                    'actions'
-                  )}); background-position: {getActionIconPosition(character.activity.type, 20)}"
-                ></div>
+                <ActivityIcon
+                  activity={character.activity}
+                  size={20}
+                  position="absolute"
+                  className="bottom-right"
+                />
               {/if}
             </div>
           {/each}
@@ -201,24 +202,6 @@
     padding: 2px;
     user-select: none;
     -webkit-user-select: none;
-  }
-
-  .activity-icon {
-    position: absolute;
-    bottom: 0px;
-    right: 0px;
-    width: 20px;
-    height: 20px;
-    background-repeat: no-repeat;
-    background-size: 200px 20px; /* 10 sprite sheets */
-    border: 1px solid rgba(0, 0, 0, 0.5);
-    border-radius: 2px;
-    background-color: rgba(255, 255, 255);
-  }
-
-  .place-overlay.visible .character-portrait {
-    border-color: rgba(255, 255, 255, 1);
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
   }
 
   .night-overlay {

@@ -6,6 +6,7 @@
   import { getActivityLabel } from '../sim/activities-labels';
   import { formatMinutes } from './_helpers/date.svelte';
   import { getCharacterImage, getIconSheet, getActionIconPosition } from './_helpers/images.svelte';
+  import ActivityIcon from './ActivityIcon.svelte';
 
   let props = $props<{
     character: Character;
@@ -45,12 +46,7 @@
       <span class="label">Activity:</span>
       <span class="value">
         {#if props.character.activity}
-          <div
-            class="activity-icon"
-            style="background-image: url({getIconSheet(
-              'actions'
-            )}); background-position: {getActionIconPosition(props.character.activity.type, 20)}"
-          ></div>
+          <ActivityIcon activity={props.character.activity} size={20} />
         {/if}
         {getActivityLabel(props.character.activity)} - {Math.round(
           props.character.activity?.progress || 0
@@ -102,15 +98,5 @@
     display: flex;
     align-items: center;
     gap: 8px;
-  }
-
-  .activity-icon {
-    width: 20px;
-    height: 20px;
-    background-repeat: no-repeat;
-    background-size: 200px 20px;
-    border: 1px solid rgba(0, 0, 0, 0.5);
-    border-radius: 2px;
-    background-color: rgba(255, 255, 255);
   }
 </style>

@@ -50,8 +50,7 @@ export function getActionIconPosition(type: string, size: number = 32) {
   const typePositions: Record<string, number> = {
     eat: 5,
     sleep: 9,
-    goTo: 0,
-    cook: 1,
+    cook: 10,
   };
 
   const position = typePositions[type] || 0;

@@ -1,5 +1,5 @@
 import type { Character, Item } from '@/lib/_model/model-sim';
-import { getItemsByTypeAndOwner, removeItem } from '../items';
+import { addItem, getItemsByTypeAndOwner, removeItem } from '../items';
 import { ActivityType, ItemType } from '@/lib/_model/model-sim.enums';
 import { config } from '@/lib/_config/config';
 import { gs } from '@/lib/_state';
@@ -12,11 +12,44 @@ export function eat(character: Character) {
   }
 }
 
+export function cook(character: Character) {
+  character.activity!.progress += config.actionSpeed.cook;
+  const ingredients = gs.items[character.activity!.targetId];
+  if (character.activity!.progress >= 100) {
+    // remove ingredient
+    removeItem(character.activity!.targetId);
+    // create meal
+    addItem({
+      type: ItemType.Meal,
+      description: 'Cooked ' + ingredients.description,
+      owner: character.id,
+      location: character.place,
+    });
+  }
+}
+
 export function setHaveMealTask(character: Character) {
   // are there available meals?
   const meals = getItemsByTypeAndOwner(ItemType.Meal, character.id);
   if (meals.length === 0) {
-    // TODO
+    // are there ingredients? if yes cook them, else go find some
+    const ingredients = getItemsByTypeAndOwner(ItemType.FoodIngredient, character.id);
+    const ingredientsInPlace = ingredients.filter(
+      (ingredient) => ingredient.location === character.place
+    );
+    if (ingredientsInPlace.length > 0) {
+      character.activity = {
+        type: ActivityType.Cook,
+        progress: 0,
+        targetId: ingredientsInPlace[0].id,
+      };
+    } else {
+      character.activity = {
+        type: ActivityType.GoTo,
+        progress: 0,
+        targetId: ingredients[0].location,
+      };
+    }
     return;
   } else {
     // is there a meal in the place?

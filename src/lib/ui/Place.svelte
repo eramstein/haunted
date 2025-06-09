@@ -8,6 +8,7 @@
     getItemIconPosition,
   } from './_helpers';
   import { getItemsByLocation } from '../sim/items';
+  import ActivityIcon from './ActivityIcon.svelte';
 
   const viewedPlace = $derived(gs.places[gs.player.place] || gs.places[0]);
   const presentCharacters = $derived(
@@ -36,12 +37,12 @@
           }}
         ></div>
         {#if character.activity}
-          <div
-            class="activity-icon"
-            style="background-image: url({getIconSheet(
-              'actions'
-            )}); background-position: {getActionIconPosition(character.activity.type)}"
-          ></div>
+          <ActivityIcon
+            activity={character.activity}
+            size={32}
+            position="absolute"
+            className="bottom-right"
+          />
         {/if}
       </div>
     {/each}
@@ -56,7 +57,7 @@
         }}
       >
         <div
-          class="action-icon"
+          class="item-icon"
           style="background-image: url({getIconSheet(
             'item-types'
           )}); background-position: {getItemIconPosition(item.type)}"
@@ -126,7 +127,7 @@
     background: rgba(0, 0, 0, 0.9);
     border-color: rgba(255, 255, 255, 0.5);
   }
-  .action-icon {
+  .item-icon {
     width: 32px;
     height: 32px;
     background-repeat: no-repeat;
@@ -146,17 +147,5 @@
   .item-owner {
     color: rgba(255, 255, 255, 0.7);
     font-size: 12px;
-  }
-  .activity-icon {
-    position: absolute;
-    bottom: 0px;
-    right: 0px;
-    width: 32px;
-    height: 32px;
-    background-repeat: no-repeat;
-    background-size: auto 100%;
-    border: 2px solid rgba(255, 255, 255, 0.8);
-    border-radius: 4px;
-    background-color: rgba(0, 0, 0, 0.5);
   }
 </style>

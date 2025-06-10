@@ -46,12 +46,10 @@ export interface Character extends CharacterBase {
   activity: Activity | null;
   objective: Objective | null;
   needs: {
-    food: {
-      lastMeal: number;
-    };
-    sleep: {
-      lastSleep: number;
-    };
+    food: number;
+    sleep: number;
+    fun: number;
+    social: number;
   };
 }
 
@@ -81,17 +79,20 @@ export interface ItemIndices {
 }
 
 // Define specific target types for each activity
-type ActivityTargets = {
+export type ActivityTargets = {
   [ActivityType.GoTo]: number; // Place ID
   [ActivityType.Eat]: string; // Item ID
   [ActivityType.Cook]: string[]; // Multiple Item IDs
-  [ActivityType.Sleep]: never; // No targets needed
+  [ActivityType.Sleep]: null; // No targets needed
+  [ActivityType.Play]: null; // No targets needed - these are group activities only
+  [ActivityType.Chat]: null; // No targets needed - these are group activities only
 };
 
 export interface Activity<T extends ActivityType = ActivityType> {
   type: T;
   progress: number; // 0-100
   target: ActivityTargets[T];
+  participants?: number[]; // for group activities, character ids
 }
 
 export interface Objective {

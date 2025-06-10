@@ -17,11 +17,17 @@ export function setCharactersObjectives(characters: Character[]) {
 
 // follow pyramid of needs
 function getPriorityObjective(character: Character): ObjectiveType | null {
-  if (gs.time.ellapsedTime - character.needs.food.lastMeal > config.needs.food) {
+  if (character.needs.food > config.needs.food) {
     return ObjectiveType.HaveMeal;
   }
-  if (gs.time.ellapsedTime - character.needs.sleep.lastSleep > config.needs.sleep) {
+  if (character.needs.sleep > config.needs.sleep) {
     return ObjectiveType.Rest;
+  }
+  if (character.needs.social > config.needs.social) {
+    return ObjectiveType.Socialize;
+  }
+  if (character.needs.fun > config.needs.fun) {
+    return ObjectiveType.HaveFun;
   }
   return null;
 }
@@ -29,8 +35,12 @@ function getPriorityObjective(character: Character): ObjectiveType | null {
 export function checkIfObjectiveIsSatisfied(character: Character, objective: ObjectiveType) {
   switch (objective) {
     case ObjectiveType.HaveMeal:
-      return gs.time.ellapsedTime - character.needs.food.lastMeal < config.needs.food / 2;
+      return character.needs.food < config.needs.food / 2;
     case ObjectiveType.Rest:
-      return gs.time.ellapsedTime - character.needs.sleep.lastSleep < config.needs.sleep / 2;
+      return character.needs.sleep < config.needs.sleep / 2;
+    case ObjectiveType.HaveFun:
+      return character.needs.fun < config.needs.fun / 2;
+    case ObjectiveType.Socialize:
+      return character.needs.social < config.needs.social / 2;
   }
 }

@@ -31,12 +31,10 @@ function initCharacter(character: CharacterBase, index: number): Character {
     activity: null,
     objective: null,
     needs: {
-      food: {
-        lastMeal: -360,
-      },
-      sleep: {
-        lastSleep: -760,
-      },
+      food: 0,
+      sleep: 0,
+      fun: 0,
+      social: 1440,
     },
   };
 }

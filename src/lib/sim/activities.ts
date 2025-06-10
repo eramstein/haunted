@@ -1,8 +1,15 @@
 import type { Activity, Character } from '../_model/model-sim';
 import { ActivityType, ObjectiveType } from '../_model/model-sim.enums';
-import { cook, eat, setHaveMealTask } from './actions/eat';
-import { sleep, setRestTask } from './actions/sleep';
-import { move } from './actions/move';
+import {
+  move,
+  cook,
+  eat,
+  setHaveMealTask,
+  sleep,
+  setRestTask,
+  setSocializeTask,
+  chat,
+} from './actions';
 import { checkIfObjectiveIsSatisfied } from './objectives';
 
 export function workOnActivities(characters: Character[]) {
@@ -28,6 +35,9 @@ function setActivityFromObjective(character: Character) {
     case ObjectiveType.Rest:
       setRestTask(character);
       break;
+    case ObjectiveType.Socialize:
+      setSocializeTask(character);
+      break;
     default:
       break;
   }
@@ -47,6 +57,9 @@ function progressActivity(character: Character) {
       break;
     case ActivityType.Cook:
       cook(character, character.activity as Activity<ActivityType.Cook>);
+      break;
+    case ActivityType.Chat:
+      chat(character, character.activity as Activity<ActivityType.Chat>);
       break;
     default:
       break;

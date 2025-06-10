@@ -5,8 +5,9 @@ import { gs } from '@/lib/_state';
 
 export function sleep(character: Character, activity: Activity<ActivityType.Sleep>) {
   activity.progress += config.actionSpeed.sleep;
-  if (activity.progress >= 100) {
-    character.needs.sleep.lastSleep = gs.time.ellapsedTime;
+  character.needs.sleep -= config.needsRefill.sleep;
+  if (character.needs.sleep < 0) {
+    character.needs.sleep = 0;
   }
 }
 

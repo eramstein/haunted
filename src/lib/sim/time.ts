@@ -2,6 +2,7 @@ import { gs } from '../_state';
 import { uiState } from '../_state/state-ui.svelte';
 import { workOnActivities } from './activities';
 import { setCharactersObjectives } from './objectives';
+import { updateCharactersNeeds } from './needs';
 
 // Track accumulated real time for tick calculation
 let accumulatedTime = 0;
@@ -42,6 +43,7 @@ export function setSpeed(speed: number) {
 function simulationTick() {
   gs.time.ellapsedTime += 1;
   setComputedTimes();
+  updateCharactersNeeds();
   workOnActivities(gs.characters);
   // every 10 minutes, check if any characters have an objective
   if (gs.time.ellapsedTime % 10 === 0) {

@@ -12,18 +12,21 @@
   const size = $derived(props.size || 32);
   const position = $derived(props.position || 'static');
   const className = $derived(props.className || '');
+  const iconPosition = $derived(getActionIconPosition(props.activity.type, size));
 </script>
 
-<div
-  class="activity-icon {className}"
-  style="
-    background-image: url({getIconSheet('actions')});
-    background-position: {getActionIconPosition(props.activity.type, size)};
-    width: {size}px;
-    height: {size}px;
-    position: {position};
-  "
-></div>
+{#if iconPosition !== null}
+  <div
+    class="activity-icon {className}"
+    style="
+      background-image: url({getIconSheet('actions')});
+      background-position: {iconPosition};
+      width: {size}px;
+      height: {size}px;
+      position: {position};
+    "
+  ></div>
+{/if}
 
 <style>
   .activity-icon {

@@ -27,13 +27,25 @@
     <div class="detail-item">
       <span class="label">Food:</span>
       <span class="value">
-        {formatMinutes(gs.time.ellapsedTime - props.character.needs.food.lastMeal)}
+        {formatMinutes(props.character.needs.food)}
       </span>
     </div>
     <div class="detail-item">
       <span class="label">Sleep:</span>
       <span class="value">
-        {formatMinutes(gs.time.ellapsedTime - props.character.needs.sleep.lastSleep)}
+        {formatMinutes(props.character.needs.sleep)}
+      </span>
+    </div>
+    <div class="detail-item">
+      <span class="label">Fun:</span>
+      <span class="value">
+        {formatMinutes(props.character.needs.fun)}
+      </span>
+    </div>
+    <div class="detail-item">
+      <span class="label">Social:</span>
+      <span class="value">
+        {formatMinutes(props.character.needs.social)}
       </span>
     </div>
     <div class="detail-item">
@@ -51,6 +63,14 @@
         {getActivityLabel(props.character.activity)} - {Math.round(
           props.character.activity?.progress || 0
         )}%
+        {#if props.character.activity?.participants?.length}
+          <div class="participants">
+            with {props.character.activity.participants
+              .filter((id: number) => id !== props.character.id)
+              .map((id: number) => gs.characters.find((c) => c.id === id)?.name)
+              .join(', ')}
+          </div>
+        {/if}
       </span>
     </div>
   </div>
@@ -98,5 +118,11 @@
     display: flex;
     align-items: center;
     gap: 8px;
+  }
+
+  .participants {
+    font-size: 0.9em;
+    color: #aaa;
+    margin-top: 4px;
   }
 </style>

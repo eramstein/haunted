@@ -53,6 +53,10 @@ export function getActionIconPosition(type: string, size: number = 32) {
     cook: 10,
   };
 
+  if (!typePositions[type]) {
+    return null;
+  }
+
   const position = typePositions[type] || 0;
   // For 16px display, we need to scale the position by 16/32 = 0.5
   const scale = size / 32;

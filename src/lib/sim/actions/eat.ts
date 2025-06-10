@@ -7,7 +7,7 @@ import { gs } from '@/lib/_state';
 export function eat(character: Character, activity: Activity<ActivityType.Eat>) {
   activity.progress += config.actionSpeed.eat;
   if (activity.progress >= 100) {
-    character.needs.food.lastMeal = gs.time.ellapsedTime;
+    character.needs.food = 0;
     if (activity.type === ActivityType.Eat) {
       const targetId = activity.target as string;
       removeItem(targetId);
@@ -40,6 +40,10 @@ export function setHaveMealTask(character: Character) {
   if (meals.length === 0) {
     // are there ingredients? if yes cook them, else go find some
     const ingredients = getItemsByTypeAndOwner(ItemType.FoodIngredient, character.id);
+    if (ingredients.length === 0) {
+      // TODO: go shopping
+      return;
+    }
     const ingredientsInPlace = ingredients.filter(
       (ingredient) => ingredient.location === character.place
     );

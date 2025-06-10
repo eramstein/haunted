@@ -36,9 +36,9 @@
             uiState.selectedCharacter = character;
           }}
         ></div>
-        {#if character.activity}
+        {#if character.activities.length > 0}
           <ActivityIcon
-            activity={character.activity}
+            activity={character.activities[0]}
             size={32}
             position="absolute"
             className="bottom-right"

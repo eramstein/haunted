@@ -48,17 +48,17 @@ export function setHaveMealTask(character: Character) {
       (ingredient) => ingredient.location === character.place
     );
     if (ingredientsInPlace.length > 0) {
-      character.activity = {
+      character.activities.push({
         type: ActivityType.Cook,
         progress: 0,
         target: [ingredientsInPlace[0].id],
-      };
+      });
     } else {
-      character.activity = {
+      character.activities.push({
         type: ActivityType.GoTo,
         progress: 0,
         target: ingredients[0].location,
-      };
+      });
     }
     return;
   } else {
@@ -66,19 +66,19 @@ export function setHaveMealTask(character: Character) {
     const mealInPlace = meals.find((meal) => meal.location === character.place);
     // if yes, eat it
     if (mealInPlace) {
-      character.activity = {
+      character.activities.push({
         type: ActivityType.Eat,
         progress: 0,
         target: mealInPlace.id,
-      };
+      });
     }
     // if no, pick up a meal
     else {
-      character.activity = {
+      character.activities.push({
         type: ActivityType.GoTo,
         progress: 0,
         target: meals[0].location,
-      };
+      });
     }
   }
 }

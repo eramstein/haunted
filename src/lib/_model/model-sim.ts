@@ -43,7 +43,7 @@ export interface CharacterBase {
 export interface Character extends CharacterBase {
   id: number;
   place: number;
-  activity: Activity | null;
+  activities: Activity[]; // character will do these in order
   objective: Objective | null;
   needs: {
     food: number;
@@ -84,8 +84,8 @@ export type ActivityTargets = {
   [ActivityType.Eat]: string; // Item ID
   [ActivityType.Cook]: string[]; // Multiple Item IDs
   [ActivityType.Sleep]: null; // No targets needed
-  [ActivityType.Play]: null; // No targets needed - these are group activities only
-  [ActivityType.Chat]: null; // No targets needed - these are group activities only
+  [ActivityType.Play]: number; // Place ID
+  [ActivityType.Chat]: number; // Place ID
 };
 
 export interface Activity<T extends ActivityType = ActivityType> {

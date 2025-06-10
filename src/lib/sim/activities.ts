@@ -17,11 +17,11 @@ export function workOnActivities(characters: Character[]) {
 }
 
 function workOnActivity(character: Character) {
-  if (character.activity === null) {
+  if (character.activities.length === 0) {
     setActivityFromObjective(character);
   } else {
     progressActivity(character);
-    if (character.activity.progress >= 100) {
+    if (character.activities[0].progress >= 100) {
       finishActivity(character);
     }
   }
@@ -44,22 +44,23 @@ function setActivityFromObjective(character: Character) {
 }
 
 function progressActivity(character: Character) {
-  if (!character.activity) return;
-  switch (character.activity.type) {
+  if (character.activities.length === 0) return;
+  const activity = character.activities[0];
+  switch (activity.type) {
     case ActivityType.GoTo:
-      move(character, character.activity as Activity<ActivityType.GoTo>);
+      move(character, activity as Activity<ActivityType.GoTo>);
       break;
     case ActivityType.Eat:
-      eat(character, character.activity as Activity<ActivityType.Eat>);
+      eat(character, activity as Activity<ActivityType.Eat>);
       break;
     case ActivityType.Sleep:
-      sleep(character, character.activity as Activity<ActivityType.Sleep>);
+      sleep(character, activity as Activity<ActivityType.Sleep>);
       break;
     case ActivityType.Cook:
-      cook(character, character.activity as Activity<ActivityType.Cook>);
+      cook(character, activity as Activity<ActivityType.Cook>);
       break;
     case ActivityType.Chat:
-      chat(character, character.activity as Activity<ActivityType.Chat>);
+      chat(character, activity as Activity<ActivityType.Chat>);
       break;
     default:
       break;
@@ -67,7 +68,7 @@ function progressActivity(character: Character) {
 }
 
 function finishActivity(character: Character) {
-  character.activity = null;
+  character.activities.shift();
   if (character.objective) {
     const objectiveCompleted = checkIfObjectiveIsSatisfied(character, character.objective.type);
     if (objectiveCompleted) {

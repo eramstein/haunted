@@ -24,18 +24,18 @@ export function setRestTask(character: Character) {
 
   // If character is in their bedroom, start sleeping
   if (character.place === bedroom) {
-    character.activity = {
+    character.activities.push({
       type: ActivityType.Sleep,
       progress: 0,
       target: undefined as never,
-    };
+    });
   }
   // If not, go to bedroom
   else {
-    character.activity = {
+    character.activities.push({
       type: ActivityType.GoTo,
       progress: 0,
       target: bedroom,
-    };
+    });
   }
 }

@@ -5,7 +5,7 @@
   import { gs } from '../_state';
   import { getActivityLabel } from '../sim/activities-labels';
   import { formatMinutes } from './_helpers/date.svelte';
-  import { getCharacterImage, getIconSheet, getActionIconPosition } from './_helpers/images.svelte';
+  import { getCharacterImage } from './_helpers/images.svelte';
   import ActivityIcon from './ActivityIcon.svelte';
 
   let props = $props<{
@@ -57,15 +57,15 @@
     <div class="detail-item">
       <span class="label">Activity:</span>
       <span class="value">
-        {#if props.character.activity}
-          <ActivityIcon activity={props.character.activity} size={20} />
+        {#if props.character.activities[0]}
+          <ActivityIcon activity={props.character.activities[0]} size={20} />
         {/if}
-        {getActivityLabel(props.character.activity)} - {Math.round(
-          props.character.activity?.progress || 0
+        {getActivityLabel(props.character.activities[0])} - {Math.round(
+          props.character.activities[0]?.progress || 0
         )}%
-        {#if props.character.activity?.participants?.length}
+        {#if props.character.activities[0]?.participants?.length}
           <div class="participants">
-            with {props.character.activity.participants
+            with {props.character.activities[0].participants
               .filter((id: number) => id !== props.character.id)
               .map((id: number) => gs.characters.find((c) => c.id === id)?.name)
               .join(', ')}

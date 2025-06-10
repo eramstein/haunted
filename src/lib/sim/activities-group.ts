@@ -23,9 +23,14 @@ export function proposeActivity(
   };
   console.log('groupActivity', groupActivity);
   if (acceptedCharacters.length > 0) {
-    fromCharacter.activity = groupActivity;
-    acceptedCharacters.forEach((character) => {
-      character.activity = groupActivity;
+    [fromCharacter, ...acceptedCharacters].forEach((character) => {
+      // for now we assume that for group activities, the target is the place
+      character.activities.push({
+        type: ActivityType.GoTo,
+        progress: 0,
+        target,
+      });
+      character.activities.push(groupActivity);
     });
   }
 }

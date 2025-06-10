@@ -105,9 +105,9 @@
                 in:receive={{ key: character.id }}
                 out:send={{ key: character.id }}
               />
-              {#if character.activity !== null}
+              {#if character.activities.length}
                 <ActivityIcon
-                  activity={character.activity}
+                  activity={character.activities[0]}
                   size={20}
                   position="absolute"
                   className="bottom-right"

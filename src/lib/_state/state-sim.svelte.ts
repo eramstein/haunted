@@ -28,10 +28,10 @@ function initCharacter(character: CharacterBase, index: number): Character {
     ...character,
     id: index,
     place: 0, // Default to first place
-    activity: null,
+    activities: [],
     objective: null,
     needs: {
-      food: 0,
+      food: 360,
       sleep: 0,
       fun: 0,
       social: 1440,

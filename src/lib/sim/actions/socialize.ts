@@ -10,7 +10,7 @@ export function setSocializeTask(character: Character) {
     (c) => c.id !== character.id
   );
   if (availableForChat.length > 0) {
-    proposeActivity(character, availableForChat, ActivityType.Chat);
+    proposeActivity(character, availableForChat, ActivityType.Chat, character.place);
   }
 }
 

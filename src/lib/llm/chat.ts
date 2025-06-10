@@ -1,5 +1,7 @@
 import { llmService } from './llm-service';
-import type { Character } from '../_model';
+import type { Character, Place } from '../_model';
+import { ActivityType } from '../_model/model-sim.enums';
+import { saveChat } from './index-db';
 
 async function summarizeChat(chatHistory: string, character: string) {
   const prompt = `
@@ -14,12 +16,17 @@ async function summarizeChat(chatHistory: string, character: string) {
 }
 
 export async function generateChat(
+  chatId: string,
   characters: Character[],
+  place: Place,
+  activityType: ActivityType,
   onStream: (chunk: string) => void
 ): Promise<string> {
   const systemPrompt = {
     role: 'system',
-    content: characters.map((c) => c.llm.systemPrompt).join('\n'),
+    content:
+      'The following characters have a chat: ' +
+      characters.map((c) => c.name + ': ' + c.llm.systemPrompt).join('\n'),
   };
 
   const stream = await llmService.chat({
@@ -39,6 +46,15 @@ export async function generateChat(
     fullResponse += convertedChunk;
     onStream?.(convertedChunk);
   }
+
+  // store full chat in the database
+  await saveChat(
+    chatId,
+    characters.map((c) => c.id),
+    place.id,
+    activityType,
+    fullResponse
+  );
 
   return fullResponse;
 }

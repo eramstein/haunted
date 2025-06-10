@@ -33,8 +33,8 @@ function initCharacter(character: CharacterBase, index: number): Character {
     needs: {
       food: 0,
       sleep: 0,
-      fun: 1440,
-      social: 0,
+      fun: 0,
+      social: 1440,
     },
   };
 }

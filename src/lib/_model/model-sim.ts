@@ -98,3 +98,12 @@ export interface Activity<T extends ActivityType = ActivityType> {
 export interface Objective {
   type: ObjectiveType;
 }
+
+export interface GroupActivityLog {
+  id: string;
+  activityType: ActivityType;
+  participants: number[];
+  location: number;
+  timestamp: number; // in minutes since startDate
+  content: string;
+}

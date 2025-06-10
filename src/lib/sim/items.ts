@@ -1,10 +1,7 @@
 import type { Item } from '../_model/model-sim';
 import { ItemType } from '../_model/model-sim.enums';
 import { gs } from '../_state';
-
-function generateUniqueId(): string {
-  return crypto.randomUUID();
-}
+import { generateUniqueId } from './_utils/random';
 
 export function addItem(item: Omit<Item, 'id'>): Item {
   const id = generateUniqueId();

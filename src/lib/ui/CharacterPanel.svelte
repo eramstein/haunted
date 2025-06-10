@@ -7,10 +7,13 @@
   import { formatMinutes } from './_helpers/date.svelte';
   import { getCharacterImage } from './_helpers/images.svelte';
   import ActivityIcon from './ActivityIcon.svelte';
+  import GroupActivityHistory from './GroupActivityHistory.svelte';
 
   let props = $props<{
     character: Character;
   }>();
+
+  let showHistory = $state(false);
 </script>
 
 <div class="character-panel">
@@ -74,6 +77,14 @@
       </span>
     </div>
   </div>
+  <div class="history-section">
+    <button class="toggle-button" onclick={() => (showHistory = !showHistory)}>
+      {showHistory ? 'Hide' : 'Show'} Group Activity History
+    </button>
+    {#if showHistory}
+      <GroupActivityHistory characterId={props.character.id} />
+    {/if}
+  </div>
 </div>
 
 <style>
@@ -124,5 +135,30 @@
     font-size: 0.9em;
     color: #aaa;
     margin-top: 4px;
+  }
+
+  .history-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .toggle-button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+  }
+
+  .toggle-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .toggle-button:active {
+    background: rgba(255, 255, 255, 0.15);
   }
 </style>

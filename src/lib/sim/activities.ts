@@ -9,6 +9,8 @@ import {
   setRestTask,
   setSocializeTask,
   chat,
+  setPlayTask,
+  play,
 } from './actions';
 import { checkIfObjectiveIsSatisfied } from './objectives';
 
@@ -38,6 +40,9 @@ function setActivityFromObjective(character: Character) {
     case ObjectiveType.Socialize:
       setSocializeTask(character);
       break;
+    case ObjectiveType.HaveFun:
+      setPlayTask(character);
+      break;
     default:
       break;
   }
@@ -61,6 +66,9 @@ function progressActivity(character: Character) {
       break;
     case ActivityType.Chat:
       chat(character, activity as Activity<ActivityType.Chat>);
+      break;
+    case ActivityType.Play:
+      play(character, activity as Activity<ActivityType.Play>);
       break;
     default:
       break;

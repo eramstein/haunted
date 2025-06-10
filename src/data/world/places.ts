@@ -70,3 +70,14 @@ Object.values(NPCS).forEach((npc) => {
     position: roomPositions[npc.name.toLowerCase()],
   });
 });
+
+export const PLACES_IDS_BY_TYPE: Record<string, number> = {
+  livingRoom: 0,
+  kitchen: 1,
+  diningRoom: 2,
+  gamingRoom: 3,
+  library: 4,
+  bathroom: 5,
+  veranda: 6,
+  cellar: 7,
+};

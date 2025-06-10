@@ -4,13 +4,14 @@ import { gs } from '@/lib/_state';
 import { getCharactersByActivityType } from '../characters';
 import { proposeActivity } from '../activities-group';
 import { config } from '@/lib/_config/config';
+import { PLACES_IDS_BY_TYPE } from '@/data/world/places';
 
 export function setSocializeTask(character: Character) {
   const availableForChat = getCharactersByActivityType(gs.characters).filter(
     (c) => c.id !== character.id
   );
   if (availableForChat.length > 0) {
-    proposeActivity(character, availableForChat, ActivityType.Chat, character.place);
+    proposeActivity(character, availableForChat, ActivityType.Chat, PLACES_IDS_BY_TYPE.livingRoom);
   }
 }
 

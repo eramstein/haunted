@@ -31,10 +31,10 @@ function initCharacter(character: CharacterBase, index: number): Character {
     activities: [],
     objective: null,
     needs: {
-      food: 360,
+      food: 0,
       sleep: 0,
-      fun: 0,
-      social: 1440,
+      fun: 1440,
+      social: 0,
     },
   };
 }

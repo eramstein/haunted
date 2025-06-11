@@ -5,6 +5,7 @@
   import type { GroupActivityLog, Character } from '../_model/model-sim';
   import { generateGroupActivityTranscript } from '../llm/chat';
   import { getChatsForCharacter } from '../llm/index-db';
+  import { getCharacterImage } from './_helpers/images.svelte';
 
   let props = $props<{
     characterId: number;
@@ -12,8 +13,17 @@
 
   let activities = $state<GroupActivityLog[]>([]);
   let streamingChats = $state<Record<string, string>>({});
+  let expandedSections = $state<Record<string, boolean>>({});
+
+  function toggleSection(activityId: string) {
+    expandedSections[activityId] = !expandedSections[activityId];
+  }
 
   $effect(() => {
+    getChats();
+  });
+
+  function getChats() {
     // Fetch chats for the last 24 hours
     const endTime = Date.now();
     const startTime = endTime - 24 * 60 * 60 * 1000; // 24 hours ago
@@ -24,7 +34,7 @@
       .catch((error) => {
         console.error('Failed to fetch chats:', error);
       });
-  });
+  }
 
   async function generateActivityChat(activity: GroupActivityLog) {
     if (activity.content) return;
@@ -47,6 +57,7 @@
           streamingChats[activity.id] += chunk;
         }
       );
+      getChats();
     } catch (error) {
       console.error('Failed to generate chat:', error);
       streamingChats[activity.id] = 'Failed to generate chat log.';
@@ -63,24 +74,44 @@
       {#each activities as activity}
         <div class="activity-item">
           <div class="activity-header">
-            <span class="activity-type">{LABELS_ACTIVITY_TYPES[activity.activityType]}</span>
+            <div class="activity-info">
+              <div class="activity-type-location">
+                <div class="activity-type">{LABELS_ACTIVITY_TYPES[activity.activityType]}</div>
+                <div class="activity-location">at {gs.places[activity.location]?.name}</div>
+              </div>
+              <div class="participant-portraits">
+                {#each activity.participants
+                  .filter((id) => id !== props.characterId)
+                  .map((id) => gs.characters.find((c) => c.id === id))
+                  .filter((c): c is Character => c !== undefined) as participant}
+                  <img
+                    src={getCharacterImage(participant.name)}
+                    alt={participant.name}
+                    class="participant-portrait"
+                    title={participant.name}
+                  />
+                {/each}
+              </div>
+            </div>
             <span class="activity-time">{new Date(activity.timestamp).toLocaleString()}</span>
           </div>
           <div class="activity-details">
-            <div class="location">
-              at {gs.places[activity.location]?.name}
-            </div>
-            <div class="participants">
-              with {activity.participants
-                .filter((id) => id !== props.characterId)
-                .map((id) => gs.characters.find((c) => c.id === id)?.name)
-                .join(', ')}
-            </div>
             {#if activity.activityType === ActivityType.Chat}
               <div class="chat-section">
-                {#if activity.content?.transcript}
-                  <div class="chat-log">
-                    {activity.content.transcript}
+                {#if activity.content?.transcript || activity.content?.summary}
+                  <div class="chat-content">
+                    <button class="toggle-button" onclick={() => toggleSection(activity.id)}>
+                      {expandedSections[activity.id] ? 'Summary' : 'Transcript'}
+                    </button>
+                    {#if expandedSections[activity.id] && activity.content?.transcript}
+                      <div class="chat-log">
+                        {activity.content.transcript}
+                      </div>
+                    {:else if activity.content?.summary}
+                      <div class="chat-summary">
+                        {activity.content.summary}
+                      </div>
+                    {/if}
                   </div>
                 {:else if streamingChats[activity.id]}
                   <div class="chat-log streaming">
@@ -141,8 +172,37 @@
     margin-bottom: 0.5rem;
   }
 
+  .activity-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .activity-type-location {
+    padding-right: 2rem;
+  }
+
   .activity-type {
+    font-size: 1.2rem;
     font-weight: 500;
+  }
+
+  .activity-location {
+    color: #888;
+  }
+
+  .participant-portraits {
+    display: flex;
+    gap: 0.25rem;
+    margin-left: 0.5rem;
+  }
+
+  .participant-portrait {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
 
   .activity-time {
@@ -151,17 +211,7 @@
   }
 
   .activity-details {
-    font-size: 0.9em;
     color: #aaa;
-  }
-
-  .location {
-    margin-bottom: 0.25rem;
-  }
-
-  .participants {
-    font-style: italic;
-    margin-bottom: 0.5rem;
   }
 
   .chat-section {
@@ -170,11 +220,33 @@
     border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
 
+  .chat-content {
+    position: relative;
+  }
+
+  .toggle-button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background-color 0.2s;
+  }
+
+  .toggle-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
   .chat-log {
-    font-style: italic;
     color: #ddd;
     white-space: pre-wrap;
     line-height: 1.4;
+    width: 90%;
   }
 
   .chat-log.streaming {
@@ -198,5 +270,11 @@
 
   .generate-chat-button:active {
     background: rgba(255, 255, 255, 0.15);
+  }
+
+  .chat-summary {
+    font-style: italic;
+    color: #ddd;
+    line-height: 1.4;
   }
 </style>

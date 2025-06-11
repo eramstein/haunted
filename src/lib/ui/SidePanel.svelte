@@ -26,8 +26,7 @@
   .side-panel {
     position: fixed;
     top: 0;
-    right: -400px;
-    width: 400px;
+    width: fit-content;
     height: 100vh;
     background: rgba(0, 0, 0, 0.9);
     color: white;

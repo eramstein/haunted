@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
     "lint": "eslint . --ext .js,.ts,.svelte",
-    "services": "concurrently \"ollama start\" \"chroma run --path ./chroma\""
+    "services": "concurrently \"ollama start\" \"chroma run --path ./chroma\"",
+    "chroma": "chroma run --path ./chroma"
   },
   "dependencies": {
     "@mistralai/mistralai": "^1.7.1",

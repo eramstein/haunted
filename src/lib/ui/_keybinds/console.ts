@@ -1,6 +1,7 @@
 import { initNpcMemory, listCollectionsWithContent, resetVectorDatabase } from '@/lib/llm';
 import { initWorldMemory } from '@/lib/llm/world';
 import { gs } from '../../_state';
+import { deleteOldChats } from '@/lib/llm/index-db';
 
 export const consoleCommands = {
   load: () => {
@@ -9,6 +10,8 @@ export const consoleCommands = {
   },
   reset: () => {
     resetVectorDatabase();
+    deleteOldChats(Infinity);
+    localStorage.clear();
   },
   list: () => {
     listCollectionsWithContent();

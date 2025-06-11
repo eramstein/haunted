@@ -34,8 +34,8 @@ export interface Position {
 export interface CharacterBase {
   name: string;
   llm: {
-    systemPrompt: string;
-    personalityTraits: string[];
+    bio: string;
+    traits: string[];
     initialMemories: string[];
   };
 }
@@ -105,5 +105,11 @@ export interface GroupActivityLog {
   participants: number[];
   location: number;
   timestamp: number; // in minutes since startDate
-  content: string;
+  content: GroupActivitySummary; // initially empty, then filled with LLM chat content when user looks at it (it's a Schrödinger's chat, hohoho)
+}
+
+export interface GroupActivitySummary {
+  transcript: string;
+  summary: string;
+  updates: any;
 }

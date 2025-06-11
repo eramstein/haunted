@@ -118,7 +118,7 @@ export class MistralService implements LLMService {
         messages: request.messages,
         tools: request.tools,
         stream: true,
-        response_format: request.responseFormat,
+        responseFormat: request.responseFormat,
         options: {
           temperature: request.options?.temperature,
           repeat_penalty: request.options?.repeat_penalty,

@@ -1,21 +1,12 @@
 import { llmService } from './llm-service';
-import type { Character, Place } from '../_model';
+import type { Character, GroupActivitySummary, Place } from '../_model';
 import { ActivityType } from '../_model/model-sim.enums';
 import { saveChat } from './index-db';
+import { groupActivityTranscriptSystemPrompt, summarySystemPrompt } from './chat-system-prompts';
+import { activityTypeToContext, getGroupDescription } from './chat-helpers';
+import { gs } from '../_state';
 
-async function summarizeChat(chatHistory: string, character: string) {
-  const prompt = `
-    Summarize all interactions between these characters into 2-3 sentences, focusing on id events (e.g., game outcomes, social moments, plans). Output only the summary text.
-    Test to summarize: ${chatHistory}
-  `;
-  const memory = await llmService.chat({
-    messages: [{ role: 'user', content: prompt }],
-    stream: false,
-  });
-  return llmService.getMessage(memory);
-}
-
-export async function generateChat(
+export async function generateGroupActivityTranscript(
   chatId: string,
   characters: Character[],
   place: Place,
@@ -24,13 +15,27 @@ export async function generateChat(
 ): Promise<string> {
   const systemPrompt = {
     role: 'system',
-    content:
-      'The following characters have a chat: ' +
-      characters.map((c) => c.name + ': ' + c.llm.systemPrompt).join('\n'),
+    content: groupActivityTranscriptSystemPrompt,
+  };
+
+  const context = activityTypeToContext[activityType] || '';
+  const locationDescription = place.name + ', ' + place.description || '';
+  const charactersDescription = getGroupDescription(characters);
+  const timeOfDay = gs.time.dateString.split(' ').pop() || '';
+
+  const userPrompt = {
+    role: 'user',
+    content: `
+      - Characters:
+        ${charactersDescription}
+      - Location: ${locationDescription}
+      - Context: ${context}. Time of day ${timeOfDay}.
+      - Past Events: none.
+    `,
   };
 
   const stream = await llmService.chat({
-    messages: [systemPrompt],
+    messages: [systemPrompt, userPrompt],
     stream: true,
     options: {
       temperature: 0.7,
@@ -40,12 +45,14 @@ export async function generateChat(
     },
   });
 
-  let fullResponse = '';
+  let transcript = '';
   for await (const chunk of stream) {
     const convertedChunk = llmService.getStreamChunk(chunk);
-    fullResponse += convertedChunk;
+    transcript += convertedChunk;
     onStream?.(convertedChunk);
   }
+
+  const postProcessing = await generateSummary(transcript);
 
   // store full chat in the database
   await saveChat(
@@ -53,8 +60,50 @@ export async function generateChat(
     characters.map((c) => c.id),
     place.id,
     activityType,
-    fullResponse
+    { transcript, summary: postProcessing.summary, updates: postProcessing.updates }
   );
 
-  return fullResponse;
+  return transcript;
+}
+
+async function generateSummary(transcript: string): Promise<GroupActivitySummary> {
+  const systemPrompt = {
+    role: 'system',
+    content: summarySystemPrompt,
+  };
+
+  const userPrompt = {
+    role: 'user',
+    content: `Transcript: ${transcript}`,
+  };
+
+  const response = await llmService.chat({
+    messages: [systemPrompt, userPrompt],
+    responseFormat: { type: 'json_object' },
+  });
+
+  const formattedResponse = llmService.getMessage(response);
+
+  try {
+    const parsed = JSON.parse(formattedResponse);
+
+    if (!parsed || typeof parsed !== 'object') {
+      console.error('Invalid response format: expected an object');
+      return { summary: '', updates: null, transcript };
+    }
+
+    if (typeof parsed.summary !== 'string') {
+      console.error('Invalid response format: missing or invalid summary property');
+      return { summary: '', updates: null, transcript };
+    }
+
+    if (!parsed.updates || typeof parsed.updates !== 'object') {
+      console.error('Invalid response format: missing or invalid updates property');
+      return { summary: '', updates: null, transcript };
+    }
+
+    return parsed;
+  } catch (error) {
+    return { summary: '', updates: null, transcript };
+  }
 }

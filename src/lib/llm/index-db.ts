@@ -1,6 +1,6 @@
 import Dexie, { type Table } from 'dexie';
 import type { ActivityType } from '../_model/model-sim.enums';
-import type { GroupActivityLog } from '../_model';
+import type { GroupActivityLog, GroupActivitySummary } from '../_model';
 
 // Initialize Dexie database
 const db = new Dexie('MansionSimDB');
@@ -19,7 +19,7 @@ export async function saveChat(
   participants: number[],
   location: number,
   activityType: ActivityType,
-  content: string
+  content: GroupActivitySummary
 ): Promise<number> {
   try {
     return await chats.put({

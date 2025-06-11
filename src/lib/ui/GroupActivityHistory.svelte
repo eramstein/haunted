@@ -3,8 +3,7 @@
   import { LABELS_ACTIVITY_TYPES } from '../_config/labels';
   import { ActivityType } from '../_model/model-sim.enums';
   import type { GroupActivityLog, Character } from '../_model/model-sim';
-  import { formatMinutes } from './_helpers/date.svelte';
-  import { generateChat } from '../llm/chat';
+  import { generateGroupActivityTranscript } from '../llm/chat';
   import { getChatsForCharacter } from '../llm/index-db';
 
   let props = $props<{
@@ -39,7 +38,7 @@
     streamingChats[activity.id] = '';
 
     try {
-      await generateChat(
+      await generateGroupActivityTranscript(
         activity.id,
         participants,
         gs.places[activity.location],
@@ -79,9 +78,9 @@
             </div>
             {#if activity.activityType === ActivityType.Chat}
               <div class="chat-section">
-                {#if activity.content}
+                {#if activity.content?.transcript}
                   <div class="chat-log">
-                    {activity.content}
+                    {activity.content.transcript}
                   </div>
                 {:else if streamingChats[activity.id]}
                   <div class="chat-log streaming">

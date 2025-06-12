@@ -5,6 +5,7 @@
   import { generateGroupActivityTranscript } from '../llm/chat';
   import { getChatsForCharacter } from '../llm/index-db';
   import { getCharacterImage } from './_helpers/images.svelte';
+  import { formatDate } from './_helpers/date.svelte';
 
   let props = $props<{
     characterId: number;
@@ -102,7 +103,7 @@
               </div>
             </div>
             <div class="activity-header-right">
-              <span class="activity-time">{new Date(activity.timestamp).toLocaleString()}</span>
+              <span class="activity-time">{formatDate(activity.timestamp)}</span>
               <div class="tabs">
                 <button
                   class="tab-button"

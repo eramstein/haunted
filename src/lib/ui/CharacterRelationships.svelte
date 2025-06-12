@@ -1,7 +1,10 @@
 <script lang="ts">
   import { gs } from '../_state';
-  import type { Character, Relationship } from '../_model/model-sim';
+  import type { Character, Relationship, RelationshipUpdate } from '../_model/model-sim';
   import { getCharacterImage } from './_helpers/images.svelte';
+  import { getChatsForCharacter } from '../llm/index-db';
+  import { LABELS_ACTIVITY_TYPES } from '../_config/labels';
+  import { formatDate, getFeelingColor } from './_helpers';
 
   let props = $props<{
     characterId: number;
@@ -12,6 +15,11 @@
       character: Character;
       relationship: Relationship;
     }>
+  >([]);
+
+  let selectedFeeling = $state<{ feeling: string; character: Character } | null>(null);
+  let relationshipUpdates = $state<
+    Array<RelationshipUpdate & { timestamp: number; activityType: string }>
   >([]);
 
   $effect(() => {
@@ -28,6 +36,36 @@
         character: otherCharacter,
         relationship: character.relationships[otherCharacter.id],
       }));
+  }
+
+  async function showFeelingUpdates(feeling: string, character: Character) {
+    selectedFeeling = { feeling, character };
+
+    // Fetch chats for the last 24 hours
+    const endTime = Date.now();
+    const startTime = endTime - 24 * 60 * 60 * 1000; // 24 hours ago
+
+    try {
+      const chats = await getChatsForCharacter(props.characterId.toString(), startTime, endTime);
+      // Filter chats that include both characters and have updates for this feeling
+      relationshipUpdates = chats
+        .flatMap(
+          (chat) =>
+            chat.content?.updates?.map((update) => ({
+              ...update,
+              timestamp: chat.timestamp,
+              activityType: LABELS_ACTIVITY_TYPES[chat.activityType],
+            })) || []
+        )
+        .filter(
+          (update) =>
+            (update.from === gs.characters[props.characterId].name ||
+              update.toward === gs.characters[props.characterId].name) &&
+            update.feeling === feeling
+        );
+    } catch (error) {
+      console.error('Failed to fetch relationship updates:', error);
+    }
   }
 </script>
 
@@ -49,14 +87,50 @@
           <div class="relationship-status">{rel.relationship.status}</div>
           <div class="feelings">
             {#each Object.entries(rel.relationship.feelings) as [feeling, value]}
-              <div class="feeling-item">
+              <div class="feeling-item" onclick={() => showFeelingUpdates(feeling, rel.character)}>
                 <span class="feeling-name">{feeling}</span>
-                <span class="feeling-value">{value}</span>
+                <span class="feeling-value" style="color: {getFeelingColor(value)}">{value}</span>
               </div>
             {/each}
           </div>
         </div>
       {/each}
+    </div>
+  {/if}
+
+  {#if selectedFeeling}
+    <div class="updates-section">
+      <h4>Updates for {selectedFeeling.feeling} with {selectedFeeling.character.name}</h4>
+      {#if relationshipUpdates.length === 0}
+        <p class="no-updates">No updates found for this feeling.</p>
+      {:else}
+        <table class="updates-table">
+          <thead>
+            <tr>
+              <th>Activity</th>
+              <th>Time</th>
+              <th>Change</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each relationshipUpdates as update}
+              <tr>
+                <td class="activity-cell">{update.activityType}</td>
+                <td>{formatDate(update.timestamp)}</td>
+                <td
+                  class="delta-cell"
+                  class:positive={update.delta > 0}
+                  class:negative={update.delta < 0}
+                >
+                  {update.delta > 0 ? '+' : ''}{update.delta}
+                </td>
+                <td class="reason-cell">{update.reason}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      {/if}
     </div>
   {/if}
 </div>
@@ -72,6 +146,12 @@
   h3 {
     margin: 0 0 1rem 0;
     font-size: 1.2rem;
+    color: #fff;
+  }
+
+  h4 {
+    margin: 1.5rem 0 1rem 0;
+    font-size: 1.1rem;
     color: #fff;
   }
 
@@ -132,6 +212,12 @@
     padding: 0.25rem;
     background: rgba(0, 0, 0, 0.2);
     border-radius: 2px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .feeling-item:hover {
+    background: rgba(0, 0, 0, 0.3);
   }
 
   .feeling-name {
@@ -140,5 +226,58 @@
 
   .feeling-value {
     color: #888;
+  }
+
+  .updates-section {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .no-updates {
+    color: #888;
+    font-style: italic;
+  }
+
+  .updates-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .updates-table th,
+  .updates-table td {
+    padding: 0.5rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .updates-table th {
+    color: #888;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+  }
+
+  .delta-cell {
+    font-weight: 500;
+  }
+
+  .delta-cell.positive {
+    color: #4caf50;
+  }
+
+  .delta-cell.negative {
+    color: #f44336;
+  }
+
+  .reason-cell {
+    color: #888;
+    font-style: italic;
+  }
+
+  .activity-cell {
+    text-transform: capitalize;
   }
 </style>

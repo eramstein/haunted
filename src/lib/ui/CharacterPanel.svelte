@@ -8,18 +8,25 @@
   import { getCharacterImage } from './_helpers/images.svelte';
   import ActivityIcon from './ActivityIcon.svelte';
   import GroupActivityHistory from './GroupActivityHistory.svelte';
+  import CharacterRelationships from './CharacterRelationships.svelte';
 
   let props = $props<{
     character: Character;
   }>();
 
-  let showDetails = $state(false);
+  type Tab = 'none' | 'activity' | 'relationships';
+  let activeTab = $state<Tab>('none');
 </script>
 
 <div class="character-panel-container">
-  {#if showDetails}
+  {#if activeTab === 'activity'}
     <div class="details-section">
       <GroupActivityHistory characterId={props.character.id} />
+    </div>
+  {/if}
+  {#if activeTab === 'relationships'}
+    <div class="details-section">
+      <CharacterRelationships characterId={props.character.id} />
     </div>
   {/if}
   <div class="character-panel">
@@ -29,9 +36,22 @@
         class="character-portrait"
         style="background-image: url({getCharacterImage(props.character.name)})"
       ></div>
-      <button class="toggle-button" onclick={() => (showDetails = !showDetails)}>
-        {showDetails ? 'Hide' : 'Show'} Activity History
-      </button>
+      <div class="tabs">
+        <button
+          class="tab-button"
+          class:active={activeTab === 'activity'}
+          onclick={() => (activeTab = activeTab === 'activity' ? 'none' : 'activity')}
+        >
+          Activity History
+        </button>
+        <button
+          class="tab-button"
+          class:active={activeTab === 'relationships'}
+          onclick={() => (activeTab = activeTab === 'relationships' ? 'none' : 'relationships')}
+        >
+          Relationships
+        </button>
+      </div>
       <div class="detail-item">
         <span class="label">Location:</span>
         <span class="value">{gs.places[props.character.place]?.name}</span>
@@ -144,7 +164,13 @@
     margin-top: 4px;
   }
 
-  .toggle-button {
+  .tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+  }
+
+  .tab-button {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: #fff;
@@ -152,16 +178,20 @@
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.9rem;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
     width: fit-content;
-    margin: 0.5rem 0;
   }
 
-  .toggle-button:hover {
+  .tab-button:hover {
     background: rgba(255, 255, 255, 0.2);
   }
 
-  .toggle-button:active {
+  .tab-button.active {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+
+  .tab-button:active {
     background: rgba(255, 255, 255, 0.15);
   }
 

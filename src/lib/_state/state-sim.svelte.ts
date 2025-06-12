@@ -1,6 +1,7 @@
-import { type CharacterBase, type Character, type State, type Place } from '../_model/model-sim';
+import type { CharacterBase, Character, State, Place, Relationship } from '../_model/model-sim';
 import { PLACES } from '@/data/world/places';
 import { NPCS } from '@/data/npcs';
+import { RelationshipStatus } from '../_model/model-sim.enums';
 
 export const initialState: State = {
   time: {
@@ -36,7 +37,20 @@ function initCharacter(character: CharacterBase, index: number): Character {
       fun: 0,
       social: 1440,
     },
+    relationships: getRelationships(character),
   };
+}
+
+function getRelationships(character: CharacterBase) {
+  const relationships: Record<number, Relationship> = {};
+  NPCS.forEach((otherCharacter, index) => {
+    if (otherCharacter.name === character.name) return;
+    relationships[index] = {
+      status: RelationshipStatus.Acquaintance,
+      feelings: {},
+    };
+  });
+  return relationships;
 }
 
 function initPlace(place: Omit<Place, 'id'>, index: number): Place {

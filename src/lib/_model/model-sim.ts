@@ -1,4 +1,10 @@
-import type { ActivityType, ItemType, ObjectiveType } from './model-sim.enums';
+import type {
+  ActivityType,
+  ItemType,
+  ObjectiveType,
+  RelationshipFeeling,
+  RelationshipStatus,
+} from './model-sim.enums';
 
 export interface State {
   time: Time;
@@ -51,6 +57,12 @@ export interface Character extends CharacterBase {
     fun: number;
     social: number;
   };
+  relationships: Record<number, Relationship>; // key is character id
+}
+
+export interface Relationship {
+  status: RelationshipStatus;
+  feelings: Partial<Record<RelationshipFeeling, number>>; // -100 to 100
 }
 
 export interface Memory {
@@ -111,5 +123,13 @@ export interface GroupActivityLog {
 export interface GroupActivitySummary {
   transcript: string;
   summary: string;
-  updates: any;
+  updates: RelationshipUpdate[];
+}
+
+export interface RelationshipUpdate {
+  from: string;
+  toward: string;
+  feeling: RelationshipFeeling;
+  delta: number;
+  reason: string;
 }

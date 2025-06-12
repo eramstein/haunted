@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { gs } from '../_state';
+  import { gs, uiState } from '../_state';
   import { LABELS_ACTIVITY_TYPES } from '../_config/labels';
-  import { ActivityType } from '../_model/model-sim.enums';
   import type { GroupActivityLog, Character } from '../_model/model-sim';
   import { generateGroupActivityTranscript } from '../llm/chat';
   import { getChatsForCharacter } from '../llm/index-db';
@@ -11,13 +10,12 @@
     characterId: number;
   }>();
 
+  type Tab = 'none' | 'transcript' | 'summary' | 'updates';
+
+  let characterName = $derived(gs.characters[props.characterId].name);
   let activities = $state<GroupActivityLog[]>([]);
   let streamingChats = $state<Record<string, string>>({});
-  let expandedSections = $state<Record<string, boolean>>({});
-
-  function toggleSection(activityId: string) {
-    expandedSections[activityId] = !expandedSections[activityId];
-  }
+  let activityTabs = $state<Record<string, Tab>>({});
 
   $effect(() => {
     getChats();
@@ -30,6 +28,13 @@
     getChatsForCharacter(props.characterId.toString(), startTime, endTime)
       .then((chats) => {
         activities = chats.sort((a, b) => b.timestamp - a.timestamp);
+        activityTabs = activities.reduce(
+          (acc, activity) => {
+            acc[activity.id] = 'summary';
+            return acc;
+          },
+          {} as Record<string, Tab>
+        );
       })
       .catch((error) => {
         console.error('Failed to fetch chats:', error);
@@ -89,44 +94,91 @@
                     alt={participant.name}
                     class="participant-portrait"
                     title={participant.name}
+                    onclick={() => {
+                      uiState.selectedCharacter = participant;
+                    }}
                   />
                 {/each}
               </div>
             </div>
-            <span class="activity-time">{new Date(activity.timestamp).toLocaleString()}</span>
+            <div class="activity-header-right">
+              <span class="activity-time">{new Date(activity.timestamp).toLocaleString()}</span>
+              <div class="tabs">
+                <button
+                  class="tab-button"
+                  class:active={activityTabs[activity.id] === 'summary'}
+                  onclick={() =>
+                    (activityTabs[activity.id] =
+                      activityTabs[activity.id] === 'summary' ? 'none' : 'summary')}
+                >
+                  Summary
+                </button>
+                <button
+                  class="tab-button"
+                  class:active={activityTabs[activity.id] === 'transcript'}
+                  onclick={() =>
+                    (activityTabs[activity.id] =
+                      activityTabs[activity.id] === 'transcript' ? 'none' : 'transcript')}
+                >
+                  Transcript
+                </button>
+                <button
+                  class="tab-button"
+                  class:active={activityTabs[activity.id] === 'updates'}
+                  onclick={() =>
+                    (activityTabs[activity.id] =
+                      activityTabs[activity.id] === 'updates' ? 'none' : 'updates')}
+                >
+                  Updates
+                </button>
+              </div>
+            </div>
           </div>
           <div class="activity-details">
-            {#if activity.activityType === ActivityType.Chat}
-              <div class="chat-section">
-                {#if activity.content?.transcript || activity.content?.summary}
-                  <div class="chat-content">
-                    <button class="toggle-button" onclick={() => toggleSection(activity.id)}>
-                      {expandedSections[activity.id] ? 'Summary' : 'Transcript'}
-                    </button>
-                    {#if expandedSections[activity.id] && activity.content?.transcript}
-                      <div class="chat-log">
-                        {activity.content.transcript}
-                      </div>
-                    {:else if activity.content?.summary}
-                      <div class="chat-summary">
-                        {activity.content.summary}
-                      </div>
-                    {/if}
-                  </div>
-                {:else if streamingChats[activity.id]}
-                  <div class="chat-log streaming">
-                    {streamingChats[activity.id]}
-                  </div>
-                {:else}
-                  <button
-                    class="generate-chat-button"
-                    onclick={() => generateActivityChat(activity)}
-                  >
-                    Generate Chat Log
-                  </button>
-                {/if}
-              </div>
-            {/if}
+            <div class="chat-section">
+              {#if activity.content?.transcript || activity.content?.summary}
+                <div class="chat-content">
+                  {#if activityTabs[activity.id] === 'transcript' && activity.content?.transcript}
+                    <div class="chat-log">
+                      {activity.content.transcript}
+                    </div>
+                  {:else if activityTabs[activity.id] === 'summary' && activity.content?.summary}
+                    <div class="chat-summary">
+                      {activity.content.summary}
+                    </div>
+                  {:else if activityTabs[activity.id] === 'updates' && activity.content?.updates}
+                    <div class="chat-summary">
+                      {#if activity.content.updates.length === 0}
+                        <div>No relationship updates.</div>
+                      {:else}
+                        <ul class="updates-list">
+                          {#each activity.content.updates.filter((u) => u.from === characterName || u.toward === characterName) as update}
+                            <li class="update-item">
+                              <span>
+                                {update.from} → {update.toward}
+                              </span>:
+                              <span class="update-feeling">{update.feeling}</span>
+                              <span class="update-delta"
+                                >({update.delta > 0 ? '+' : ''}{update.delta})</span
+                              >
+                              <span class="update-reason">— {update.reason}</span>
+                            </li>
+                          {/each}
+                        </ul>
+                      {/if}
+                    </div>
+                  {/if}
+                </div>
+              {:else if streamingChats[activity.id]}
+                <div class="chat-log streaming">
+                  {streamingChats[activity.id]}
+                </div>
+              {:else}
+                <button class="generate-chat-button" onclick={() => generateActivityChat(activity)}>
+                  Generate Chat Log
+                </button>
+              {/if}
+            </div>
           </div>
         </div>
       {/each}
@@ -162,7 +214,7 @@
   .activity-item {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 4px;
-    padding: 0.75rem;
+    padding: 0.5rem 0.75rem 0.75rem 0.75rem;
   }
 
   .activity-header {
@@ -170,6 +222,10 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 0.5rem;
+  }
+
+  .activity-header-right {
+    text-align: right;
   }
 
   .activity-info {
@@ -224,29 +280,10 @@
     position: relative;
   }
 
-  .toggle-button {
-    position: absolute;
-    top: 0;
-    right: 0;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #fff;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    transition: background-color 0.2s;
-  }
-
-  .toggle-button:hover {
-    background: rgba(255, 255, 255, 0.2);
-  }
-
   .chat-log {
     color: #ddd;
     white-space: pre-wrap;
     line-height: 1.4;
-    width: 90%;
   }
 
   .chat-log.streaming {
@@ -276,5 +313,63 @@
     font-style: italic;
     color: #ddd;
     line-height: 1.4;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+  }
+
+  .tab-button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    width: fit-content;
+  }
+
+  .tab-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .tab-button.active {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+
+  .tab-button:active {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .updates-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .update-item {
+    margin-bottom: 0.25rem;
+    color: #eee;
+    font-size: 0.98em;
+    line-height: 1.4;
+  }
+  .update-feeling {
+    color: #aaf;
+    margin-left: 0.25em;
+    margin-right: 0.25em;
+  }
+  .update-delta {
+    color: #afa;
+    margin-left: 0.25em;
+    margin-right: 0.25em;
+  }
+  .update-reason {
+    color: #ccc;
+    margin-left: 0.5em;
+    font-style: italic;
   }
 </style>

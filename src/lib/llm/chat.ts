@@ -5,6 +5,7 @@ import { saveChat } from './index-db';
 import { groupActivityTranscriptSystemPrompt, summarySystemPrompt } from './chat-system-prompts';
 import { activityTypeToContext, getGroupDescription } from './chat-helpers';
 import { gs } from '../_state';
+import { updateRelationships } from '../sim/relationships';
 
 export async function generateGroupActivityTranscript(
   chatId: string,
@@ -52,7 +53,11 @@ export async function generateGroupActivityTranscript(
     onStream?.(convertedChunk);
   }
 
+  console.log('transcript', transcript);
+
   const postProcessing = await generateSummary(transcript);
+
+  console.log('postProcessing', postProcessing);
 
   // store full chat in the database
   await saveChat(
@@ -62,6 +67,9 @@ export async function generateGroupActivityTranscript(
     activityType,
     { transcript, summary: postProcessing.summary, updates: postProcessing.updates }
   );
+
+  // update relationships
+  updateRelationships(postProcessing.updates);
 
   return transcript;
 }
@@ -89,21 +97,21 @@ async function generateSummary(transcript: string): Promise<GroupActivitySummary
 
     if (!parsed || typeof parsed !== 'object') {
       console.error('Invalid response format: expected an object');
-      return { summary: '', updates: null, transcript };
+      return { summary: '', updates: [], transcript };
     }
 
     if (typeof parsed.summary !== 'string') {
       console.error('Invalid response format: missing or invalid summary property');
-      return { summary: '', updates: null, transcript };
+      return { summary: '', updates: [], transcript };
     }
 
     if (!parsed.updates || typeof parsed.updates !== 'object') {
       console.error('Invalid response format: missing or invalid updates property');
-      return { summary: '', updates: null, transcript };
+      return { summary: '', updates: [], transcript };
     }
 
     return parsed;
   } catch (error) {
-    return { summary: '', updates: null, transcript };
+    return { summary: '', updates: [], transcript };
   }
 }

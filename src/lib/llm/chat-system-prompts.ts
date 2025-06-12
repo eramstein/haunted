@@ -1,3 +1,5 @@
+import { RelationshipFeeling } from '../_model/model-sim.enums';
+
 export const groupActivityTranscriptSystemPrompt = `
 You are simulating a light, naturalistic conversation, short (6-10 exchanges), between a group of fictional characters in a shared location within a story-driven simulation game. Each character has a distinct personality, goals, and relationship with others.
 
@@ -45,35 +47,41 @@ Alice: (nodding enthusiastically) Right? Clara, you saved us that night. Bob, ma
 Bob: (grinning despite himself) Doubt it, but I’ll eat. Just don’t touch my new laptop, Alice.
 `;
 
+const feelingsList = Object.values(RelationshipFeeling).join('\n- ');
+
 export const summarySystemPrompt = `
 You are analyzing a fictional conversation between characters in a simulation game.
 
 Given the transcript of their dialogue, do the following:
-1. Write a one-sentence summary of what happened.
-2. Identify any shifts in opinions or moods between characters.
-3. Return the result in the specified JSON format.
 
-Format:
+1. Write a one-sentence summary of what happened during the interaction.
+2. Identify how the feelings of the characters toward one another may have changed as a result of the conversation.
+3. For each change, provide:
+   - "from": the character who experienced the change
+   - "toward": the character it is directed at
+   - "feeling": one of the valid feelings listed below
+   - "delta": the amount of change as a float between -1.0 and 1.0
+   - "reason": a short explanation of why this change occurred, based on the dialogue
+
+  Only use the following valid feelings:
+
+  ${feelingsList}
+
+  Format your response as follows:
+
 {
   "summary": "<one sentence summary>",
-  "updates": {
-    "opinionChanges": [
-      {
-        "from": "Alice",
-        "toward": "Bob",
-        "change": -0.2,
-        "reason": "Bob was dismissive of her again"
-      }
-    ],
-    "moodChanges": [
-      {
-        "character": "Clara",
-        "change": +0.3,
-        "reason": "She enjoyed being included in the conversation"
-      }
-    ]
-  }
+  "updates": [
+    {
+      "from": "<Character A>",
+      "toward": "<Character B>",
+      "feeling": "<feeling>",
+      "delta": <float>,
+      "reason": "<short explanation>"
+    },
+    ...
+  ]
 }
 
-Only return output in this format. All numbers should be valid floats between -1.0 and +1.0. Do not add any commentary or explanation outside the defined sections.
+Do not add any commentary or headings other than the two sections above. Only use the provided format and feelings list. Return valid JSON.
 `;

@@ -6,6 +6,7 @@
   import { getChatsForCharacter } from '../llm/index-db';
   import { getCharacterImage } from './_helpers/images.svelte';
   import { formatDate } from './_helpers/date.svelte';
+  import { getTime } from '../sim';
 
   let props = $props<{
     characterId: number;
@@ -24,8 +25,8 @@
 
   function getChats() {
     // Fetch chats for the last 24 hours
-    const endTime = Date.now();
-    const startTime = endTime - 24 * 60 * 60 * 1000; // 24 hours ago
+    const endTime = gs.time.ellapsedTime;
+    const startTime = endTime - 24 * 60 * 60; // 24 hours ago
     getChatsForCharacter(props.characterId.toString(), startTime, endTime)
       .then((chats) => {
         activities = chats.sort((a, b) => b.timestamp - a.timestamp);
@@ -43,7 +44,7 @@
   }
 
   async function generateActivityChat(activity: GroupActivityLog) {
-    if (activity.content) return;
+    if (activity.content?.transcript) return;
     activityTabs[activity.id] = 'transcript';
 
     const participants = activity.participants
@@ -57,6 +58,7 @@
     try {
       await generateGroupActivityTranscript(
         activity.id,
+        activity.timestamp,
         participants,
         gs.places[activity.location],
         activity.activityType,
@@ -104,7 +106,7 @@
               </div>
             </div>
             <div class="activity-header-right">
-              <span class="activity-time">{formatDate(activity.timestamp)}</span>
+              <span class="activity-time">{formatDate(getTime(activity.timestamp))}</span>
               <div class="tabs">
                 <button
                   class="tab-button"

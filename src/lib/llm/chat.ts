@@ -1,14 +1,17 @@
 import { llmService } from './llm-service';
 import type { Character, GroupActivitySummary, Place } from '../_model';
 import { ActivityType } from '../_model/model-sim.enums';
-import { saveChat, updateChatContent } from './index-db';
+import { updateChatContent } from './index-db';
 import { groupActivityTranscriptSystemPrompt, summarySystemPrompt } from './chat-system-prompts';
 import { activityTypeToContext, getGroupDescription } from './chat-helpers';
-import { gs, saveStateToLocalStorage } from '../_state';
+import { saveStateToLocalStorage } from '../_state';
 import { updateRelationships } from '../sim/relationships';
+import { addGroupActivityMemory } from './npc-memory';
+import { getTime } from '../sim/time';
 
 export async function generateGroupActivityTranscript(
   chatId: string,
+  timestamp: number,
   characters: Character[],
   place: Place,
   activityType: ActivityType,
@@ -22,7 +25,11 @@ export async function generateGroupActivityTranscript(
   const context = activityTypeToContext[activityType] || '';
   const locationDescription = place.name + ', ' + place.description || '';
   const charactersDescription = getGroupDescription(characters);
-  const timeOfDay = gs.time.dateString.split(' ').pop() || '';
+  const timeOfDay = getTime(timestamp).toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
 
   const userPrompt = {
     role: 'user',
@@ -53,17 +60,23 @@ export async function generateGroupActivityTranscript(
     onStream?.(convertedChunk);
   }
 
-  console.log('transcript', transcript);
-
   const postProcessing = await generateSummary(transcript);
-
-  console.log('postProcessing', postProcessing);
 
   // store full chat in the database
   await updateChatContent(chatId, {
     transcript,
     summary: postProcessing.summary,
     updates: postProcessing.updates,
+  });
+
+  // store embedded vectors
+  addGroupActivityMemory({
+    id: chatId,
+    timestamp,
+    participants: characters.map((c) => c.id),
+    location: place.id,
+    activityType,
+    content: postProcessing,
   });
 
   // update relationships

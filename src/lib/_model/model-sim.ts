@@ -65,11 +65,6 @@ export interface Relationship {
   feelings: Partial<Record<RelationshipFeeling, number>>; // -100 to 100
 }
 
-export interface Memory {
-  summary: string;
-  metadata: Record<string, string>;
-}
-
 export interface Player {
   place: number;
 }

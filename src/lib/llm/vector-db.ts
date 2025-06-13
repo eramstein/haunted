@@ -1,13 +1,18 @@
 import { ChromaClient } from 'chromadb';
+import { initChromaCollection } from './npc-memory';
 
 export const vectorDatabaseClient = new ChromaClient();
 
 export async function resetVectorDatabase() {
   const collections = await vectorDatabaseClient.listCollections();
-  collections.forEach(async (c) => {
-    await vectorDatabaseClient.deleteCollection({ name: c });
-  });
-  console.log('Vector database reset');
+  for (const collectionName of collections) {
+    const collection = await vectorDatabaseClient.getOrCreateCollection({
+      name: collectionName,
+    });
+    await collection.delete({ where: { $exists: true } }); // Match all documents that have any field
+  }
+  await initChromaCollection();
+  console.log('Vector database collections emptied');
 }
 
 export async function listCollections() {

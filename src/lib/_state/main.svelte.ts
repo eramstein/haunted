@@ -14,10 +14,10 @@ export const saveStateToLocalStorage = (): void => {
   }
 };
 
-export const loadStateFromLocalStorage = (): State | null => {
+export const loadStateFromLocalStorage = async (): Promise<State | null> => {
   try {
     const savedState = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (!savedState) return createNewSimState();
+    if (!savedState) return await createNewSimState();
 
     const parsedState: State = JSON.parse(savedState);
 

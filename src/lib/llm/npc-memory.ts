@@ -1,19 +1,20 @@
 import { vectorDatabaseClient } from './vector-db';
-import { queryWorldsMemory } from './world';
 import { gs } from '../_state';
-import type { Memory } from '../_model';
+import type { GroupActivityLog } from '../_model/model-sim';
+import { MEMORY_COLLECTION } from './config';
 
-export async function initNpcMemory() {
+export async function initChromaCollection() {
+  const collection = await vectorDatabaseClient.getOrCreateCollection({
+    name: MEMORY_COLLECTION,
+  });
   gs.characters.forEach(async (character) => {
-    const collection = await vectorDatabaseClient.getOrCreateCollection({
-      name: character.name.toLowerCase(),
-    });
     await collection.upsert({
       documents: character.llm.initialMemories,
       metadatas: character.llm.initialMemories.map(() => ({
-        memory_type: 'foundation_memory',
+        type: 'npc_lore',
+        characters: '|' + String(character.id) + '|',
       })),
-      ids: character.llm.initialMemories.map((_, i) => character.id + ' memory ' + i),
+      ids: character.llm.initialMemories.map((_, i) => character.id + ' lore ' + i),
     });
   });
   console.log('NPCs memory initalized');
@@ -64,21 +65,48 @@ export async function queryNpcMemory(characterKey: string, message: string) {
     response += documents[lowestScoreIndex] + ' ' + additionalHints;
   }
 
-  const worldResults = await queryWorldsMemory(message);
-  if (worldResults) {
-    response += ' ' + worldResults + '. ';
-  }
   return response;
 }
 
-export async function addNpcMemory(characterKey: string, memory: Memory) {
-  const uid = Date.now().toString(36) + Math.random().toString(36).substr(2);
+export async function addGroupActivityMemory(activityLog: GroupActivityLog) {
   const collection = await vectorDatabaseClient.getOrCreateCollection({
-    name: characterKey,
+    name: MEMORY_COLLECTION,
   });
+  // one collective memory about the event
   collection.add({
-    ids: [uid],
-    metadatas: [memory.metadata],
-    documents: [memory.summary],
+    ids: [activityLog.id],
+    metadatas: [
+      {
+        timestamp: activityLog.timestamp,
+        type: 'group_activity',
+        characters: '|' + activityLog.participants.join('|') + '|',
+      },
+    ],
+    documents: [activityLog.content.summary],
   });
+  // individual memories in case of high emotional impact
+  const nameToId = activityLog.participants.reduce(
+    (acc, id) => {
+      const name = gs.characters.find((c) => c.id === id)?.name || 'unknown';
+      acc[name] = id;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
+  activityLog.content.updates
+    .filter((update) => Math.abs(update.delta) > 0.6)
+    .forEach((update) => {
+      const uid = Date.now().toString(36) + Math.random().toString(36).substr(2);
+      collection.add({
+        ids: [uid],
+        metadatas: [
+          {
+            timestamp: activityLog.timestamp,
+            type: 'relationship_update',
+            characters: '|' + nameToId[update.from] + '|' + nameToId[update.toward] + '|',
+          },
+        ],
+        documents: [update.reason],
+      });
+    });
 }

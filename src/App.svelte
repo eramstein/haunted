@@ -12,11 +12,7 @@
     window.addEventListener('keydown', handleKeybinds);
 
     // Load saved game state if it exists
-    const loadedState = loadStateFromLocalStorage();
-    console.log(loadedState);
-    if (loadedState) {
-      console.log('Game state loaded from localStorage');
-    }
+    loadStateFromLocalStorage();
 
     // Start the simulation loop with setInterval
     // Check every 100ms for time progression

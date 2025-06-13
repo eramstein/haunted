@@ -1,16 +1,11 @@
-import { initNpcMemory, listCollectionsWithContent, resetVectorDatabase } from '@/lib/llm';
-import { initWorldMemory } from '@/lib/llm/world';
+import { listCollectionsWithContent, resetVectorDatabase } from '@/lib/llm';
 import { gs } from '../../_state';
-import { deleteOldChats } from '@/lib/llm/index-db';
+import { resetIndexDB } from '../../llm/index-db';
 
 export const consoleCommands = {
-  load: () => {
-    initNpcMemory();
-    initWorldMemory();
-  },
-  reset: () => {
-    resetVectorDatabase();
-    deleteOldChats(Infinity);
+  reset: async () => {
+    await resetVectorDatabase();
+    await resetIndexDB();
     localStorage.clear();
   },
   list: () => {
@@ -18,10 +13,5 @@ export const consoleCommands = {
   },
   l: () => {
     console.log(JSON.stringify(gs, null, 2));
-  },
-  vdb: async () => {
-    await resetVectorDatabase();
-    await initNpcMemory();
-    await initWorldMemory();
   },
 };

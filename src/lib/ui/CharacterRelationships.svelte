@@ -7,6 +7,7 @@
   import { formatDate, getFeelingColor } from './_helpers';
   import { RelationshipFeeling } from '../_model/model-sim.enums';
   import { updateFeelingValue } from '../sim/relationships';
+  import { getTime } from '../sim';
 
   let props = $props<{
     characterId: number;
@@ -55,8 +56,8 @@
     selectedFeeling = { feeling, character };
 
     // Fetch chats for the last 24 hours
-    const endTime = Date.now();
-    const startTime = endTime - 24 * 60 * 60 * 1000; // 24 hours ago
+    const endTime = gs.time.ellapsedTime;
+    const startTime = endTime - 24 * 60 * 60; // 24 hours ago
 
     try {
       const chats = await getChatsForCharacter(props.characterId.toString(), startTime, endTime);
@@ -158,7 +159,7 @@
             {#each relationshipUpdates as update}
               <tr>
                 <td class="activity-cell">{update.activityType}</td>
-                <td>{formatDate(update.timestamp)}</td>
+                <td>{formatDate(getTime(update.timestamp))}</td>
                 <td
                   class="delta-cell"
                   class:positive={update.delta > 0}

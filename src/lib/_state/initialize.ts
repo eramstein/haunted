@@ -3,8 +3,10 @@ import { ItemType } from '../_model/model-sim.enums';
 import { initialState } from './state-sim.svelte';
 import { addItem } from '../sim/items';
 import { PLACES_IDS_BY_TYPE } from '@/data/world/places';
+import { resetVectorDatabase } from '../llm/vector-db';
+import { resetIndexDB } from '../llm/index-db';
 
-export function createNewSimState(): State {
+export async function createNewSimState(): Promise<State> {
   // add some initial items
   const kitchenId = PLACES_IDS_BY_TYPE.kitchen;
   if (kitchenId) {
@@ -29,6 +31,11 @@ export function createNewSimState(): State {
   } else {
     throw new Error('Kitchen not found for initial items');
   }
+
+  //reset vector database and IndexDB
+  await resetVectorDatabase();
+  await resetIndexDB();
+
   return {
     ...initialState,
   };

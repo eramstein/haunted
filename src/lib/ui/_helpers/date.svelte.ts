@@ -7,8 +7,7 @@ export function formatMinutes(minutes: number) {
   return `${hours}h ${remainingMinutes}m`;
 }
 
-export function formatDate(timestamp: number): string {
-  const date = new Date(timestamp);
+export function formatDate(date: Date): string {
   const day = date.getDate();
   const month = date.toLocaleString('default', { month: 'long' });
   const hours = date.getHours().toString().padStart(2, '0');

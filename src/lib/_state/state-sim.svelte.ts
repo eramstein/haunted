@@ -1,7 +1,7 @@
 import type { CharacterBase, Character, State, Place, Relationship } from '../_model/model-sim';
 import { PLACES } from '@/data/world/places';
 import { NPCS } from '@/data/npcs';
-import { RelationshipFeeling, RelationshipStatus } from '../_model/model-sim.enums';
+import { RelationshipStatus } from '../_model/model-sim.enums';
 
 export const initialState: State = {
   time: {

@@ -92,3 +92,7 @@ export async function deleteOldChats(olderThan: number): Promise<void> {
     throw error;
   }
 }
+
+export async function resetIndexDB(): Promise<void> {
+  await chats.clear();
+}

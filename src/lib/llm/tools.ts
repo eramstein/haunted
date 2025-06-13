@@ -1,19 +1,16 @@
 import { type ToolCall } from 'ollama';
 import { getTools } from './tools-defintitions';
-import { queryWorldsMemory } from './world';
 import { llmService } from './llm-service';
 import { ToolType } from './tools-defintitions';
 
 async function getToolsFromText(message: string) {
-  const memoryPrompt = await queryWorldsMemory(message);
-  console.log('getToolsFromText memoryPrompt', message, memoryPrompt);
   const systemMessage = {
     role: 'system',
     content: `You are a tool selection assistant. Your task is to carefully analyze the user's intent and select the most appropriate tool among those presented.`,
   };
   const query = {
     role: 'user',
-    content: `This is the id information to select the tool, give it priority: ${message}. ${memoryPrompt}`,
+    content: `This is the id information to select the tool, give it priority: ${message}.`,
   };
   const response = await llmService.chat({
     messages: [systemMessage, query],

@@ -16,15 +16,20 @@ const chats: Table<GroupActivityLog> = db.table('chats');
 // Save a chat to the database
 export async function saveChat(
   id: string,
+  timestamp: number,
   participants: number[],
   location: number,
   activityType: ActivityType,
-  content: GroupActivitySummary
+  content: GroupActivitySummary = {
+    transcript: '',
+    summary: '',
+    updates: [],
+  }
 ): Promise<number> {
   try {
     return await chats.put({
       id,
-      timestamp: Date.now(),
+      timestamp,
       participants,
       location,
       activityType,
@@ -32,6 +37,20 @@ export async function saveChat(
     });
   } catch (error) {
     console.error('Error saving chat:', error);
+    throw error;
+  }
+}
+
+// Update only the content of an existing chat
+export async function updateChatContent(
+  id: string,
+  content: GroupActivitySummary
+): Promise<string | undefined> {
+  try {
+    const count = await chats.where('id').equals(id).modify({ content });
+    return count > 0 ? id : undefined;
+  } catch (error) {
+    console.error('Error updating chat content:', error);
     throw error;
   }
 }

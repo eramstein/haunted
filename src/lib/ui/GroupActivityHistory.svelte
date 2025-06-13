@@ -44,6 +44,7 @@
 
   async function generateActivityChat(activity: GroupActivityLog) {
     if (activity.content) return;
+    activityTabs[activity.id] = 'transcript';
 
     const participants = activity.participants
       .map((id: number) => gs.characters.find((c) => c.id === id))

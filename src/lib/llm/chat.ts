@@ -1,10 +1,10 @@
 import { llmService } from './llm-service';
 import type { Character, GroupActivitySummary, Place } from '../_model';
 import { ActivityType } from '../_model/model-sim.enums';
-import { saveChat } from './index-db';
+import { saveChat, updateChatContent } from './index-db';
 import { groupActivityTranscriptSystemPrompt, summarySystemPrompt } from './chat-system-prompts';
 import { activityTypeToContext, getGroupDescription } from './chat-helpers';
-import { gs } from '../_state';
+import { gs, saveStateToLocalStorage } from '../_state';
 import { updateRelationships } from '../sim/relationships';
 
 export async function generateGroupActivityTranscript(
@@ -60,16 +60,15 @@ export async function generateGroupActivityTranscript(
   console.log('postProcessing', postProcessing);
 
   // store full chat in the database
-  await saveChat(
-    chatId,
-    characters.map((c) => c.id),
-    place.id,
-    activityType,
-    { transcript, summary: postProcessing.summary, updates: postProcessing.updates }
-  );
+  await updateChatContent(chatId, {
+    transcript,
+    summary: postProcessing.summary,
+    updates: postProcessing.updates,
+  });
 
   // update relationships
   updateRelationships(postProcessing.updates);
+  saveStateToLocalStorage();
 
   return transcript;
 }

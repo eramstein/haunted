@@ -5,6 +5,8 @@
   import { getChatsForCharacter } from '../llm/index-db';
   import { LABELS_ACTIVITY_TYPES } from '../_config/labels';
   import { formatDate, getFeelingColor } from './_helpers';
+  import { RelationshipFeeling } from '../_model/model-sim.enums';
+  import { updateFeelingValue } from '../sim/relationships';
 
   let props = $props<{
     characterId: number;
@@ -17,7 +19,8 @@
     }>
   >([]);
 
-  let selectedFeeling = $state<{ feeling: string; character: Character } | null>(null);
+  let selectedFeeling = $state<{ feeling: RelationshipFeeling; character: Character } | null>(null);
+  let selectedCharacter = $state<Character | null>(null);
   let relationshipUpdates = $state<
     Array<RelationshipUpdate & { timestamp: number; activityType: string }>
   >([]);
@@ -38,7 +41,17 @@
       }));
   }
 
-  async function showFeelingUpdates(feeling: string, character: Character) {
+  function updateFeeling(value: number) {
+    if (!selectedFeeling) return;
+    updateFeelingValue(
+      selectedFeeling.feeling,
+      props.characterId,
+      selectedFeeling.character.id,
+      value
+    );
+  }
+
+  async function showFeelingUpdates(feeling: RelationshipFeeling, character: Character) {
     selectedFeeling = { feeling, character };
 
     // Fetch chats for the last 24 hours
@@ -67,6 +80,10 @@
       console.error('Failed to fetch relationship updates:', error);
     }
   }
+
+  function togglePortraitSelection(character: Character) {
+    selectedCharacter = selectedCharacter?.id === character.id ? null : character;
+  }
 </script>
 
 <div class="character-relationships">
@@ -81,16 +98,28 @@
             src={getCharacterImage(rel.character.name)}
             alt={rel.character.name}
             class="character-portrait"
+            class:selected={selectedCharacter?.id === rel.character.id}
             title={rel.character.name}
+            onclick={() => togglePortraitSelection(rel.character)}
           />
           <div class="character-name">{rel.character.name}</div>
           <div class="relationship-status">{rel.relationship.status}</div>
           <div class="feelings">
-            {#each Object.entries(rel.relationship.feelings) as [feeling, value]}
-              <div class="feeling-item" onclick={() => showFeelingUpdates(feeling, rel.character)}>
-                <span class="feeling-name">{feeling}</span>
-                <span class="feeling-value" style="color: {getFeelingColor(value)}">{value}</span>
-              </div>
+            {#each Object.values(RelationshipFeeling) as feeling}
+              {#if selectedCharacter?.id === rel.character.id || rel.relationship.feelings[feeling]}
+                <div
+                  class="feeling-item"
+                  onclick={() => showFeelingUpdates(feeling, rel.character)}
+                >
+                  <span class="feeling-name">{feeling}</span>
+                  <span
+                    class="feeling-value"
+                    style="color: {getFeelingColor(rel.relationship.feelings[feeling] || 0)}"
+                  >
+                    {rel.relationship.feelings[feeling] || 0}
+                  </span>
+                </div>
+              {/if}
             {/each}
           </div>
         </div>
@@ -101,6 +130,18 @@
   {#if selectedFeeling}
     <div class="updates-section">
       <h4>Updates for {selectedFeeling.feeling} with {selectedFeeling.character.name}</h4>
+      <div class="feeling-update-controls">
+        <label for="feeling-value">Update value:</label>
+        <input
+          type="number"
+          id="feeling-value"
+          min="-100"
+          max="100"
+          value={gs.characters[props.characterId].relationships[selectedFeeling.character.id]
+            .feelings[selectedFeeling.feeling] || 0}
+          onchange={(e) => updateFeeling(Number((e.target as HTMLInputElement).value))}
+        />
+      </div>
       {#if relationshipUpdates.length === 0}
         <p class="no-updates">No updates found for this feeling.</p>
       {:else}
@@ -183,6 +224,18 @@
     object-fit: cover;
     border: 1px solid rgba(255, 255, 255, 0.2);
     margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .character-portrait:hover {
+    transform: scale(1.05);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+
+  .character-portrait.selected {
+    border: 2px solid #fff;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
   }
 
   .character-name {
@@ -279,5 +332,39 @@
 
   .activity-cell {
     text-transform: capitalize;
+  }
+
+  .feeling-update-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+
+  .feeling-update-controls label {
+    color: #fff;
+    font-size: 0.9rem;
+  }
+
+  .feeling-update-controls input {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    width: 80px;
+  }
+
+  .feeling-update-controls input:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+
+  .feeling-update-controls input::-webkit-inner-spin-button,
+  .feeling-update-controls input::-webkit-outer-spin-button {
+    opacity: 1;
   }
 </style>

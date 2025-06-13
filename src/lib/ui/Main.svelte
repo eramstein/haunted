@@ -1,6 +1,6 @@
 <script lang="ts">
   import { UiView } from '../_model';
-  import { uiState } from '../_state';
+  import { gs, uiState } from '../_state';
   import Place from './Place.svelte';
   import TimeControls from './TimeControls.svelte';
   import ViewControls from './ViewControls.svelte';

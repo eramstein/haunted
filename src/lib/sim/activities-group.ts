@@ -4,6 +4,7 @@ import type { ActivityTargets } from '@/lib/_model/model-sim';
 import { gs } from '../_state';
 import { generateUniqueId } from './_utils/random';
 import { saveChat } from '../llm/index-db';
+import { getTime } from './time';
 
 // TODO: use a better UUID library
 export function proposeActivity(
@@ -57,5 +58,5 @@ export function recordGroupActivity(
 ) {
   // store a schrodinger's chat: empty reference with meatadata for new, actual generated when user looks at it
   const id = generateUniqueId();
-  saveChat(id, participants, location, activityType, '');
+  saveChat(id, gs.time.ellapsedTime, participants, location, activityType);
 }

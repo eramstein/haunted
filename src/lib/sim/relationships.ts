@@ -1,4 +1,5 @@
-import type { RelationshipUpdate } from '../_model/model-sim';
+import type { Character, RelationshipUpdate } from '../_model/model-sim';
+import type { RelationshipFeeling } from '../_model/model-sim.enums';
 import { gs } from '../_state';
 
 export function updateRelationships(updates: RelationshipUpdate[]) {
@@ -25,4 +26,22 @@ export function updateRelationships(updates: RelationshipUpdate[]) {
   });
 
   // TODO: handle relationship status, derived from feelings? or mix with LLM
+}
+
+export function updateFeelingValue(
+  feeling: RelationshipFeeling,
+  fromCharacterId: number,
+  towardsCharacterId: number,
+  value: number
+) {
+  const character = gs.characters.find((c) => c.id === fromCharacterId);
+  if (!character) return;
+
+  // Ensure the feeling exists in the relationship
+  if (!character.relationships[towardsCharacterId].feelings[feeling]) {
+    character.relationships[towardsCharacterId].feelings[feeling] = 0;
+  }
+
+  // Update the feeling value
+  character.relationships[towardsCharacterId].feelings[feeling] = value;
 }

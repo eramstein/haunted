@@ -11,7 +11,8 @@ export const config = {
     food: 360, // eat every 6 hours
     sleep: 1080, // get sleepy after 18 hours without sleep
     fun: 1440, // get bored after 24 hours without fun
-    social: 1440, // get lonely after 24 hours without social interaction
+    //social: 1440, // get lonely after 24 hours without social interaction
+    social: 60,
   },
   // how much needs are fullfilled by game tick
   needsRefill: {

@@ -21,15 +21,13 @@ export enum ObjectiveType {
 }
 
 export enum RelationshipStatus {
-  Unknown = 'unknown',
-  Acquaintance = 'acquaintance',
-  Friend = 'friend',
-  CloseFriend = 'close friend',
-  RomanticPartner = 'romanticPartner',
-  Spouse = 'spouse',
-  Sibling = 'sibling',
-  Rival = 'rival',
-  Enemy = 'enemy',
+  Unknown = 'does not know',
+  Acquaintance = 'acquaintance of',
+  Friend = 'friend of',
+  CloseFriend = 'close friend of',
+  RomanticPartner = 'in couple with',
+  Spouse = 'spouse of',
+  Sibling = 'sibling of',
 }
 
 export enum RelationshipFeeling {

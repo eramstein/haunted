@@ -1,7 +1,7 @@
 import type { CharacterBase, Character, State, Place, Relationship } from '../_model/model-sim';
 import { PLACES } from '@/data/world/places';
 import { NPCS } from '@/data/npcs';
-import { RelationshipStatus } from '../_model/model-sim.enums';
+import { RelationshipFeeling, RelationshipStatus } from '../_model/model-sim.enums';
 
 export const initialState: State = {
   time: {
@@ -46,7 +46,7 @@ function getRelationships(character: CharacterBase) {
   NPCS.forEach((otherCharacter, index) => {
     if (otherCharacter.name === character.name) return;
     relationships[index] = {
-      status: RelationshipStatus.Acquaintance,
+      status: RelationshipStatus.Unknown,
       feelings: {},
     };
   });

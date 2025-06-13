@@ -1,7 +1,7 @@
 import { llmService } from './llm-service';
 import type { Memory } from '../_model';
-import { BasicScale } from '../_config';
 import { gs } from '../_state';
+import { BasicScale } from '../_model/model-llm.enum';
 
 export async function generateMemories(chatTranscript: string): Promise<Memory[]> {
   let memoryCount = 1;

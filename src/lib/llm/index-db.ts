@@ -56,8 +56,8 @@ export async function updateChatContent(
 }
 
 // Fetch chats for a character within a time range
-export async function getChatsForCharacter(
-  character: string,
+export async function getChatsForCharacters(
+  characters: number[],
   startTime: number,
   endTime: number
 ): Promise<GroupActivityLog[]> {
@@ -65,7 +65,7 @@ export async function getChatsForCharacter(
     return await chats
       .where('timestamp')
       .between(startTime, endTime, true, true)
-      .filter((chat) => chat.participants.includes(Number(character)))
+      .filter((chat) => chat.participants.some((participant) => characters.includes(participant)))
       .toArray();
   } catch (error) {
     console.error('Error fetching chats:', error);

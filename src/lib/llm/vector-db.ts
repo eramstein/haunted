@@ -1,5 +1,5 @@
 import { ChromaClient } from 'chromadb';
-import { initChromaCollection } from './npc-memory';
+import { initChromaCollection } from './memory-vectors';
 
 export const vectorDatabaseClient = new ChromaClient();
 

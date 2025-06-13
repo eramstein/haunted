@@ -3,4 +3,4 @@ export * from './vector-db';
 export * from './config';
 export * from './tools-defintitions';
 export * from './tools';
-export * from './npc-memory';
+export * from './memory-vectors';

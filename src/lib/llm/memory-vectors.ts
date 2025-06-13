@@ -20,52 +20,32 @@ export async function initChromaCollection() {
   console.log('NPCs memory initalized');
 }
 
-export async function queryNpcMemory(characterKey: string, message: string) {
+export async function queryNpcMemory(characterIds: number[], message: string) {
   // Query character's personal memories
-  const characterCollection = await vectorDatabaseClient.getOrCreateCollection({
-    name: characterKey,
+  const collection = await vectorDatabaseClient.getOrCreateCollection({
+    name: MEMORY_COLLECTION,
   });
-  const characterResults = await characterCollection.query({
+  const results = await collection.query({
     queryTexts: message,
     nResults: 3,
+    where: {
+      $or: characterIds.map((id) => ({
+        characters: { $in: [`|${id}|`] },
+      })),
+    },
   });
 
-  const documents = characterResults.documents?.[0] || [];
-  const scores = characterResults.distances?.[0] || documents.map(() => 2);
-  const metadatas = characterResults.metadatas?.[0] || documents.map(() => ({}));
+  const documents = results.documents?.[0] || [];
+  const scores = results.distances?.[0] || documents.map(() => 2);
+  const metadatas = results.metadatas?.[0] || documents.map(() => ({}));
+  const ids = results.ids?.[0] || documents.map((_, i) => i);
 
-  let response = '';
-  let additionalHints = '';
-
-  documents.forEach((_, index) => {
-    const metadata = metadatas[index];
-    if (metadata?.memory_importance === 'high') {
-      scores[index] -= 0.5;
-    }
-    if (metadata?.memory_importance === 'low') {
-      scores[index] += 0.2;
-    }
-  });
-
-  let lowestScoreIndex = 0;
-  let lowestScore = 0;
-
-  scores.forEach((score, index) => {
-    if (score < lowestScore) {
-      lowestScore = score;
-      lowestScoreIndex = index;
-    }
-  });
-
-  if (scores[lowestScoreIndex] < 1.5) {
-    const sentiment = metadatas[lowestScoreIndex]?.sentiment;
-    if (sentiment) {
-      additionalHints = 'sentiment expressed: ' + sentiment + ' ';
-    }
-    response += documents[lowestScoreIndex] + ' ' + additionalHints;
-  }
-
-  return response;
+  return documents.map((doc, i) => ({
+    document: doc,
+    score: scores[i],
+    metadata: metadatas[i],
+    id: ids[i],
+  }));
 }
 
 export async function addGroupActivityMemory(activityLog: GroupActivityLog) {

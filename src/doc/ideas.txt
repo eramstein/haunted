@@ -1,0 +1,5 @@
+ghost interactions:
+- before a chat starts, add something to the prompt:
+  - Antoine must use the word "crocodile"
+  - Antoine will make a tantrum
+  - The group is going to do something silly

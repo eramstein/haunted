@@ -2,7 +2,7 @@
   import { gs } from '../_state';
   import type { Character, Relationship, RelationshipUpdate } from '../_model/model-sim';
   import { getCharacterImage } from './_helpers/images.svelte';
-  import { getChatsForCharacter } from '../llm/index-db';
+  import { getChatsForCharacters } from '../llm/index-db';
   import { LABELS_ACTIVITY_TYPES } from '../_config/labels';
   import { formatDate, getFeelingColor } from './_helpers';
   import { RelationshipFeeling } from '../_model/model-sim.enums';
@@ -60,7 +60,11 @@
     const startTime = endTime - 24 * 60 * 60; // 24 hours ago
 
     try {
-      const chats = await getChatsForCharacter(props.characterId.toString(), startTime, endTime);
+      const chats = await getChatsForCharacters(
+        [props.characterId, character.id],
+        startTime,
+        endTime
+      );
       // Filter chats that include both characters and have updates for this feeling
       relationshipUpdates = chats
         .flatMap(

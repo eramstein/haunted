@@ -6,8 +6,9 @@ import { groupActivityTranscriptSystemPrompt, summarySystemPrompt } from './chat
 import { activityTypeToContext, getGroupDescription } from './chat-helpers';
 import { saveStateToLocalStorage } from '../_state';
 import { updateRelationships } from '../sim/relationships';
-import { addGroupActivityMemory } from './npc-memory';
+import { addGroupActivityMemory } from './memory-vectors';
 import { getTime } from '../sim/time';
+import { getSystemPromptMemories } from './memory';
 
 export async function generateGroupActivityTranscript(
   chatId: string,
@@ -17,9 +18,14 @@ export async function generateGroupActivityTranscript(
   activityType: ActivityType,
   onStream: (chunk: string) => void
 ): Promise<string> {
+  const memories = await getSystemPromptMemories(timestamp, characters, place, activityType);
+  const memoriesPrompt = memories
+    ? `Relevant Memory:\nThe characters remember a past event that may influence today's conversation:\n"${memories}"`
+    : '';
+
   const systemPrompt = {
     role: 'system',
-    content: groupActivityTranscriptSystemPrompt,
+    content: `${groupActivityTranscriptSystemPrompt}\n\n${memoriesPrompt}`,
   };
 
   const context = activityTypeToContext[activityType] || '';

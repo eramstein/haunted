@@ -3,7 +3,7 @@
   import { LABELS_ACTIVITY_TYPES } from '../_config/labels';
   import type { GroupActivityLog, Character } from '../_model/model-sim';
   import { generateGroupActivityTranscript } from '../llm/chat';
-  import { getChatsForCharacter } from '../llm/index-db';
+  import { getChatsForCharacters } from '../llm/index-db';
   import { getCharacterImage } from './_helpers/images.svelte';
   import { formatDate } from './_helpers/date.svelte';
   import { getTime } from '../sim';
@@ -27,7 +27,7 @@
     // Fetch chats for the last 24 hours
     const endTime = gs.time.ellapsedTime;
     const startTime = endTime - 24 * 60 * 60; // 24 hours ago
-    getChatsForCharacter(props.characterId.toString(), startTime, endTime)
+    getChatsForCharacters([props.characterId], startTime, endTime)
       .then((chats) => {
         activities = chats.sort((a, b) => b.timestamp - a.timestamp);
         activityTabs = activities.reduce(

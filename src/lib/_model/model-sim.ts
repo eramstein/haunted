@@ -1,5 +1,6 @@
 import type {
   ActivityType,
+  EmotionType,
   ItemType,
   ObjectiveType,
   RelationshipFeeling,
@@ -42,8 +43,12 @@ export interface CharacterBase {
   llm: {
     bio: string;
     traits: string[];
-    initialMemories: string[];
   };
+}
+
+export interface CharacterDefinition extends CharacterBase {
+  initialMemories: string[];
+  emotionalProfile: Record<EmotionType, Emotion>;
 }
 
 export interface Character extends CharacterBase {
@@ -58,6 +63,11 @@ export interface Character extends CharacterBase {
     social: number;
   };
   relationships: Record<number, Relationship>; // key is character id
+  emotions: {
+    mood: number; // 0-100 - aggregated mood, computed from all emotion types
+    dominantEmotion: EmotionType | null; // computed from all emotion types
+    byType: Record<EmotionType, Emotion>;
+  };
 }
 
 export interface Relationship {
@@ -125,6 +135,20 @@ export interface RelationshipUpdate {
   from: string;
   toward: string;
   feeling: RelationshipFeeling;
+  delta: number;
+  reason: string;
+}
+
+export interface Emotion {
+  type: EmotionType;
+  currentIntensity: number; // 0-100 - current intensity of the emotion, changes fast depending on events
+  baselineIntensity: number; // 0-100 - character's trait, e.g. some people are more joyful than others. changes slowly over time
+  decayRate: number; // how fast current intensity goes back to baseline
+  increaseRate: number; // how fast current intensity goes up when triggered by an event
+}
+
+export interface EmotionUpdate {
+  type: EmotionType;
   delta: number;
   reason: string;
 }

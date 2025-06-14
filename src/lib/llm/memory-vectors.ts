@@ -2,19 +2,20 @@ import { vectorDatabaseClient } from './vector-db';
 import { gs } from '../_state';
 import type { GroupActivityLog } from '../_model/model-sim';
 import { MEMORY_COLLECTION } from './config';
+import { NPCS } from '@/data/npcs';
 
 export async function initChromaCollection() {
   const collection = await vectorDatabaseClient.getOrCreateCollection({
     name: MEMORY_COLLECTION,
   });
-  gs.characters.forEach(async (character) => {
+  NPCS.forEach(async (character, index) => {
     await collection.upsert({
-      documents: character.llm.initialMemories,
-      metadatas: character.llm.initialMemories.map(() => ({
+      documents: character.initialMemories,
+      metadatas: character.initialMemories.map(() => ({
         type: 'npc_lore',
-        characters: '|' + String(character.id) + '|',
+        characters: '|' + String(index) + '|',
       })),
-      ids: character.llm.initialMemories.map((_, i) => character.id + ' lore ' + i),
+      ids: character.initialMemories.map((_, i) => index + ' lore ' + i),
     });
   });
   console.log('NPCs memory initalized');

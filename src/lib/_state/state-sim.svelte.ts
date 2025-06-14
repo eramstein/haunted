@@ -1,4 +1,11 @@
-import type { CharacterBase, Character, State, Place, Relationship } from '../_model/model-sim';
+import type {
+  CharacterBase,
+  Character,
+  State,
+  Place,
+  Relationship,
+  CharacterDefinition,
+} from '../_model/model-sim';
 import { PLACES } from '@/data/world/places';
 import { NPCS } from '@/data/npcs';
 import { RelationshipStatus } from '../_model/model-sim.enums';
@@ -24,7 +31,7 @@ export const initialState: State = {
   },
 };
 
-function initCharacter(character: CharacterBase, index: number): Character {
+function initCharacter(character: CharacterDefinition, index: number): Character {
   return {
     ...character,
     id: index,
@@ -38,6 +45,11 @@ function initCharacter(character: CharacterBase, index: number): Character {
       social: 1440,
     },
     relationships: getRelationships(character),
+    emotions: {
+      mood: 50,
+      dominantEmotion: null,
+      byType: character.emotionalProfile,
+    },
   };
 }
 

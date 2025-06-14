@@ -4,17 +4,19 @@
   import { ObjectiveType } from '../_model/model-sim.enums';
   import { gs } from '../_state';
   import { getActivityLabel } from '../sim/activities-labels';
+  import { getMoodLabel } from '../sim/emotions';
   import { formatMinutes } from './_helpers/date.svelte';
   import { getCharacterImage } from './_helpers/images.svelte';
   import ActivityIcon from './ActivityIcon.svelte';
   import GroupActivityHistory from './GroupActivityHistory.svelte';
   import CharacterRelationships from './CharacterRelationships.svelte';
+  import CharacterEmotionalProfile from './CharacterEmotionalProfile.svelte';
 
   let props = $props<{
     character: Character;
   }>();
 
-  type Tab = 'none' | 'activity' | 'relationships';
+  type Tab = 'none' | 'activity' | 'relationships' | 'emotions';
   let activeTab = $state<Tab>('none');
 </script>
 
@@ -27,6 +29,11 @@
   {#if activeTab === 'relationships'}
     <div class="details-section">
       <CharacterRelationships characterId={props.character.id} />
+    </div>
+  {/if}
+  {#if activeTab === 'emotions'}
+    <div class="details-section">
+      <CharacterEmotionalProfile characterId={props.character.id} />
     </div>
   {/if}
   <div class="character-panel">
@@ -42,7 +49,7 @@
           class:active={activeTab === 'activity'}
           onclick={() => (activeTab = activeTab === 'activity' ? 'none' : 'activity')}
         >
-          Activity History
+          Activities
         </button>
         <button
           class="tab-button"
@@ -51,6 +58,21 @@
         >
           Relationships
         </button>
+        <button
+          class="tab-button"
+          class:active={activeTab === 'emotions'}
+          onclick={() => (activeTab = activeTab === 'emotions' ? 'none' : 'emotions')}
+        >
+          Emotions
+        </button>
+      </div>
+      <div class="detail-item">
+        <span class="label">Mood:</span>
+        <span class="value">{getMoodLabel(props.character.emotions.mood)}</span>
+      </div>
+      <div class="detail-item">
+        <span class="label">Emotion:</span>
+        <span class="value">{props.character.emotions.dominantEmotion || '-'}</span>
       </div>
       <div class="detail-item">
         <span class="label">Location:</span>
@@ -156,6 +178,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    text-transform: capitalize;
   }
 
   .participants {
@@ -168,6 +191,7 @@
     display: flex;
     gap: 0.5rem;
     margin: 0.5rem 0;
+    flex-wrap: wrap;
   }
 
   .tab-button {

@@ -3,6 +3,7 @@ import { uiState } from '../_state/state-ui.svelte';
 import { workOnActivities } from './activities';
 import { setCharactersObjectives } from './objectives';
 import { updateCharactersNeeds } from './needs';
+import { decayEmotionsForAllCharacters } from './emotions';
 
 // Track accumulated real time for tick calculation
 let accumulatedTime = 0;
@@ -48,6 +49,10 @@ function simulationTick() {
   // every 10 minutes, check if any characters have an objective
   if (gs.time.ellapsedTime % 10 === 0) {
     setCharactersObjectives(gs.characters);
+  }
+  // every 60 minutes, decay emotions
+  if (gs.time.ellapsedTime % 60 === 0) {
+    decayEmotionsForAllCharacters();
   }
 }
 

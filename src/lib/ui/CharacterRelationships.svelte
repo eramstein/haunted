@@ -77,8 +77,8 @@
         )
         .filter(
           (update) =>
-            (update.from === gs.characters[props.characterId].name ||
-              update.toward === gs.characters[props.characterId].name) &&
+            update.from === gs.characters[props.characterId].name &&
+            update.toward === character.name &&
             update.feeling === feeling
         );
     } catch (error) {

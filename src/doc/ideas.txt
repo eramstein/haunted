@@ -3,3 +3,8 @@ ghost interactions:
   - Antoine must use the word "crocodile"
   - Antoine will make a tantrum
   - The group is going to do something silly
+
+NPC "emotional moments" triggers:
+- emotion blending (e.g. joy && anticipation > 70 -> the NPC gets a big hope, anger > 0.9 -> conflict)
+
+Use emotion when accepting or proposing activities

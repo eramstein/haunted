@@ -47,3 +47,27 @@ export enum RelationshipFeeling {
   Suspicion = 'suspicion',
   Protectiveness = 'protectiveness',
 }
+
+export enum Emotion {
+  Anxious = 'anxious',
+  Angered = 'angered',
+  Disgusted = 'disgusted',
+  Surprised = 'surprised',
+  Curious = 'curious',
+  Bored = 'bored',
+  Joyful = 'joyful',
+  Relaxed = 'relaxed',
+  Calm = 'calm',
+}
+
+export enum Sentiment {
+  Depressed = 'depressed',
+  Bored = 'bored',
+  Lonely = 'lonely',
+  Exhausted = 'exhausted',
+  Stressed = 'stressed',
+  Content = 'content',
+  Happy = 'happy',
+  Satisfied = 'satisfied',
+  Sad = 'sad',
+}

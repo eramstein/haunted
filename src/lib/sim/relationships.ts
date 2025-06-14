@@ -1,28 +1,29 @@
-import type { Character, RelationshipUpdate } from '../_model/model-sim';
+import type { RelationshipUpdate } from '../_model/model-sim';
 import type { RelationshipFeeling } from '../_model/model-sim.enums';
 import { gs } from '../_state';
+import { clamp } from './_utils/math';
+
+function getRelationship(fromId: number, towardId: number) {
+  return gs.characters[fromId].relationships[towardId];
+}
 
 export function updateRelationships(updates: RelationshipUpdate[]) {
-  const characterNamesToIds = gs.characters.reduce(
-    (acc, character) => {
-      acc[character.name] = character.id;
-      return acc;
-    },
-    {} as Record<string, number>
-  );
-  updates.forEach((update) => {
-    if (
-      !gs.characters[characterNamesToIds[update.from]].relationships[
-        characterNamesToIds[update.toward]
-      ].feelings[update.feeling]
-    ) {
-      gs.characters[characterNamesToIds[update.from]].relationships[
-        characterNamesToIds[update.toward]
-      ].feelings[update.feeling] = 0;
+  const characterNamesToIds = Object.fromEntries(gs.characters.map((char) => [char.name, char.id]));
+
+  updates.forEach(({ from, toward, feeling, delta }) => {
+    const relationship = getRelationship(characterNamesToIds[from], characterNamesToIds[toward]);
+
+    // Initialize feeling if it doesn't exist
+    if (!relationship.feelings[feeling]) {
+      relationship.feelings[feeling] = 0;
     }
-    (gs.characters[characterNamesToIds[update.from]].relationships[
-      characterNamesToIds[update.toward]
-    ].feelings[update.feeling] as number) += update.delta;
+
+    // Update feeling value and clamp between -100 and 100
+    relationship.feelings[feeling] = clamp(
+      (relationship.feelings[feeling] as number) + delta,
+      -100,
+      100
+    );
   });
 
   // TODO: handle relationship status, derived from feelings? or mix with LLM

@@ -43,6 +43,12 @@
         class="character-portrait"
         style="background-image: url({getCharacterImage(props.character.name)})"
       ></div>
+      <div class="bio-section">
+        {props.character.llm.bio}
+      </div>
+      <div class="traits-list">
+        {props.character.llm.traits.join(', ')}
+      </div>
       <div class="tabs">
         <button
           class="tab-button"
@@ -223,5 +229,15 @@
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     padding-right: 1rem;
     width: calc(100vw - 500px);
+  }
+
+  .bio-section {
+    margin: 1rem 0 0 0;
+    line-height: 0.8;
+  }
+
+  .traits-list {
+    color: #aaa;
+    line-height: 0.8;
   }
 </style>

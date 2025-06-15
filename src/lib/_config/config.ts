@@ -1,3 +1,5 @@
+import { EmotionType } from '../_model/model-sim.enums';
+
 export const config = {
   actionSpeed: {
     goTo: 100, // 1 minute to go to a place
@@ -19,5 +21,15 @@ export const config = {
     sleep: 3, // 1 hour of sleep keeps you going 3 hours
     chat: 12, // 1 hour of chat keeps you going 12 hours
     play: 12, // 1 hour of play keeps you going 12 hours
+  },
+  emotionBaseVolatility: {
+    [EmotionType.Joy]: 50,
+    [EmotionType.Sadness]: 50,
+    [EmotionType.Anger]: 100,
+    [EmotionType.Fear]: 100,
+    [EmotionType.Surprise]: 100,
+    [EmotionType.Anticipation]: 50,
+    [EmotionType.Disgust]: 100,
+    [EmotionType.Trust]: 50,
   },
 };

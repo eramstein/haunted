@@ -72,6 +72,8 @@
           <div
             class="emotion-item"
             onclick={() => (editingEmotion = { type: type as EmotionType })}
+            title={`Volatility: ${emotion.volatility.toFixed(1)}
+Decay Rate: ${emotion.decayRate.toFixed(1)}`}
           >
             <span class="emotion-name">{describeEmotion(type, emotion.currentIntensity)}</span>
             <div class="emotion-bars">

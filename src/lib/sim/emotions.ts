@@ -1,3 +1,4 @@
+import { config } from '../_config/config';
 import type {
   Character,
   CompositeEmotionType,
@@ -174,7 +175,12 @@ export function updateEmotions(emotionUpdates: EmotionUpdate[]) {
 export function applyEmotionUpdate(characterId: number, update: EmotionUpdate) {
   const character = gs.characters[characterId];
   const emotion = character.emotions.byType[update.type];
-  const newValue = clamp(emotion.currentIntensity + update.delta * emotion.volatility, 0, 100);
+  const newValue = clamp(
+    emotion.currentIntensity +
+      update.delta * emotion.volatility * config.emotionBaseVolatility[update.type],
+    0,
+    100
+  );
   updateEmotionValue(update.type, characterId, newValue);
 }
 

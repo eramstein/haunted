@@ -1,4 +1,4 @@
-import { RelationshipFeeling } from '../_model/model-sim.enums';
+import { EmotionType, RelationshipFeeling } from '../_model/model-sim.enums';
 
 export const groupActivityTranscriptSystemPrompt = `
 You are simulating a light, naturalistic conversation, short (6-10 exchanges), between a group of fictional characters in a shared location within a story-driven simulation game. Each character has a distinct personality, goals, and relationship with others.
@@ -48,6 +48,7 @@ Bob: (grinning despite himself) Doubt it, but I’ll eat. Just don’t touch my 
 `;
 
 const feelingsList = Object.values(RelationshipFeeling).join('\n- ');
+const emotionsList = Object.values(EmotionType).join('\n- ');
 
 export const summarySystemPrompt = `
 You are analyzing a fictional conversation between characters in a simulation game.
@@ -63,11 +64,23 @@ Given the transcript of their dialogue, do the following:
    - "delta": the amount of change as a float between -1.0 and 1.0
    - "reason": a short explanation of why this change occurred, based on the dialogue
 
-  Only use the following valid feelings:
+4. Identify how each character’s emotional state was affected by the interaction. Emotions are personal and not directed at anyone.
+5. Provide an array of emotion updates, each containing:
+   - "characterName": the name of the character who experienced the change
+   - "type": one of the valid emotion types listed below
+   - "delta": an integer between -1.0 and 1.0 indicating the change in intensity
+   - "reason": a short explanation grounded in the interaction
+   - "subtype": (optional) a more specific description of the emotion, e.g. 'amusement', 'pride', 'relief'
 
-  ${feelingsList}
+Only use the following valid relation feelings:
 
-  Format your response as follows:
+${feelingsList}
+
+Only use the following valid emotion types:
+
+${emotionsList}
+
+Format your response as follows:
 
 {
   "summary": "<one sentence summary>",
@@ -80,8 +93,18 @@ Given the transcript of their dialogue, do the following:
       "reason": "<short explanation>"
     },
     ...
+  ],
+  "emotionUpdates": [
+    {
+      "characterName": "<Character A>",
+      "type": "<emotion type>",
+      "delta": <float>,
+      "reason": "<short explanation>",
+      "subtype": "<optional subtype>"
+    },
+    ...
   ]
 }
 
-Do not add any commentary or headings other than the two sections above. Only use the provided format and feelings list. Return valid JSON.
+Do not add any commentary or headings other than the JSON structure. Only use the provided format, feelings list, and emotion types. Return valid JSON.
 `;

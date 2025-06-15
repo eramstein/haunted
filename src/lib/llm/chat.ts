@@ -9,6 +9,7 @@ import { updateRelationships } from '../sim/relationships';
 import { addGroupActivityMemory } from './memory-vectors';
 import { getTime } from '../sim/time';
 import { getSystemPromptMemories } from './memory';
+import { updateEmotions } from '../sim';
 
 export async function generateGroupActivityTranscript(
   chatId: string,
@@ -73,6 +74,7 @@ export async function generateGroupActivityTranscript(
     transcript,
     summary: postProcessing.summary,
     relationUpdates: postProcessing.relationUpdates,
+    emotionUpdates: postProcessing.emotionUpdates,
   });
 
   // store embedded vectors
@@ -84,9 +86,11 @@ export async function generateGroupActivityTranscript(
     activityType,
     content: postProcessing,
   });
-
-  // update relationships
+  console.log('postProcessing', postProcessing);
+  // update relationships and emotions
   updateRelationships(postProcessing.relationUpdates);
+  updateEmotions(postProcessing.emotionUpdates);
+
   saveStateToLocalStorage();
 
   return transcript;
@@ -115,21 +119,26 @@ async function generateSummary(transcript: string): Promise<GroupActivitySummary
 
     if (!parsed || typeof parsed !== 'object') {
       console.error('Invalid response format: expected an object');
-      return { summary: '', relationUpdates: [], transcript };
+      return { summary: '', relationUpdates: [], emotionUpdates: [], transcript };
     }
 
     if (typeof parsed.summary !== 'string') {
       console.error('Invalid response format: missing or invalid summary property');
-      return { summary: '', relationUpdates: [], transcript };
+      return { summary: '', relationUpdates: [], emotionUpdates: [], transcript };
     }
 
     if (!parsed.relationUpdates || typeof parsed.relationUpdates !== 'object') {
       console.error('Invalid response format: missing or invalid relationUpdates property');
-      return { summary: '', relationUpdates: [], transcript };
+      return { summary: '', relationUpdates: [], emotionUpdates: [], transcript };
+    }
+
+    if (!parsed.emotionUpdates || typeof parsed.emotionUpdates !== 'object') {
+      console.error('Invalid response format: missing or invalid emotionUpdates property');
+      return { summary: '', relationUpdates: [], emotionUpdates: [], transcript };
     }
 
     return parsed;
   } catch (error) {
-    return { summary: '', relationUpdates: [], transcript };
+    return { summary: '', relationUpdates: [], emotionUpdates: [], transcript };
   }
 }

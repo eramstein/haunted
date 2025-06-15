@@ -164,6 +164,13 @@ export function decayEmotionsForAllCharacters() {
   });
 }
 
+export function updateEmotions(emotionUpdates: EmotionUpdate[]) {
+  emotionUpdates.forEach((update) => {
+    const characterId = gs.characters.findIndex((c) => c.name === update.characterName);
+    applyEmotionUpdate(characterId, update);
+  });
+}
+
 export function applyEmotionUpdate(characterId: number, update: EmotionUpdate) {
   const character = gs.characters[characterId];
   const emotion = character.emotions.byType[update.type];

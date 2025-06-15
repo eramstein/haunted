@@ -24,6 +24,7 @@ export async function saveChat(
     transcript: '',
     summary: '',
     relationUpdates: [],
+    emotionUpdates: [],
   }
 ): Promise<number> {
   try {

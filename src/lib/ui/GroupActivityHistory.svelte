@@ -7,17 +7,28 @@
   import { getCharacterImage } from './_helpers/images.svelte';
   import { formatDate } from './_helpers/date.svelte';
   import { getTime } from '../sim';
+  import { POSITIVE_EMOTIONS, NEGATIVE_EMOTIONS } from '../sim/emotions';
+  import { EmotionType } from '../_model/model-sim.enums';
 
   let props = $props<{
     characterId: number;
   }>();
 
-  type Tab = 'none' | 'transcript' | 'summary' | 'relationUpdates';
+  type Tab = 'none' | 'transcript' | 'summary' | 'updates';
 
   let characterName = $derived(gs.characters[props.characterId].name);
   let activities = $state<GroupActivityLog[]>([]);
   let streamingChats = $state<Record<string, string>>({});
   let activityTabs = $state<Record<string, Tab>>({});
+
+  function getEmotionDeltaColor(type: EmotionType, delta: number): string {
+    if (POSITIVE_EMOTIONS.includes(type)) {
+      return delta > 0 ? '#afa' : '#F44336'; // Green for positive delta, red for negative
+    } else if (NEGATIVE_EMOTIONS.includes(type)) {
+      return delta < 0 ? '#afa' : '#F44336'; // Green for negative delta, red for positive
+    }
+    return '#9E9E9E'; // Gray for neutral emotions
+  }
 
   $effect(() => {
     getChats();
@@ -128,10 +139,10 @@
                 </button>
                 <button
                   class="tab-button"
-                  class:active={activityTabs[activity.id] === 'relationUpdates'}
+                  class:active={activityTabs[activity.id] === 'updates'}
                   onclick={() =>
                     (activityTabs[activity.id] =
-                      activityTabs[activity.id] === 'relationUpdates' ? 'none' : 'relationUpdates')}
+                      activityTabs[activity.id] === 'updates' ? 'none' : 'updates')}
                 >
                   Updates
                 </button>
@@ -150,11 +161,12 @@
                     <div class="chat-summary">
                       {activity.content.summary}
                     </div>
-                  {:else if activityTabs[activity.id] === 'relationUpdates' && activity.content?.relationUpdates}
-                    <div class="chat-summary">
+                  {:else if activityTabs[activity.id] === 'updates' && activity.content?.relationUpdates}
+                    <div class="update-summary">
                       {#if activity.content.relationUpdates.length === 0}
                         <div>No relationship relationUpdates.</div>
                       {:else}
+                        <div class="update-section-title">Relationship Updates</div>
                         <ul class="relation-updates-list">
                           {#each activity.content.relationUpdates.filter((u) => u.from === characterName || u.toward === characterName) as update}
                             <li class="update-item">
@@ -169,6 +181,27 @@
                             </li>
                           {/each}
                         </ul>
+                      {/if}
+                    </div>
+                    <div class="update-summary">
+                      {#if activity.content.emotionUpdates.length === 0}
+                        <div>No emotion updates.</div>
+                      {:else}
+                        <div class="update-section-title">Emotions Updates</div>
+                        {#each activity.content.emotionUpdates.filter((u) => u.characterName === characterName) as update}
+                          <div class="update-item">
+                            <span class="update-feeling">{update.type}</span>
+                            {#if update.subtype}
+                              <span class="update-subtype">({update.subtype})</span>
+                            {/if}
+                            <span
+                              class="update-delta"
+                              style="color: {getEmotionDeltaColor(update.type, update.delta)}"
+                              >({update.delta > 0 ? '+' : ''}{update.delta})</span
+                            >
+                            <span class="update-reason">— {update.reason}</span>
+                          </div>
+                        {/each}
                       {/if}
                     </div>
                   {/if}
@@ -319,6 +352,13 @@
     line-height: 1.4;
   }
 
+  .update-summary {
+    font-style: italic;
+    color: #ddd;
+    line-height: 1.4;
+    margin-bottom: 1.5em;
+  }
+
   .tabs {
     display: flex;
     gap: 0.5rem;
@@ -375,5 +415,13 @@
     color: #ccc;
     margin-left: 0.5em;
     font-style: italic;
+  }
+
+  .update-section-title {
+    font-style: normal;
+    font-weight: 500;
+    margin-bottom: 0.5em;
+    border-bottom: 1px solid #444;
+    width: fit-content;
   }
 </style>

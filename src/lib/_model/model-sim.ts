@@ -129,6 +129,7 @@ export interface GroupActivitySummary {
   transcript: string;
   summary: string;
   relationUpdates: RelationshipUpdate[];
+  emotionUpdates: EmotionUpdate[];
 }
 
 export interface RelationshipUpdate {
@@ -148,6 +149,7 @@ export interface Emotion {
 }
 
 export interface EmotionUpdate {
+  characterName: string;
   type: EmotionType;
   delta: number;
   reason: string;

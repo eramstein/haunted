@@ -12,7 +12,7 @@
     characterId: number;
   }>();
 
-  type Tab = 'none' | 'transcript' | 'summary' | 'updates';
+  type Tab = 'none' | 'transcript' | 'summary' | 'relationUpdates';
 
   let characterName = $derived(gs.characters[props.characterId].name);
   let activities = $state<GroupActivityLog[]>([]);
@@ -128,10 +128,10 @@
                 </button>
                 <button
                   class="tab-button"
-                  class:active={activityTabs[activity.id] === 'updates'}
+                  class:active={activityTabs[activity.id] === 'relationUpdates'}
                   onclick={() =>
                     (activityTabs[activity.id] =
-                      activityTabs[activity.id] === 'updates' ? 'none' : 'updates')}
+                      activityTabs[activity.id] === 'relationUpdates' ? 'none' : 'relationUpdates')}
                 >
                   Updates
                 </button>
@@ -150,13 +150,13 @@
                     <div class="chat-summary">
                       {activity.content.summary}
                     </div>
-                  {:else if activityTabs[activity.id] === 'updates' && activity.content?.updates}
+                  {:else if activityTabs[activity.id] === 'relationUpdates' && activity.content?.relationUpdates}
                     <div class="chat-summary">
-                      {#if activity.content.updates.length === 0}
-                        <div>No relationship updates.</div>
+                      {#if activity.content.relationUpdates.length === 0}
+                        <div>No relationship relationUpdates.</div>
                       {:else}
-                        <ul class="updates-list">
-                          {#each activity.content.updates.filter((u) => u.from === characterName || u.toward === characterName) as update}
+                        <ul class="relation-updates-list">
+                          {#each activity.content.relationUpdates.filter((u) => u.from === characterName || u.toward === characterName) as update}
                             <li class="update-item">
                               <span>
                                 {update.from} → {update.toward}
@@ -350,7 +350,7 @@
     background: rgba(255, 255, 255, 0.15);
   }
 
-  .updates-list {
+  .relation-updates-list {
     list-style: none;
     padding: 0;
     margin: 0;

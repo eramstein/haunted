@@ -65,11 +65,11 @@
         startTime,
         endTime
       );
-      // Filter chats that include both characters and have updates for this feeling
+      // Filter chats that include both characters and have relationUpdates for this feeling
       relationshipUpdates = chats
         .flatMap(
           (chat) =>
-            chat.content?.updates?.map((update) => ({
+            chat.content?.relationUpdates?.map((update) => ({
               ...update,
               timestamp: chat.timestamp,
               activityType: LABELS_ACTIVITY_TYPES[chat.activityType],
@@ -82,7 +82,7 @@
             update.feeling === feeling
         );
     } catch (error) {
-      console.error('Failed to fetch relationship updates:', error);
+      console.error('Failed to fetch relationship relationUpdates:', error);
     }
   }
 
@@ -133,7 +133,7 @@
   {/if}
 
   {#if selectedFeeling}
-    <div class="updates-section">
+    <div class="relation-updates-section">
       <h4>Updates for {selectedFeeling.feeling} with {selectedFeeling.character.name}</h4>
       <div class="feeling-update-controls">
         <label for="feeling-value">Update value:</label>
@@ -148,9 +148,9 @@
         />
       </div>
       {#if relationshipUpdates.length === 0}
-        <p class="no-updates">No updates found for this feeling.</p>
+        <p class="no-relation-updates">No relationUpdates found for this feeling.</p>
       {:else}
-        <table class="updates-table">
+        <table class="relation-updates-table">
           <thead>
             <tr>
               <th>Activity</th>
@@ -286,32 +286,32 @@
     color: #888;
   }
 
-  .updates-section {
+  .relation-updates-section {
     margin-top: 2rem;
     padding-top: 1rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  .no-updates {
+  .no-relation-updates {
     color: #888;
     font-style: italic;
   }
 
-  .updates-table {
+  .relation-updates-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 0.5rem;
     font-size: 0.9rem;
   }
 
-  .updates-table th,
-  .updates-table td {
+  .relation-updates-table th,
+  .relation-updates-table td {
     padding: 0.5rem;
     text-align: left;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  .updates-table th {
+  .relation-updates-table th {
     color: #888;
     font-weight: 500;
     text-transform: uppercase;

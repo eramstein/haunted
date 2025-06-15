@@ -74,7 +74,7 @@ export async function addGroupActivityMemory(activityLog: GroupActivityLog) {
     },
     {} as Record<string, number>
   );
-  activityLog.content.updates
+  activityLog.content.relationUpdates
     .filter((update) => Math.abs(update.delta) > 0.6)
     .forEach((update) => {
       const uid = Date.now().toString(36) + Math.random().toString(36).substr(2);

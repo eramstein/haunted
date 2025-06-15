@@ -14,7 +14,7 @@ interface MergedMemory {
   activityType?: ActivityType;
   timestamp?: number;
   location?: number;
-  updates?: string[];
+  relationUpdates?: string[];
 }
 
 // returns a text describing relevant memories to be added to the chat system prompt
@@ -56,7 +56,7 @@ export async function getSystemPromptMemories(
       timestamp: memory.timestamp,
       participants: memory.participants,
       location: memory.location,
-      updates: memory.content.updates,
+      relationUpdates: memory.content.relationUpdates,
       summary: memory.content.summary,
     };
     if (existing) {

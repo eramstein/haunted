@@ -23,7 +23,7 @@ export async function saveChat(
   content: GroupActivitySummary = {
     transcript: '',
     summary: '',
-    updates: [],
+    relationUpdates: [],
   }
 ): Promise<number> {
   try {

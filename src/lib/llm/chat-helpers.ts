@@ -1,6 +1,7 @@
 import { LABELS_FEELINGS } from '../_config/labels';
 import type { Character, Relationship } from '../_model';
 import { ActivityType, RelationshipFeeling, RelationshipStatus } from '../_model/model-sim.enums';
+import { describeEmotion, getMoodLabel } from '../sim';
 
 export const activityTypeToContext: Partial<Record<ActivityType, string>> = {
   [ActivityType.Chat]: 'Casual socializing',
@@ -18,7 +19,6 @@ export function getGroupDescription(characters: Character[]) {
       ) +
       '\n';
   }
-  console.log('getGroupDescription', description);
   return description;
 }
 
@@ -28,8 +28,13 @@ export function getCharacterDescription(
 ) {
   const traits = character.llm.traits.join(', ');
   const relationships = getRelationshipsDescription(character, otherCharactersInvolved);
-  const mood = '';
-  return `${character.name} Bio: ${character.llm.bio}; Traits: ${traits}; ${relationships}`;
+  const mood = character.emotions.dominantEmotion
+    ? describeEmotion(
+        character.emotions.dominantEmotion.name,
+        character.emotions.dominantEmotion.intensity
+      )
+    : getMoodLabel(character.emotions.mood);
+  return `${character.name}: feeling ${mood}; Bio: ${character.llm.bio}; Traits: ${traits}; ${relationships}`;
 }
 
 function getRelationshipsDescription(character: Character, otherCharacters: Character[]) {

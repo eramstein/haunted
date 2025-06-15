@@ -71,7 +71,7 @@ Given the transcript of their dialogue, do the following:
 
 {
   "summary": "<one sentence summary>",
-  "updates": [
+  "relationUpdates": [
     {
       "from": "<Character A>",
       "toward": "<Character B>",

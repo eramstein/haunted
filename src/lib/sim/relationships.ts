@@ -7,10 +7,10 @@ function getRelationship(fromId: number, towardId: number) {
   return gs.characters[fromId].relationships[towardId];
 }
 
-export function updateRelationships(updates: RelationshipUpdate[]) {
+export function updateRelationships(relationUpdates: RelationshipUpdate[]) {
   const characterNamesToIds = Object.fromEntries(gs.characters.map((char) => [char.name, char.id]));
 
-  updates.forEach(({ from, toward, feeling, delta }) => {
+  relationUpdates.forEach(({ from, toward, feeling, delta }) => {
     const relationship = getRelationship(characterNamesToIds[from], characterNamesToIds[toward]);
 
     // Initialize feeling if it doesn't exist

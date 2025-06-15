@@ -128,7 +128,7 @@ export interface GroupActivityLog {
 export interface GroupActivitySummary {
   transcript: string;
   summary: string;
-  updates: RelationshipUpdate[];
+  relationUpdates: RelationshipUpdate[];
 }
 
 export interface RelationshipUpdate {

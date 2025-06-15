@@ -72,7 +72,7 @@ export async function generateGroupActivityTranscript(
   await updateChatContent(chatId, {
     transcript,
     summary: postProcessing.summary,
-    updates: postProcessing.updates,
+    relationUpdates: postProcessing.relationUpdates,
   });
 
   // store embedded vectors
@@ -86,7 +86,7 @@ export async function generateGroupActivityTranscript(
   });
 
   // update relationships
-  updateRelationships(postProcessing.updates);
+  updateRelationships(postProcessing.relationUpdates);
   saveStateToLocalStorage();
 
   return transcript;
@@ -115,21 +115,21 @@ async function generateSummary(transcript: string): Promise<GroupActivitySummary
 
     if (!parsed || typeof parsed !== 'object') {
       console.error('Invalid response format: expected an object');
-      return { summary: '', updates: [], transcript };
+      return { summary: '', relationUpdates: [], transcript };
     }
 
     if (typeof parsed.summary !== 'string') {
       console.error('Invalid response format: missing or invalid summary property');
-      return { summary: '', updates: [], transcript };
+      return { summary: '', relationUpdates: [], transcript };
     }
 
-    if (!parsed.updates || typeof parsed.updates !== 'object') {
-      console.error('Invalid response format: missing or invalid updates property');
-      return { summary: '', updates: [], transcript };
+    if (!parsed.relationUpdates || typeof parsed.relationUpdates !== 'object') {
+      console.error('Invalid response format: missing or invalid relationUpdates property');
+      return { summary: '', relationUpdates: [], transcript };
     }
 
     return parsed;
   } catch (error) {
-    return { summary: '', updates: [], transcript };
+    return { summary: '', relationUpdates: [], transcript };
   }
 }

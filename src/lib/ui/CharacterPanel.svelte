@@ -72,7 +72,7 @@
       </div>
       <div class="detail-item">
         <span class="label">Emotion:</span>
-        <span class="value">{props.character.emotions.dominantEmotion || '-'}</span>
+        <span class="value">{props.character.emotions.dominantEmotion?.name || '-'}</span>
       </div>
       <div class="detail-item">
         <span class="label">Location:</span>

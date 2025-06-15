@@ -3,7 +3,12 @@
   import type { Character, Emotion } from '../_model/model-sim';
   import { EmotionType } from '../_model/model-sim.enums';
   import { getCharacterImage } from './_helpers/images.svelte';
-  import { getEmotionColor, getMoodLabel, updateEmotionValue } from '../sim/emotions';
+  import {
+    describeEmotion,
+    getEmotionColor,
+    getMoodLabel,
+    updateEmotionValue,
+  } from '../sim/emotions';
 
   let props = $props<{
     characterId: number;
@@ -54,7 +59,12 @@
       <h4>{getMoodLabel(character.emotions.mood)} ({character.emotions.mood})</h4>
       {#if character.emotions.dominantEmotion}
         <p class="dominant-emotion">
-          Dominant Emotion: {character.emotions.dominantEmotion}
+          Dominant Emotion: <strong
+            >{describeEmotion(
+              character.emotions.dominantEmotion.name,
+              character.emotions.dominantEmotion.intensity
+            )}</strong
+          >
         </p>
       {/if}
       <div class="emotions-grid">
@@ -63,7 +73,7 @@
             class="emotion-item"
             onclick={() => (editingEmotion = { type: type as EmotionType })}
           >
-            <span class="emotion-name">{type}</span>
+            <span class="emotion-name">{describeEmotion(type, emotion.currentIntensity)}</span>
             <div class="emotion-bars">
               <div class="emotion-bar">
                 <div
@@ -142,7 +152,7 @@
 
   .dominant-emotion {
     color: #aaa;
-    margin: 0.25rem 0 0 0;
+    margin: 0 0 0.5rem 0;
   }
 
   .emotions-grid {
@@ -168,6 +178,7 @@
     display: block;
     font-weight: 500;
     margin-bottom: 0.5rem;
+    text-transform: capitalize;
   }
 
   .emotion-bars {

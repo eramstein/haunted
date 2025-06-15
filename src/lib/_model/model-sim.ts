@@ -65,7 +65,7 @@ export interface Character extends CharacterBase {
   relationships: Record<number, Relationship>; // key is character id
   emotions: {
     mood: number; // 0-100 - aggregated mood, computed from all emotion types
-    dominantEmotion: EmotionType | null; // computed from all emotion types
+    dominantEmotion: DominantEmotion | null; // computed from all emotion types
     byType: Record<EmotionType, Emotion>;
   };
 }
@@ -144,11 +144,22 @@ export interface Emotion {
   currentIntensity: number; // 0-100 - current intensity of the emotion, changes fast depending on events
   baselineIntensity: number; // 0-100 - character's trait, e.g. some people are more joyful than others. changes slowly over time
   decayRate: number; // how fast current intensity goes back to baseline
-  increaseRate: number; // how fast current intensity goes up when triggered by an event
+  volatility: number; // how fast current intensity goes up when triggered by an event
 }
 
 export interface EmotionUpdate {
   type: EmotionType;
   delta: number;
   reason: string;
+  subtype?: string; // for example, joy could have 'amusement', 'contentment', 'pride', 'relief'
+}
+
+export interface CompositeEmotionType {
+  name: string;
+  components: [EmotionType, EmotionType];
+}
+
+export interface DominantEmotion {
+  name: string; // this can be a base emotion, or a composite one
+  intensity: number;
 }

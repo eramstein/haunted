@@ -16,6 +16,9 @@ export const NPC_EMMA: CharacterDefinition = {
     `
     PERSONAL_SECRET: Emma secretly kept her childhood toys, it a source of confort for her but she's worried people would make fun of her because of it.
   `,
+    `        
+    FOOD_PREFERENCES: Emma's favorite food is red meat and potatoes.
+  `,
   ],
   emotionalProfile: {
     [EmotionType.Joy]: {

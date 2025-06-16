@@ -11,12 +11,13 @@
   import GroupActivityHistory from './GroupActivityHistory.svelte';
   import CharacterRelationships from './CharacterRelationships.svelte';
   import CharacterEmotionalProfile from './CharacterEmotionalProfile.svelte';
+  import CharacterItems from './CharacterItems.svelte';
 
   let props = $props<{
     character: Character;
   }>();
 
-  type Tab = 'none' | 'activity' | 'relationships' | 'emotions';
+  type Tab = 'none' | 'activity' | 'relationships' | 'emotions' | 'items';
   let activeTab = $state<Tab>('none');
 </script>
 
@@ -34,6 +35,11 @@
   {#if activeTab === 'emotions'}
     <div class="details-section">
       <CharacterEmotionalProfile characterId={props.character.id} />
+    </div>
+  {/if}
+  {#if activeTab === 'items'}
+    <div class="details-section">
+      <CharacterItems characterId={props.character.id} />
     </div>
   {/if}
   <div class="character-panel">
@@ -62,7 +68,7 @@
           class:active={activeTab === 'relationships'}
           onclick={() => (activeTab = activeTab === 'relationships' ? 'none' : 'relationships')}
         >
-          Relationships
+          Relations
         </button>
         <button
           class="tab-button"
@@ -70,6 +76,13 @@
           onclick={() => (activeTab = activeTab === 'emotions' ? 'none' : 'emotions')}
         >
           Emotions
+        </button>
+        <button
+          class="tab-button"
+          class:active={activeTab === 'items'}
+          onclick={() => (activeTab = activeTab === 'items' ? 'none' : 'items')}
+        >
+          Items
         </button>
       </div>
       <div class="detail-item">

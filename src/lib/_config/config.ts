@@ -34,12 +34,6 @@ export const config = {
   },
 };
 
-export const itemPrices: Record<ItemType, number> = {
-  [ItemType.FoodIngredient]: 10,
-  [ItemType.Drink]: 5,
-  [ItemType.Meal]: 20,
-};
-
 // how many items bought at once ideally
 export const itemCartSize: Record<ItemType, number> = {
   [ItemType.FoodIngredient]: 10,

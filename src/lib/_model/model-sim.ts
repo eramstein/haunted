@@ -87,6 +87,7 @@ export interface Item {
   description: string;
   owner: number;
   location: number;
+  price: number;
 }
 
 // de-normalized indices for fast lookup
@@ -95,6 +96,11 @@ export interface ItemIndices {
   byOwnerId: Record<number, string[]>;
   byLocationId: Record<number, string[]>;
   byTypeAndOwner: Record<string, string[]>;
+}
+
+export interface Article {
+  description: string;
+  price: number;
 }
 
 // Define specific target types for each activity

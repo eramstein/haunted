@@ -19,6 +19,8 @@ export const LABELS_ACTIVITY_TYPES: Record<ActivityType, string> = {
   [ActivityType.Sleep]: 'Sleep',
   [ActivityType.Play]: 'Play',
   [ActivityType.Chat]: 'Chat',
+  [ActivityType.Buy]: 'Buy',
+  [ActivityType.Work]: 'Work',
 };
 
 export const LABELS_FEELINGS: Record<RelationshipFeeling, string[]> = {

@@ -4,9 +4,7 @@ import type { ActivityTargets } from '@/lib/_model/model-sim';
 import { gs } from '../_state';
 import { generateUniqueId } from './_utils/random';
 import { saveChat } from '../llm/index-db';
-import { getTime } from './time';
 
-// TODO: use a better UUID library
 export function proposeActivity(
   fromCharacter: Character,
   characters: Character[],

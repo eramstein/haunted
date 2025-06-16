@@ -7,4 +7,6 @@ ghost interactions:
 NPC "emotional moments" triggers:
 - emotion blending (e.g. joy && anticipation > 70 -> the NPC gets a big hope, anger > 0.9 -> conflict)
 
+NPC "trigger" memories: old important secrets (special metadata) start events
+
 Use emotion when accepting or proposing activities

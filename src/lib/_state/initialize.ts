@@ -8,29 +8,29 @@ import { resetIndexDB } from '../llm/index-db';
 
 export async function createNewSimState(): Promise<State> {
   // add some initial items
-  const kitchenId = PLACES_IDS_BY_TYPE.kitchen;
-  if (kitchenId) {
-    initialState.characters.forEach((c, charIndex) => {
-      Array.from({ length: 0 }, () =>
-        addItem({
-          type: ItemType.Meal,
-          description: 'A sandwich',
-          owner: charIndex,
-          location: kitchenId,
-        })
-      );
-      Array.from({ length: 1 }, () =>
-        addItem({
-          type: ItemType.FoodIngredient,
-          description: 'Vegetables',
-          owner: charIndex,
-          location: kitchenId,
-        })
-      );
-    });
-  } else {
-    throw new Error('Kitchen not found for initial items');
-  }
+  // const kitchenId = PLACES_IDS_BY_TYPE.kitchen;
+  // if (kitchenId) {
+  //   initialState.characters.forEach((c, charIndex) => {
+  //     Array.from({ length: 0 }, () =>
+  //       addItem({
+  //         type: ItemType.Meal,
+  //         description: 'A sandwich',
+  //         owner: charIndex,
+  //         location: kitchenId,
+  //       })
+  //     );
+  //     Array.from({ length: 1 }, () =>
+  //       addItem({
+  //         type: ItemType.FoodIngredient,
+  //         description: 'Vegetables',
+  //         owner: charIndex,
+  //         location: kitchenId,
+  //       })
+  //     );
+  //   });
+  // } else {
+  //   throw new Error('Kitchen not found for initial items');
+  // }
 
   //reset vector database and IndexDB
   await resetVectorDatabase();

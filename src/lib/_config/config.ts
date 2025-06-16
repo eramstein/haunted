@@ -1,4 +1,4 @@
-import { EmotionType } from '../_model/model-sim.enums';
+import { EmotionType, ItemType } from '../_model/model-sim.enums';
 
 export const config = {
   actionSpeed: {
@@ -8,13 +8,13 @@ export const config = {
     cook: 100 / 30, // 30 minutes to eat
     chat: 100 / 60, // 1 hour to chat
     play: 100 / 60, // 1 hour to play
+    buy: 100 / 15, // 15 minutes to buy
   },
   needs: {
     food: 360, // eat every 6 hours
     sleep: 1080, // get sleepy after 18 hours without sleep
-    fun: 1440, // get bored after 24 hours without fun
-    //social: 1440, // get lonely after 24 hours without social interaction
-    social: 60,
+    fun: 720, // get bored after 12 hours without fun
+    social: 720, // get lonely after 12 hours without social interaction
   },
   // how much needs are fullfilled by game tick
   needsRefill: {
@@ -32,4 +32,17 @@ export const config = {
     [EmotionType.Disgust]: 100,
     [EmotionType.Trust]: 50,
   },
+};
+
+export const itemPrices: Record<ItemType, number> = {
+  [ItemType.FoodIngredient]: 10,
+  [ItemType.Drink]: 5,
+  [ItemType.Meal]: 20,
+};
+
+// how many items bought at once ideally
+export const itemCartSize: Record<ItemType, number> = {
+  [ItemType.FoodIngredient]: 10,
+  [ItemType.Drink]: 10,
+  [ItemType.Meal]: 1,
 };

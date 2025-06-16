@@ -1,5 +1,5 @@
 import type { Activity, Character } from '../_model/model-sim';
-import { ActivityType, ObjectiveType } from '../_model/model-sim.enums';
+import { ActivityType, ItemType, ObjectiveType } from '../_model/model-sim.enums';
 import {
   move,
   cook,
@@ -11,6 +11,7 @@ import {
   chat,
   setPlayTask,
   play,
+  buy,
 } from './actions';
 import { checkIfObjectiveIsSatisfied } from './objectives';
 
@@ -69,6 +70,9 @@ function progressActivity(character: Character) {
       break;
     case ActivityType.Play:
       play(character, activity as Activity<ActivityType.Play>);
+      break;
+    case ActivityType.Buy:
+      buy(character, activity as Activity<ActivityType.Buy>);
       break;
     default:
       break;

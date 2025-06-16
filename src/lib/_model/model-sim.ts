@@ -29,6 +29,7 @@ export interface Place {
   description: string;
   image?: string;
   position: Position;
+  outside?: boolean;
 }
 
 export interface Position {
@@ -68,6 +69,7 @@ export interface Character extends CharacterBase {
     dominantEmotion: DominantEmotion | null; // computed from all emotion types
     byType: Record<EmotionType, Emotion>;
   };
+  money: number; // dollars / euros
 }
 
 export interface Relationship {
@@ -103,6 +105,8 @@ export type ActivityTargets = {
   [ActivityType.Sleep]: null; // No targets needed
   [ActivityType.Play]: number; // Place ID
   [ActivityType.Chat]: number; // Place ID
+  [ActivityType.Buy]: ItemType;
+  [ActivityType.Work]: number; // Place ID
 };
 
 export interface Activity<T extends ActivityType = ActivityType> {

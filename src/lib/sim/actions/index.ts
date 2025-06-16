@@ -3,3 +3,4 @@ export * from './eat';
 export * from './sleep';
 export * from './socialize';
 export * from './play';
+export * from './buy';

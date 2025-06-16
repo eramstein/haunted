@@ -11,6 +11,8 @@ export enum ActivityType {
   Sleep = 'sleep',
   Play = 'play',
   Chat = 'chat',
+  Buy = 'buy',
+  Work = 'work',
 }
 
 export enum ObjectiveType {

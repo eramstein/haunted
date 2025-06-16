@@ -1,7 +1,0 @@
-CHAT:
-- add NPC info
-  - mood / current state
-  - opinion of others
-  - enjoyment of current activity
-  - relevant qualities
-- add past memories

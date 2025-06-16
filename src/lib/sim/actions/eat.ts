@@ -3,6 +3,7 @@ import { addItem, getItemsByTypeAndOwner, removeItem } from '../items';
 import { ActivityType, ItemType } from '@/lib/_model/model-sim.enums';
 import { config } from '@/lib/_config/config';
 import { gs } from '@/lib/_state';
+import { PLACES_IDS_BY_TYPE } from '@/data/world/places';
 
 export function eat(character: Character, activity: Activity<ActivityType.Eat>) {
   activity.progress += config.actionSpeed.eat;
@@ -16,6 +17,17 @@ export function eat(character: Character, activity: Activity<ActivityType.Eat>) 
 }
 
 export function cook(character: Character, activity: Activity<ActivityType.Cook>) {
+  // check if character is in the kitchen
+  if (character.place !== PLACES_IDS_BY_TYPE.kitchen) {
+    character.activities.unshift({
+      type: ActivityType.GoTo,
+      progress: 0,
+      target: PLACES_IDS_BY_TYPE.kitchen,
+    });
+    return;
+  }
+
+  // transform ingredients into meal
   activity.progress += config.actionSpeed.cook;
   if (activity.type === ActivityType.Cook) {
     const target = activity.target as string[];
@@ -41,7 +53,11 @@ export function setHaveMealTask(character: Character) {
     // are there ingredients? if yes cook them, else go find some
     const ingredients = getItemsByTypeAndOwner(ItemType.FoodIngredient, character.id);
     if (ingredients.length === 0) {
-      // TODO: go shopping
+      character.activities.push({
+        type: ActivityType.Buy,
+        progress: 0,
+        target: ItemType.FoodIngredient,
+      });
       return;
     }
     const ingredientsInPlace = ingredients.filter(

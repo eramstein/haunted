@@ -92,7 +92,7 @@
         onclick={() => onPlaceClick(place)}
         ondblclick={() => onPlaceDoubleClick(place)}
       >
-        {#if debug}
+        {#if debug || place.outside}
           <div class="place-name">{place.name}</div>
         {/if}
         <div class="characters">

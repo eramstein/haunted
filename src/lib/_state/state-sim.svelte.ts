@@ -9,13 +9,18 @@ import type {
 import { PLACES } from '@/data/world/places';
 import { NPCS } from '@/data/npcs';
 import { RelationshipStatus } from '../_model/model-sim.enums';
+import { config } from '../_config';
 
 export const initialState: State = {
   time: {
-    startDate: new Date(),
+    startDate: (() => {
+      const date = new Date();
+      date.setHours(6, 0, 0, 0);
+      return date;
+    })(),
     ellapsedTime: 0,
     lightLevel: 1,
-    dateString: '12:00',
+    dateString: '06:00',
   },
   places: PLACES.map(initPlace),
   characters: NPCS.map(initCharacter),
@@ -39,10 +44,10 @@ function initCharacter(character: CharacterDefinition, index: number): Character
     activities: [],
     objective: null,
     needs: {
-      food: 0,
+      food: config.needs.food,
       sleep: 0,
-      fun: 0,
-      social: 1440,
+      fun: config.needs.fun - 180,
+      social: config.needs.social - 120,
     },
     relationships: getRelationships(character),
     emotions: {
@@ -50,6 +55,7 @@ function initCharacter(character: CharacterDefinition, index: number): Character
       dominantEmotion: null,
       byType: character.emotionalProfile,
     },
+    money: 10,
   };
 }
 

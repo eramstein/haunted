@@ -12,6 +12,8 @@ import {
   setPlayTask,
   play,
   buy,
+  setGetMoneyTask,
+  work,
 } from './actions';
 import { checkIfObjectiveIsSatisfied } from './objectives';
 
@@ -44,6 +46,9 @@ function setActivityFromObjective(character: Character) {
     case ObjectiveType.HaveFun:
       setPlayTask(character);
       break;
+    case ObjectiveType.GetMoney:
+      setGetMoneyTask(character);
+      break;
     default:
       break;
   }
@@ -74,6 +79,9 @@ function progressActivity(character: Character) {
     case ActivityType.Buy:
       buy(character, activity as Activity<ActivityType.Buy>);
       break;
+    case ActivityType.Work:
+      work(character, activity as Activity<ActivityType.Work>);
+      break;
     default:
       break;
   }
@@ -82,7 +90,7 @@ function progressActivity(character: Character) {
 function finishActivity(character: Character) {
   character.activities.shift();
   if (character.objective) {
-    const objectiveCompleted = checkIfObjectiveIsSatisfied(character, character.objective.type);
+    const objectiveCompleted = checkIfObjectiveIsSatisfied(character, character.objective);
     if (objectiveCompleted) {
       character.objective = null;
     }

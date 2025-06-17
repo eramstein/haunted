@@ -1,12 +1,14 @@
-import type { CharacterDefinition } from '@/lib/_model/model-sim';
+import type { CharacterBase } from '@/lib/_model/model-sim';
 import { EmotionType } from '@/lib/_model/model-sim.enums';
 
-export const NPC_OUSMANE: CharacterDefinition = {
+export const NPC_OUSMANE: CharacterBase = {
   name: 'Ousmane',
   llm: {
     bio: '29, male, retired footballer turned professional trading card game player',
     traits: ['competitive', 'charismatic', 'resilient', 'strategic', 'nostalgic'],
   },
+  work: null,
+  money: 500000,
   initialMemories: [
     'CAREER_CHANGE: Ousmane was a rising football star until a knee injury forced him to retire early, pushing him to find a new passion in trading card games.',
     'FAMILY_BACKGROUND: Raised in a tight-knit family that celebrated his athletic talent, he now feels pressure to prove himself in a different field.',

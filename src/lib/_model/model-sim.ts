@@ -45,11 +45,10 @@ export interface CharacterBase {
     bio: string;
     traits: string[];
   };
-}
-
-export interface CharacterDefinition extends CharacterBase {
   initialMemories: string[];
   emotionalProfile: Record<EmotionType, Emotion>;
+  work: Work | null;
+  money: number; // dollars / euros
 }
 
 export interface Character extends CharacterBase {
@@ -69,7 +68,12 @@ export interface Character extends CharacterBase {
     dominantEmotion: DominantEmotion | null; // computed from all emotion types
     byType: Record<EmotionType, Emotion>;
   };
-  money: number; // dollars / euros
+}
+
+export interface Work {
+  description: string;
+  place: number;
+  salary: number; // $ per hour
 }
 
 export interface Relationship {
@@ -112,7 +116,7 @@ export type ActivityTargets = {
   [ActivityType.Play]: number; // Place ID
   [ActivityType.Chat]: number; // Place ID
   [ActivityType.Buy]: ItemType;
-  [ActivityType.Work]: number; // Place ID
+  [ActivityType.Work]: number; // Money to make
 };
 
 export interface Activity<T extends ActivityType = ActivityType> {
@@ -124,6 +128,7 @@ export interface Activity<T extends ActivityType = ActivityType> {
 
 export interface Objective {
   type: ObjectiveType;
+  target?: number; // can be a place, a character, an item, an amount of money...
 }
 
 export interface GroupActivityLog {

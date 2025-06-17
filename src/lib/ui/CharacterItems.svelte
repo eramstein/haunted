@@ -40,12 +40,10 @@
   <h3>Items & Money</h3>
 
   <div class="money-section">
-    <h4>Money</h4>
     <div class="money-amount">{formatMoney(money)}</div>
   </div>
 
   <div class="items-section">
-    <h4>Items</h4>
     {#if items.length === 0}
       <p class="no-items">No items found</p>
     {:else}
@@ -80,12 +78,6 @@
   h3 {
     margin: 0 0 1rem 0;
     font-size: 1.2rem;
-    color: #fff;
-  }
-
-  h4 {
-    margin: 1.5rem 0 1rem 0;
-    font-size: 1.1rem;
     color: #fff;
   }
 

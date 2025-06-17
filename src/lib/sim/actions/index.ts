@@ -4,3 +4,5 @@ export * from './sleep';
 export * from './socialize';
 export * from './play';
 export * from './buy';
+export * from './money';
+export * from './work';

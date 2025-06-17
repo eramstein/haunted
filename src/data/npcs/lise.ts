@@ -1,12 +1,14 @@
-import type { CharacterDefinition } from '@/lib/_model/model-sim';
+import type { CharacterBase } from '@/lib/_model/model-sim';
 import { EmotionType } from '@/lib/_model/model-sim.enums';
 
-export const NPC_LISE: CharacterDefinition = {
+export const NPC_LISE: CharacterBase = {
   name: 'Lise',
   llm: {
     bio: '21, female, unemployed writer',
     traits: ['creative', 'introspective', 'resilient', 'dreamy', 'sensitive'],
   },
+  work: null,
+  money: 0,
   initialMemories: [
     'CAREER_STRUGGLE: Lise dreams of becoming a published author, but her short stories have yet to gain traction, leaving her financially strained.',
     'FAMILY_BACKGROUND: Growing up in a working-class family that valued practical careers, she feels unsupported in her pursuit of writing.',

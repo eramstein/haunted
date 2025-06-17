@@ -180,6 +180,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    width: 400px;
   }
 
   .detail-item {
@@ -246,7 +247,7 @@
 
   .bio-section {
     margin: 1rem 0 0 0;
-    line-height: 0.8;
+    line-height: 1;
   }
 
   .traits-list {

@@ -20,6 +20,7 @@ export enum ObjectiveType {
   Rest = 'rest',
   HaveFun = 'haveFun',
   Socialize = 'socialize',
+  GetMoney = 'getMoney',
 }
 
 export enum RelationshipStatus {

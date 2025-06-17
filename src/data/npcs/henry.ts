@@ -1,11 +1,17 @@
-import type { CharacterDefinition } from '@/lib/_model/model-sim';
+import type { CharacterBase } from '@/lib/_model/model-sim';
 import { EmotionType } from '@/lib/_model/model-sim.enums';
 
-export const NPC_HENRY: CharacterDefinition = {
+export const NPC_HENRY: CharacterBase = {
   name: 'Henry',
   llm: {
     bio: '25, male, history student',
     traits: ['naive', 'friendly', 'generous', 'loyal'],
+  },
+  money: 50,
+  work: {
+    description: 'Assistant teacher',
+    place: 10,
+    salary: 10,
   },
   initialMemories: [
     `        

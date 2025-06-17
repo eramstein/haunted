@@ -10,6 +10,7 @@ export const LABELS_OBJECTIVE_TYPES: Record<ObjectiveType, string> = {
   [ObjectiveType.Rest]: 'Rest',
   [ObjectiveType.HaveFun]: 'Have fun',
   [ObjectiveType.Socialize]: 'Socialize',
+  [ObjectiveType.GetMoney]: 'Get money',
 };
 
 export const LABELS_ACTIVITY_TYPES: Record<ActivityType, string> = {

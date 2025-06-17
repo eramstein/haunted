@@ -1,9 +1,10 @@
 import type { Activity, Character, Item } from '@/lib/_model/model-sim';
 import { addItem, getItemsByTypeAndOwner, removeItem } from '../items';
-import { ActivityType, ItemType } from '@/lib/_model/model-sim.enums';
+import { ActivityType, ItemType, ObjectiveType } from '@/lib/_model/model-sim.enums';
 import { config } from '@/lib/_config/config';
 import { gs } from '@/lib/_state';
 import { PLACES_IDS_BY_TYPE } from '@/data/world/places';
+import { changeObjective } from '../objectives';
 
 export function eat(character: Character, activity: Activity<ActivityType.Eat>) {
   activity.progress += config.actionSpeed.eat;
@@ -41,6 +42,7 @@ export function cook(character: Character, activity: Activity<ActivityType.Cook>
         description: 'Cooked ' + ingredients.description,
         owner: character.id,
         location: character.place,
+        price: ingredients.price,
       });
     }
   }
@@ -53,6 +55,15 @@ export function setHaveMealTask(character: Character) {
     // are there ingredients? if yes cook them, else go find some
     const ingredients = getItemsByTypeAndOwner(ItemType.FoodIngredient, character.id);
     if (ingredients.length === 0) {
+      const minCost = config.itemsMinCost[ItemType.FoodIngredient];
+      if (character.money < minCost) {
+        changeObjective(
+          character,
+          { type: ObjectiveType.GetMoney },
+          'not enough money to buy ingredients'
+        );
+        return;
+      }
       character.activities.push({
         type: ActivityType.Buy,
         progress: 0,

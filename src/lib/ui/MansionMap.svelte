@@ -4,7 +4,12 @@
   import { getMapImage } from './_helpers/images.svelte';
   import { gs } from '../_state';
   import { UiView, type Character, type Place, type Position } from '../_model';
-  import { getCharacterImage, getIconSheet, getActionIconPosition } from './_helpers/images.svelte';
+  import {
+    getCharacterImage,
+    getIconSheet,
+    getActionIconPosition,
+    getPlaceImage,
+  } from './_helpers/images.svelte';
   import { uiState } from '../_state/state-ui.svelte';
   import ActivityIcon from './ActivityIcon.svelte';
 
@@ -93,7 +98,16 @@
         ondblclick={() => onPlaceDoubleClick(place)}
       >
         {#if debug || place.outside}
-          <div class="place-name">{place.name}</div>
+          <div class="place-info">
+            {#if place.outside}
+              <img
+                src={getPlaceImage(place.image || place.name)}
+                class="place-image"
+                alt={place.name}
+              />
+            {/if}
+            <div class="place-name">{place.name}</div>
+          </div>
         {/if}
         <div class="characters">
           {#each characters as character (character.id)}
@@ -166,13 +180,27 @@
   }
 
   .place-name {
-    position: absolute;
-    bottom: -25px;
-    left: 50%;
-    transform: translateX(-50%);
     color: white;
     text-shadow: 1px 1px 2px black;
     opacity: 1;
+  }
+
+  .place-info {
+    position: absolute;
+    bottom: -45px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .place-image {
+    width: 80px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    object-fit: cover;
   }
 
   .characters {

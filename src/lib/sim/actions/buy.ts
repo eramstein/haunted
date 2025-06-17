@@ -1,10 +1,11 @@
 import type { Activity, Character } from '@/lib/_model/model-sim';
 import { addItem } from '../items';
-import { config, itemCartSize } from '@/lib/_config';
+import { config } from '@/lib/_config';
 import { ARTICLES } from '@/data/world/items';
 import { getRandomItemFromArray } from '../_utils/random';
-import { ActivityType } from '@/lib/_model/model-sim.enums';
+import { ActivityType, ObjectiveType } from '@/lib/_model/model-sim.enums';
 import { PLACES_IDS_BY_TYPE } from '@/data/world/places';
+import { changeObjective } from '../objectives';
 
 export function buy(character: Character, activity: Activity<ActivityType.Buy>) {
   // check if character is in the grocery store
@@ -25,10 +26,12 @@ export function buy(character: Character, activity: Activity<ActivityType.Buy>) 
 
   // when done, add items
   const itemType = activity.target;
-  for (let i = 0; i < itemCartSize[itemType]; i++) {
+  let boughtCount = 0;
+  for (let i = 0; i < config.itemCartSize[itemType]; i++) {
     const article = getRandomItemFromArray(ARTICLES[itemType] || []);
     if (article.price <= character.money) {
       character.money -= article.price;
+      boughtCount++;
       addItem({
         type: itemType,
         owner: character.id,
@@ -38,5 +41,12 @@ export function buy(character: Character, activity: Activity<ActivityType.Buy>) 
     } else {
       break;
     }
+  }
+  if (boughtCount === 0) {
+    changeObjective(
+      character,
+      { type: ObjectiveType.GetMoney },
+      'not enough money to buy ' + itemType
+    );
   }
 }

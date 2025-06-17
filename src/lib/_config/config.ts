@@ -9,6 +9,7 @@ export const config = {
     chat: 100 / 60, // 1 hour to chat
     play: 100 / 60, // 1 hour to play
     buy: 100 / 15, // 15 minutes to buy
+    work: 100 / 240, // 4 hours to work
   },
   needs: {
     food: 360, // eat every 6 hours
@@ -32,11 +33,14 @@ export const config = {
     [EmotionType.Disgust]: 100,
     [EmotionType.Trust]: 50,
   },
-};
-
-// how many items bought at once ideally
-export const itemCartSize: Record<ItemType, number> = {
-  [ItemType.FoodIngredient]: 10,
-  [ItemType.Drink]: 10,
-  [ItemType.Meal]: 1,
+  itemCartSize: {
+    [ItemType.FoodIngredient]: 10,
+    [ItemType.Drink]: 10,
+    [ItemType.Meal]: 1,
+  },
+  itemsMinCost: {
+    [ItemType.FoodIngredient]: 10,
+    [ItemType.Drink]: 10,
+    [ItemType.Meal]: 20,
+  },
 };

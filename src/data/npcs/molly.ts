@@ -1,12 +1,18 @@
-import type { CharacterDefinition } from '@/lib/_model/model-sim';
+import type { CharacterBase } from '@/lib/_model/model-sim';
 import { EmotionType } from '@/lib/_model/model-sim.enums';
 
-export const NPC_MOLLY: CharacterDefinition = {
+export const NPC_MOLLY: CharacterBase = {
   name: 'Molly',
   llm: {
     bio: '23, female, psychology student',
     traits: ['nerdy', 'shy', 'friendly', 'warm', 'curious'],
   },
+  work: {
+    description: 'Administrative assistant',
+    place: 9,
+    salary: 20,
+  },
+  money: 50,
   initialMemories: [
     `        
     EDUCATION_HISTORY: Molly initially wanted to study medicine, but failed a math exam which prevented her to enter med school.

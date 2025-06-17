@@ -48,6 +48,8 @@ function initCharacter(character: CharacterBase, index: number): Character {
       dominantEmotion: null,
       byType: character.emotionalProfile,
     },
+    failedObjectives: {},
+    problems: [],
   };
 }
 

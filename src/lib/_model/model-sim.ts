@@ -56,6 +56,8 @@ export interface Character extends CharacterBase {
   place: number;
   activities: Activity[]; // character will do these in order
   objective: Objective | null;
+  failedObjectives: Partial<Record<ObjectiveType, boolean>>; // don't retry until unlocked
+  problems: string[]; // issues the character can't solve by themselves
   needs: {
     food: number;
     sleep: number;

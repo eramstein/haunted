@@ -2,6 +2,7 @@ import type { Character, Objective } from '@/lib/_model/model-sim';
 import { ObjectiveType } from '../_model/model-sim.enums';
 import { gs } from '../_state';
 import { config } from '../_config';
+import { recordProblem } from './problems';
 
 export function setCharactersObjectives(characters: Character[]) {
   characters.forEach((character) => {
@@ -17,19 +18,31 @@ export function setCharactersObjectives(characters: Character[]) {
 
 // follow pyramid of needs
 function getPriorityObjective(character: Character): Objective | null {
-  if (character.needs.food > config.needs.food) {
+  if (
+    character.needs.food > config.needs.food &&
+    !character.failedObjectives[ObjectiveType.HaveMeal]
+  ) {
     return { type: ObjectiveType.HaveMeal };
   }
-  if (character.needs.sleep > config.needs.sleep) {
+  if (
+    character.needs.sleep > config.needs.sleep &&
+    !character.failedObjectives[ObjectiveType.Rest]
+  ) {
     return { type: ObjectiveType.Rest };
   }
-  if (character.needs.social > config.needs.social) {
+  if (
+    character.needs.social > config.needs.social &&
+    !character.failedObjectives[ObjectiveType.Socialize]
+  ) {
     return { type: ObjectiveType.Socialize };
   }
-  if (character.needs.fun > config.needs.fun) {
+  if (
+    character.needs.fun > config.needs.fun &&
+    !character.failedObjectives[ObjectiveType.HaveFun]
+  ) {
     return { type: ObjectiveType.HaveFun };
   }
-  if (character.money < 1000) {
+  if (character.money < 1000 && !character.failedObjectives[ObjectiveType.GetMoney]) {
     return { type: ObjectiveType.GetMoney, target: character.money + 100 };
   }
   return null;
@@ -51,9 +64,27 @@ export function checkIfObjectiveIsSatisfied(character: Character, objective: Obj
 }
 
 export function changeObjective(character: Character, objective: Objective, reason: string = '') {
+  // if the new objective is stuck, don't swap and fail the current one
+  if (character.failedObjectives[objective.type]) {
+    failObjective(character, character.objective!);
+    return;
+  }
+  // else, swap objective
   character.objective = objective;
   if (reason) {
-    // TODO: log memory
+    // TODO: log memory?
     console.log(`${character.name} changed objective to ${objective.type} because ${reason}`);
   }
+}
+
+export function failObjective(character: Character, objective: Objective) {
+  character.failedObjectives[objective.type] = true;
+  character.objective = null;
+  recordProblem(character, objective);
+}
+
+export function resetFailedObjectives() {
+  gs.characters.forEach((character) => {
+    character.failedObjectives = {};
+  });
 }

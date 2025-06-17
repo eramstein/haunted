@@ -1,5 +1,6 @@
 import type { Character } from '@/lib/_model/model-sim';
-import { ActivityType } from '@/lib/_model/model-sim.enums';
+import { ActivityType, ObjectiveType } from '@/lib/_model/model-sim.enums';
+import { failObjective } from '../objectives';
 
 export function setGetMoneyTask(character: Character) {
   if (character.work) {
@@ -14,7 +15,6 @@ export function setGetMoneyTask(character: Character) {
       target: character.objective?.target || 0,
     });
   } else {
-    // fail state
-    console.log('failed to get money', character.name);
+    failObjective(character, { type: ObjectiveType.GetMoney });
   }
 }

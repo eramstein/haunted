@@ -1,7 +1,7 @@
 import { gs } from '../_state';
 import { uiState } from '../_state/state-ui.svelte';
 import { workOnActivities } from './activities';
-import { setCharactersObjectives } from './objectives';
+import { resetFailedObjectives, setCharactersObjectives } from './objectives';
 import { updateCharactersNeeds } from './needs';
 import { decayEmotionsForAllCharacters } from './emotions';
 
@@ -53,6 +53,10 @@ function simulationTick() {
   // every 60 minutes, decay emotions
   if (gs.time.ellapsedTime % 60 === 0) {
     decayEmotionsForAllCharacters();
+  }
+  // every 12 hours, reset failed objectives
+  if (gs.time.ellapsedTime % 720 === 0) {
+    resetFailedObjectives();
   }
 }
 

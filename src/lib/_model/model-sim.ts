@@ -3,6 +3,8 @@ import type {
   EmotionType,
   ItemType,
   ObjectiveType,
+  ProblemReason,
+  ProblemType,
   RelationshipFeeling,
   RelationshipStatus,
 } from './model-sim.enums';
@@ -57,7 +59,7 @@ export interface Character extends CharacterBase {
   activities: Activity[]; // character will do these in order
   objective: Objective | null;
   failedObjectives: Partial<Record<ObjectiveType, boolean>>; // don't retry until unlocked
-  problems: string[]; // issues the character can't solve by themselves
+  problems: Problem[]; // issues the character can't solve by themselves using normal activities
   needs: {
     food: number;
     sleep: number;
@@ -119,6 +121,7 @@ export type ActivityTargets = {
   [ActivityType.Chat]: number; // Place ID
   [ActivityType.Buy]: ItemType;
   [ActivityType.Work]: number; // Money to make
+  [ActivityType.AskForHelp]: number; // Person to ask
 };
 
 export interface Activity<T extends ActivityType = ActivityType> {
@@ -130,7 +133,7 @@ export interface Activity<T extends ActivityType = ActivityType> {
 
 export interface Objective {
   type: ObjectiveType;
-  target?: number; // can be a place, a character, an item, an amount of money...
+  target?: any; // can be a place, a character, an item, an amount of money, a problem type...
 }
 
 export interface GroupActivityLog {
@@ -181,4 +184,9 @@ export interface CompositeEmotionType {
 export interface DominantEmotion {
   name: string; // this can be a base emotion, or a composite one
   intensity: number;
+}
+
+export interface Problem {
+  type: ProblemType;
+  reason: ProblemReason;
 }

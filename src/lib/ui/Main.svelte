@@ -6,7 +6,10 @@
   import ViewControls from './ViewControls.svelte';
   import MansionMap from './MansionMap.svelte';
   import SidePanel from './SidePanel.svelte';
+  import UserPromptModal from './UserPromptModal.svelte';
 </script>
+
+<UserPromptModal />
 
 <div class="main">
   <div class="controls">

@@ -24,6 +24,9 @@ function getPriorityObjective(character: Character): Objective | null {
   ) {
     return { type: ObjectiveType.HaveMeal };
   }
+  if (character.problems.length > 0) {
+    return { type: ObjectiveType.SolveProblem, target: character.problems[0].type };
+  }
   if (
     character.needs.sleep > config.needs.sleep &&
     !character.failedObjectives[ObjectiveType.Rest]
@@ -60,13 +63,15 @@ export function checkIfObjectiveIsSatisfied(character: Character, objective: Obj
       return character.needs.social < config.needs.social / 2;
     case ObjectiveType.GetMoney:
       return character.money >= (objective.target || 0);
+    case ObjectiveType.SolveProblem:
+      return character.problems.findIndex((p) => p.type === objective.target) === -1;
   }
 }
 
 export function changeObjective(character: Character, objective: Objective, reason: string = '') {
   // if the new objective is stuck, don't swap and fail the current one
   if (character.failedObjectives[objective.type]) {
-    failObjective(character, character.objective!);
+    failObjective(character, character.objective!, false);
     return;
   }
   // else, swap objective
@@ -77,10 +82,16 @@ export function changeObjective(character: Character, objective: Objective, reas
   }
 }
 
-export function failObjective(character: Character, objective: Objective) {
+export function failObjective(
+  character: Character,
+  objective: Objective,
+  isProblem: boolean = true
+) {
   character.failedObjectives[objective.type] = true;
   character.objective = null;
-  recordProblem(character, objective);
+  if (isProblem) {
+    recordProblem(character, objective);
+  }
 }
 
 export function resetFailedObjectives() {

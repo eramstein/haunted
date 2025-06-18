@@ -13,6 +13,7 @@ export enum ActivityType {
   Chat = 'chat',
   Buy = 'buy',
   Work = 'work',
+  AskForHelp = 'askForHelp',
 }
 
 export enum ObjectiveType {
@@ -21,6 +22,7 @@ export enum ObjectiveType {
   HaveFun = 'haveFun',
   Socialize = 'socialize',
   GetMoney = 'getMoney',
+  SolveProblem = 'solveProblem',
 }
 
 export enum RelationshipStatus {
@@ -60,4 +62,15 @@ export enum EmotionType {
   Anticipation = 'anticipating',
   Disgust = 'disgusted',
   Trust = 'trusting',
+}
+
+export enum ProblemType {
+  NoProblem = 'just tilting for no reason',
+  NoFood = 'has no food',
+  NoMoney = 'has no money',
+}
+
+export enum ProblemReason {
+  NoReason = 'life is unfair',
+  NoIncome = 'has no income',
 }

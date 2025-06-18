@@ -6,3 +6,5 @@ export * from './play';
 export * from './buy';
 export * from './money';
 export * from './work';
+export * from './help';
+export * from './gift';

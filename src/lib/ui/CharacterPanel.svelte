@@ -12,6 +12,7 @@
   import CharacterRelationships from './CharacterRelationships.svelte';
   import CharacterEmotionalProfile from './CharacterEmotionalProfile.svelte';
   import CharacterItems from './CharacterItems.svelte';
+  import { stringifyProblem } from '../sim';
 
   let props = $props<{
     character: Character;
@@ -85,6 +86,12 @@
           Items
         </button>
       </div>
+      {#if props.character.problems.length > 0}
+        <div class="detail-item">
+          <span class="label">Problems:</span>
+          <span class="value">{props.character.problems.map(stringifyProblem).join(', ')}</span>
+        </div>
+      {/if}
       <div class="detail-item">
         <span class="label">Mood:</span>
         <span class="value">{getMoodLabel(props.character.emotions.mood)}</span>

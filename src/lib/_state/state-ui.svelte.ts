@@ -1,4 +1,4 @@
-import { UiView, type UiState } from '../_model/model-ui';
+import { UiView, type UiState, type UserPrompt } from '../_model/model-ui';
 
 export const uiState: UiState = $state({
   currentView: UiView.MansionMap,
@@ -7,4 +7,10 @@ export const uiState: UiState = $state({
   selectedPlace: null,
   selectedCharacter: null,
   selectedItem: null,
+  userPrompt: null,
 });
+
+export function promptUser(prompt: UserPrompt) {
+  uiState.isPaused = true;
+  uiState.userPrompt = prompt;
+}

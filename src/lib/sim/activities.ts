@@ -14,8 +14,10 @@ import {
   buy,
   setGetMoneyTask,
   work,
+  askForHelp,
 } from './actions';
 import { checkIfObjectiveIsSatisfied } from './objectives';
+import { setSolveProblemTask } from './problems';
 
 export function workOnActivities(characters: Character[]) {
   characters.forEach(workOnActivity);
@@ -48,6 +50,9 @@ function setActivityFromObjective(character: Character) {
       break;
     case ObjectiveType.GetMoney:
       setGetMoneyTask(character);
+      break;
+    case ObjectiveType.SolveProblem:
+      setSolveProblemTask(character);
       break;
     default:
       break;
@@ -82,12 +87,15 @@ function progressActivity(character: Character) {
     case ActivityType.Work:
       work(character, activity as Activity<ActivityType.Work>);
       break;
+    case ActivityType.AskForHelp:
+      askForHelp(character, activity as Activity<ActivityType.AskForHelp>);
+      break;
     default:
       break;
   }
 }
 
-function finishActivity(character: Character) {
+export function finishActivity(character: Character) {
   character.activities.shift();
   if (character.objective) {
     const objectiveCompleted = checkIfObjectiveIsSatisfied(character, character.objective);

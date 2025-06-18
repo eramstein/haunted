@@ -7,7 +7,16 @@ export type UiState = {
   selectedPlace: Place | null;
   selectedCharacter: Character | null;
   selectedItem: Item | null;
+  userPrompt: UserPrompt | null;
 };
+
+export interface UserPrompt {
+  title: string;
+  options: {
+    label: string;
+    action: () => void;
+  }[];
+}
 
 export enum UiView {
   MansionMap = 'MansionMap',

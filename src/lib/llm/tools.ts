@@ -1,7 +1,6 @@
 import { type ToolCall } from 'ollama';
-import { getTools } from './tools-defintitions';
+import { getTools, ToolType } from './tools-definitions';
 import { llmService } from './llm-service';
-import { ToolType } from './tools-defintitions';
 
 async function getToolsFromText(message: string) {
   const systemMessage = {

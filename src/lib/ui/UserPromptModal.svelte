@@ -3,9 +3,11 @@
 
   // Svelte 5 runes
   let prompt = $derived(() => uiState.userPrompt);
+  let feedback = $derived(() => uiState.userPromptFeedback);
 
   function closeModal() {
     uiState.userPrompt = null;
+    uiState.userPromptFeedback = '';
   }
 </script>
 
@@ -15,19 +17,24 @@
   <div class="modal">
     <button class="close-button" onclick={closeModal}>×</button>
     <h2>{p.title}</h2>
-    <div class="options">
-      {#each p.options as option}
-        <button
-          class="option-button"
-          onclick={() => {
-            option.action();
-            closeModal();
-          }}
-        >
-          {option.label}
-        </button>
-      {/each}
-    </div>
+    {#if feedback() === ''}
+      <div class="options">
+        {#each p.options as option}
+          <button
+            class="option-button"
+            onclick={() => {
+              option.action();
+            }}
+          >
+            {option.label}
+          </button>
+        {/each}
+      </div>
+    {:else}
+      <div class="feedback">
+        {feedback()}
+      </div>
+    {/if}
   </div>
 {/if}
 
@@ -94,5 +101,10 @@
   }
   .option-button:hover {
     background: #666;
+  }
+  .feedback {
+    margin-top: 2rem;
+    font-size: 1.1rem;
+    text-align: left;
   }
 </style>

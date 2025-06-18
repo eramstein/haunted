@@ -114,7 +114,7 @@ export class MistralService implements LLMService {
   ): Promise<MistralChatResponse | AsyncIterable<MistralStreamChunk>> {
     if (request.stream) {
       return mistralClient.chat.stream({
-        model: 'mistral-small-2503',
+        model: 'mistral-medium-2505',
         messages: request.messages,
         tools: request.tools,
         stream: true,
@@ -128,7 +128,7 @@ export class MistralService implements LLMService {
       }) as Promise<AsyncIterable<MistralStreamChunk>>;
     }
     return mistralClient.chat.complete({
-      model: 'mistral-small-2503',
+      model: 'mistral-medium-2505',
       messages: request.messages,
       tools: request.tools,
       stream: false,

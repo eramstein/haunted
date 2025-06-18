@@ -8,6 +8,7 @@ export const uiState: UiState = $state({
   selectedCharacter: null,
   selectedItem: null,
   userPrompt: null,
+  userPromptFeedback: '',
 });
 
 export function promptUser(prompt: UserPrompt) {

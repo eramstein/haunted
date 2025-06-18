@@ -8,6 +8,7 @@ export type UiState = {
   selectedCharacter: Character | null;
   selectedItem: Item | null;
   userPrompt: UserPrompt | null;
+  userPromptFeedback: string;
 };
 
 export interface UserPrompt {

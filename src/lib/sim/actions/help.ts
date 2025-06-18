@@ -1,4 +1,3 @@
-import { config } from '@/lib/_config/config';
 import type { Activity, Character, Problem, RelationshipUpdate } from '@/lib/_model/model-sim';
 import {
   ActivityType,
@@ -8,12 +7,13 @@ import {
 } from '@/lib/_model/model-sim.enums';
 import { finishActivity } from '../activities';
 import { gs } from '@/lib/_state';
-import { promptUser } from '@/lib/_state/state-ui.svelte';
+import { promptUser, uiState } from '@/lib/_state/state-ui.svelte';
 import { giftFood, giftMoney } from './gift';
-import { increaseFeelingValue } from '../relationships';
+import { updateRelationships } from '../relationships';
 import { solveProblem } from '../problems';
-import { saveChat } from '@/lib/llm/index-db';
 import { generateUniqueId } from '../_utils/random';
+import { characterAskingForHelp, saveChat, ToolType } from '@/lib/llm';
+import { llmService } from '@/lib/llm/llm-service';
 
 export function askForHelp(character: Character, activity: Activity<ActivityType.AskForHelp>) {
   if (character.problems.length === 0) {
@@ -23,26 +23,20 @@ export function askForHelp(character: Character, activity: Activity<ActivityType
   const problem = character.problems[0];
   const helper = gs.characters[activity.target];
   console.log(`${character.name} asks ${helper.name} for help with ${problem.type}`);
-  // TODO: prompt player to choose: quick resolution, let LLM solve, or play as helper
   promptUser({
-    title: `Ask for help`,
+    title: `${character.name} asks ${helper.name} for help`,
     options: [
       {
         label: 'Quick resolution',
-        action: () => quickResolution(character, helper, activity, problem),
+        action: () => quickResolution(character, helper, problem),
       },
-      { label: 'Let LLM solve', action: () => letLLMSolve(character, helper, activity, problem) },
-      { label: 'Play as helper', action: () => playAsHelper(character, helper, activity, problem) },
+      { label: 'Let LLM solve', action: () => letLLMSolve(character, helper, problem) },
+      { label: 'Play as helper', action: () => playAsHelper(character, helper, problem) },
     ],
   });
 }
 
-function quickResolution(
-  character: Character,
-  helper: Character,
-  activity: Activity<ActivityType.AskForHelp>,
-  problem: Problem
-) {
+function quickResolution(character: Character, helper: Character, problem: Problem) {
   // check if character accepts to help (TODO)
   const accepts = true;
   if (!accepts) {
@@ -51,7 +45,7 @@ function quickResolution(
   }
   // check if they could help
   let didHelp = '';
-  const didntHelp = helper.name + ' refused to help ' + character.name;
+  const didNotHelp = helper.name + ' refused to help ' + character.name;
   switch (problem.type) {
     case ProblemType.NoFood:
       if (problem.reason === ProblemReason.NoIncome) {
@@ -68,6 +62,64 @@ function quickResolution(
       break;
   }
   // update feelings and solve problem
+  console.log('resolveHelpRequest from quick resolution');
+  resolveHelpRequest(character, helper, problem, didHelp, didNotHelp, '');
+}
+
+async function letLLMSolve(character: Character, helper: Character, problem: Problem) {
+  console.log('let LLM solve');
+  const response = await characterAskingForHelp(character, helper, problem);
+  if (response.toolCalls.length === 0) {
+    console.error('help request: LLM failure, no tool calls, revert on auto resolve');
+    quickResolution(character, helper, problem);
+    return;
+  }
+  const toolCall = response.toolCalls[0];
+  let didHelp = '';
+  let didNotHelp = '';
+  switch (toolCall.function.name) {
+    case ToolType.GiveFood:
+      const food = giftFood(helper, character);
+      if (food) {
+        didHelp = helper.name + ' gave ' + character.name + ' food (' + food.description + ')';
+      }
+      break;
+    case ToolType.GiveMoney:
+      const moneyGifted = giftMoney(
+        helper,
+        character,
+        +llmService.getToolArguments(toolCall.function.arguments).amount
+      );
+      if (moneyGifted > 0) {
+        didHelp = helper.name + ' gave ' + character.name + ' money';
+      }
+      break;
+    case ToolType.RefuseHelp:
+      didNotHelp =
+        helper.name +
+        ' refused to help ' +
+        character.name +
+        ' because ' +
+        llmService.getToolArguments(toolCall.function.arguments).reason;
+      break;
+  }
+  // update feelings and solve problem
+  console.log('resolveHelpRequest from letLLMSolve');
+  resolveHelpRequest(character, helper, problem, didHelp, didNotHelp, response.conversation);
+}
+
+function playAsHelper(character: Character, helper: Character, problem: Problem) {
+  console.log('play as helper');
+}
+
+function resolveHelpRequest(
+  character: Character,
+  helper: Character,
+  problem: Problem,
+  didHelp: string,
+  didNotHelp: string,
+  transcript: string
+) {
   const relationUpdates: RelationshipUpdate[] = [];
   if (didHelp) {
     relationUpdates.push({
@@ -84,35 +136,29 @@ function quickResolution(
       toward: helper.name,
       feeling: RelationshipFeeling.Gratitude,
       delta: -10,
-      reason: didntHelp,
+      reason: didNotHelp,
     });
   }
   finishActivity(character);
+  updateRelationships(relationUpdates);
   // log that chat happened
-  console.log(didHelp);
+  console.log(didHelp || didNotHelp);
   const id = generateUniqueId();
-  saveChat(id, gs.time.ellapsedTime, [character.id, helper.id], character.place, activity.type, {
-    transcript: '',
-    summary: didHelp || didntHelp,
-    relationUpdates,
-    emotionUpdates: [],
-  });
-}
-
-function letLLMSolve(
-  character: Character,
-  helper: Character,
-  activity: Activity<ActivityType.AskForHelp>,
-  problem: Problem
-) {
-  console.log('let LLM solve');
-}
-
-function playAsHelper(
-  character: Character,
-  helper: Character,
-  activity: Activity<ActivityType.AskForHelp>,
-  problem: Problem
-) {
-  console.log('play as helper');
+  saveChat(
+    id,
+    gs.time.ellapsedTime,
+    [character.id, helper.id],
+    character.place,
+    ActivityType.AskForHelp,
+    {
+      transcript,
+      summary: didHelp || didNotHelp,
+      relationUpdates,
+      emotionUpdates: [],
+    }
+  );
+  uiState.userPromptFeedback = `
+    ${didHelp || didNotHelp} \n\n
+    ${transcript}
+  `;
 }

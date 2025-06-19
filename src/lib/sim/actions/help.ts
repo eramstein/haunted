@@ -22,7 +22,6 @@ export function askForHelp(character: Character, activity: Activity<ActivityType
   }
   const problem = character.problems[0];
   const helper = gs.characters[activity.target];
-  console.log(`${character.name} asks ${helper.name} for help with ${problem.type}`);
   promptUser({
     title: `${character.name} asks ${helper.name} for help`,
     options: [
@@ -30,13 +29,22 @@ export function askForHelp(character: Character, activity: Activity<ActivityType
         label: 'Quick resolution',
         action: () => quickResolution(character, helper, problem),
       },
-      { label: 'Let LLM solve', action: () => letLLMSolve(character, helper, problem) },
+      {
+        label: 'Let LLM solve',
+        action: (onStream) => letLLMSolve(character, helper, problem, onStream),
+        stream: true,
+      },
       { label: 'Play as helper', action: () => playAsHelper(character, helper, problem) },
     ],
   });
 }
 
-function quickResolution(character: Character, helper: Character, problem: Problem) {
+function quickResolution(
+  character: Character,
+  helper: Character,
+  problem: Problem,
+  transcript?: string
+) {
   // check if character accepts to help (TODO)
   const accepts = true;
   if (!accepts) {
@@ -62,16 +70,19 @@ function quickResolution(character: Character, helper: Character, problem: Probl
       break;
   }
   // update feelings and solve problem
-  console.log('resolveHelpRequest from quick resolution');
-  resolveHelpRequest(character, helper, problem, didHelp, didNotHelp, '');
+  resolveHelpRequest(character, helper, problem, didHelp, didNotHelp, transcript || '');
 }
 
-async function letLLMSolve(character: Character, helper: Character, problem: Problem) {
-  console.log('let LLM solve');
-  const response = await characterAskingForHelp(character, helper, problem);
+async function letLLMSolve(
+  character: Character,
+  helper: Character,
+  problem: Problem,
+  onStream?: (chunk: string) => void
+) {
+  const response = await characterAskingForHelp(character, helper, problem, onStream);
   if (response.toolCalls.length === 0) {
     console.error('help request: LLM failure, no tool calls, revert on auto resolve');
-    quickResolution(character, helper, problem);
+    quickResolution(character, helper, problem, response.conversation);
     return;
   }
   const toolCall = response.toolCalls[0];
@@ -91,7 +102,7 @@ async function letLLMSolve(character: Character, helper: Character, problem: Pro
         +llmService.getToolArguments(toolCall.function.arguments).amount
       );
       if (moneyGifted > 0) {
-        didHelp = helper.name + ' gave ' + character.name + ' money';
+        didHelp = helper.name + ' gave ' + character.name + ' money (' + moneyGifted + '$)';
       }
       break;
     case ToolType.RefuseHelp:
@@ -104,7 +115,6 @@ async function letLLMSolve(character: Character, helper: Character, problem: Pro
       break;
   }
   // update feelings and solve problem
-  console.log('resolveHelpRequest from letLLMSolve');
   resolveHelpRequest(character, helper, problem, didHelp, didNotHelp, response.conversation);
 }
 
@@ -142,7 +152,6 @@ function resolveHelpRequest(
   finishActivity(character);
   updateRelationships(relationUpdates);
   // log that chat happened
-  console.log(didHelp || didNotHelp);
   const id = generateUniqueId();
   saveChat(
     id,

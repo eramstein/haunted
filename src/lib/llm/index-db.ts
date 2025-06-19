@@ -7,7 +7,7 @@ const db = new Dexie('MansionSimDB');
 
 // Define schema with numeric timestamp
 db.version(1).stores({
-  chats: 'id,timestamp,[participants+timestamp]', // Indexes for querying
+  chats: 'id,timestamp,activityType,[participants+timestamp]', // Indexes for querying
 });
 
 // Export the chats table
@@ -96,4 +96,30 @@ export async function deleteOldChats(olderThan: number): Promise<void> {
 
 export async function resetIndexDB(): Promise<void> {
   await chats.clear();
+}
+
+// Fetch chats for specific activity type and participants
+export async function getChatsByActivityType(
+  activityType: ActivityType,
+  participants: number[],
+  startTime: number,
+  endTime: number
+): Promise<GroupActivityLog[]> {
+  try {
+    return await chats
+      .where('activityType')
+      .equals(activityType)
+      .filter((chat) => {
+        // Check if all required participants are in the chat
+        return participants.every((participant) => chat.participants.includes(participant));
+      })
+      .filter((chat) => {
+        // Filter by time range
+        return chat.timestamp >= startTime && chat.timestamp <= endTime;
+      })
+      .toArray();
+  } catch (error) {
+    console.error('Error fetching chats by activity type:', error);
+    throw error;
+  }
 }

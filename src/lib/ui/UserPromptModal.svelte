@@ -1,14 +1,18 @@
 <script lang="ts">
   import { uiState } from '../_state';
 
-  // Svelte 5 runes
   let prompt = $derived(() => uiState.userPrompt);
   let feedback = $derived(() => uiState.userPromptFeedback);
+  let streamingChat = $state<string>('');
 
   function closeModal() {
     uiState.userPrompt = null;
     uiState.userPromptFeedback = '';
   }
+
+  const onStream = (chunk: string) => {
+    streamingChat += chunk;
+  };
 </script>
 
 {#if prompt()}
@@ -23,16 +27,21 @@
           <button
             class="option-button"
             onclick={() => {
-              option.action();
+              if (option.stream) {
+                option.action(onStream);
+              } else {
+                option.action();
+              }
             }}
           >
             {option.label}
           </button>
         {/each}
       </div>
+      <div class="feedback">{@html streamingChat.replace(/\n/g, '<br>')}</div>
     {:else}
       <div class="feedback">
-        {feedback()}
+        {@html feedback().replace(/\n/g, '<br>')}
       </div>
     {/if}
   </div>
@@ -59,8 +68,7 @@
     border-radius: 1rem;
     box-shadow: 0 4px 32px rgba(0, 0, 0, 0.4);
     z-index: 1001;
-    min-width: 320px;
-    max-width: 90vw;
+    width: 640px;
     text-align: center;
   }
   .close-button {

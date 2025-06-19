@@ -131,6 +131,7 @@ export class MistralService implements LLMService {
       model: 'mistral-medium-2505',
       messages: request.messages,
       tools: request.tools,
+      toolChoice: request.tools ? 'any' : 'none',
       stream: false,
       responseFormat: request.responseFormat,
       options: {

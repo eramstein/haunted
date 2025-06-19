@@ -15,7 +15,8 @@ export interface UserPrompt {
   title: string;
   options: {
     label: string;
-    action: () => void;
+    action: (onStream?: (chunk: string) => void) => void;
+    stream?: boolean;
   }[];
 }
 

@@ -1,7 +1,15 @@
 import { LABELS_FEELINGS } from '../_config/labels';
-import type { Character, Relationship } from '../_model';
-import { ActivityType, RelationshipFeeling, RelationshipStatus } from '../_model/model-sim.enums';
-import { describeEmotion, getMoodLabel } from '../sim';
+import type { Character, Problem, Relationship } from '../_model';
+import {
+  ActivityType,
+  ItemType,
+  ProblemType,
+  RelationshipFeeling,
+  RelationshipStatus,
+} from '../_model/model-sim.enums';
+import { gs } from '../_state';
+import { describeEmotion, getItemsByTypeAndOwner, getMoodLabel } from '../sim';
+import { getChatsByActivityType } from './index-db';
 
 export const activityTypeToContext: Partial<Record<ActivityType, string>> = {
   [ActivityType.Chat]: 'Casual socializing',
@@ -98,4 +106,49 @@ function sampleFeelings(
   }
 
   return topN.slice(0, maxReturned);
+}
+
+export function getCharacterResources(character: Character, problem: Problem) {
+  const resources: string[] = [];
+  if (problem.type === ProblemType.NoFood) {
+    const meals = getItemsByTypeAndOwner(ItemType.Meal, character.id);
+    if (meals.length > 0) {
+      resources.push(meals.map((m) => m.description).join(', '));
+    }
+    const foodIngredients = getItemsByTypeAndOwner(ItemType.FoodIngredient, character.id);
+    if (foodIngredients.length > 0) {
+      resources.push('some food ingredients');
+    }
+  }
+  if (problem.type === ProblemType.NoMoney || problem.type === ProblemType.NoFood) {
+    resources.push(character.money.toString() + '$');
+  }
+  return resources.length > 0 ? character.name + ' has ' + resources.join(', ') : '';
+}
+
+export async function getPastHelpHistory(requester: Character, helper: Character) {
+  try {
+    // Query for AskForHelp activities between these two characters
+    const endTime = gs.time.ellapsedTime;
+    const startTime = endTime - 7 * 24 * 60 * 60; // 7 days ago
+    const chats = await getChatsByActivityType(
+      ActivityType.AskForHelp,
+      [requester.id, helper.id],
+      startTime,
+      endTime
+    );
+    const filteredChats = chats.filter((chat) => {
+      // Check if requester is first participant and helper is second participant
+      if (chat.participants.length < 2) {
+        return false;
+      }
+      return chat.participants[0] === requester.id && chat.participants[1] === helper.id;
+    });
+    return (
+      helper.name + ' helped ' + requester.name + ' ' + filteredChats.length + ' times recently'
+    );
+  } catch (error) {
+    console.error('Error fetching past help history:', error);
+    return [];
+  }
 }

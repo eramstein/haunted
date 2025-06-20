@@ -2,7 +2,7 @@
   import { gs, uiState } from '../_state';
   import { LABELS_ACTIVITY_TYPES } from '../_config/labels';
   import type { GroupActivityLog, Character } from '../_model/model-sim';
-  import { generateGroupActivityTranscript } from '../llm/chat';
+  import { groupChat } from '../llm/chat';
   import { getChatsForCharacters } from '../llm/index-db';
   import { getCharacterImage } from './_helpers/images.svelte';
   import { formatDate } from './_helpers/date.svelte';
@@ -67,7 +67,7 @@
     streamingChats[activity.id] = '';
 
     try {
-      await generateGroupActivityTranscript(
+      await groupChat(
         activity.id,
         activity.timestamp,
         participants,

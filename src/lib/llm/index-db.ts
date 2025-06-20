@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie';
-import type { ActivityType } from '../_model/model-sim.enums';
+import { ActivityType } from '../_model/model-sim.enums';
 import type { GroupActivityLog, GroupActivitySummary } from '../_model';
 
 // Initialize Dexie database
@@ -45,11 +45,36 @@ export async function saveChat(
 // Update only the content of an existing chat
 export async function updateChatContent(
   id: string,
-  content: GroupActivitySummary
-): Promise<string | undefined> {
+  content: GroupActivitySummary,
+  metadata: {
+    timestamp: number;
+    participants: number[];
+    location: number;
+    activityType: ActivityType;
+  } = {
+    timestamp: 0,
+    participants: [],
+    location: 0,
+    activityType: ActivityType.Chat,
+  }
+): Promise<string> {
   try {
-    const count = await chats.where('id').equals(id).modify({ content });
-    return count > 0 ? id : undefined;
+    // First try to get the existing chat to preserve other fields
+    const existingChat = await chats.where('id').equals(id).first();
+
+    if (existingChat) {
+      // Update existing chat
+      await chats.where('id').equals(id).modify({ content });
+    } else {
+      // Create new chat with minimal required fields
+      await chats.put({
+        id,
+        content,
+        ...metadata,
+      });
+    }
+
+    return id;
   } catch (error) {
     console.error('Error updating chat content:', error);
     throw error;

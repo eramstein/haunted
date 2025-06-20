@@ -105,3 +105,11 @@ function setComputedTimes() {
   // update light level
   updateLightLevel(+hours, +minutes);
 }
+
+export function getTimeOfDay(timestamp: number) {
+  return getTime(timestamp).toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+}

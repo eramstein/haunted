@@ -2,14 +2,22 @@ import { loadStateFromLocalStorage, saveStateToLocalStorage, gs } from '../../_s
 import { togglePause } from '../../sim/time';
 
 export function handleKeybinds(event: KeyboardEvent) {
+  // Skip keybinds if user is typing in an input field
+  const target = event.target as HTMLElement;
+  if (
+    target &&
+    (target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      target.contentEditable === 'true' ||
+      target.closest('[contenteditable="true"]'))
+  ) {
+    return;
+  }
+
   if (event.key === 'F4') {
     event.preventDefault();
     const loadedState = loadStateFromLocalStorage();
-    if (loadedState) {
-      console.log('State reloaded from localStorage');
-    } else {
-      console.log('No saved state found');
-    }
+    console.log('State reloaded from localStorage', loadedState);
   } else if (event.key === 'F5') {
     event.preventDefault();
     saveStateToLocalStorage();

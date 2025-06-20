@@ -16,6 +16,7 @@ export interface State {
   player: Player;
   items: Record<string, Item>;
   itemIndices: ItemIndices;
+  chat: ChatState | null;
 }
 
 export interface Time {
@@ -189,4 +190,19 @@ export interface DominantEmotion {
 export interface Problem {
   type: ProblemType;
   reason: ProblemReason;
+}
+
+export interface ChatState {
+  playingAsCharacter: Character;
+  otherCharacters: Character[];
+  activityType: ActivityType;
+  history: ChatMessage[];
+  summary: string;
+  previousUpdates: GroupActivitySummary[];
+  lastSummaryMessageIndex: number;
+}
+
+export interface ChatMessage {
+  role: string;
+  content: string;
 }

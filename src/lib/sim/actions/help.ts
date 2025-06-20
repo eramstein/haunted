@@ -7,12 +7,12 @@ import {
 } from '@/lib/_model/model-sim.enums';
 import { finishActivity } from '../activities';
 import { gs } from '@/lib/_state';
-import { promptUser, uiState } from '@/lib/_state/state-ui.svelte';
+import { promptUser, closePrompt, uiState } from '@/lib/_state/state-ui.svelte';
 import { giftFood, giftMoney } from './gift';
 import { updateRelationships } from '../relationships';
 import { solveProblem } from '../problems';
 import { generateUniqueId } from '../_utils/random';
-import { characterAskingForHelp, saveChat, ToolType } from '@/lib/llm';
+import { aiInitiatesChat, characterAskingForHelp, saveChat, ToolType } from '@/lib/llm';
 import { llmService } from '@/lib/llm/llm-service';
 
 export function askForHelp(character: Character, activity: Activity<ActivityType.AskForHelp>) {
@@ -34,7 +34,11 @@ export function askForHelp(character: Character, activity: Activity<ActivityType
         action: (onStream) => letLLMSolve(character, helper, problem, onStream),
         stream: true,
       },
-      { label: 'Play as helper', action: () => playAsHelper(character, helper, problem) },
+      {
+        label: 'Play as helper',
+        action: (onStream) => playAsHelper(character, helper, onStream),
+        stream: true,
+      },
     ],
   });
 }
@@ -118,8 +122,9 @@ async function letLLMSolve(
   resolveHelpRequest(character, helper, problem, didHelp, didNotHelp, response.conversation);
 }
 
-function playAsHelper(character: Character, helper: Character, problem: Problem) {
-  console.log('play as helper');
+function playAsHelper(character: Character, helper: Character, onStream?: (chunk: string) => void) {
+  closePrompt();
+  aiInitiatesChat(helper, character, ActivityType.AskForHelp, onStream);
 }
 
 function resolveHelpRequest(

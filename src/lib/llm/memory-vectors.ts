@@ -29,11 +29,16 @@ export async function queryNpcMemory(characterIds: number[], message: string) {
   const results = await collection.query({
     queryTexts: message,
     nResults: 3,
-    where: {
-      $or: characterIds.map((id) => ({
-        characters: { $in: [`|${id}|`] },
-      })),
-    },
+    where:
+      characterIds.length === 1
+        ? {
+            characters: { $in: [`|${characterIds[0]}|`] },
+          }
+        : {
+            $or: characterIds.map((id) => ({
+              characters: { $in: [`|${id}|`] },
+            })),
+          },
   });
 
   const documents = results.documents?.[0] || [];

@@ -1,5 +1,5 @@
 import { LABELS_FEELINGS } from '../_config/labels';
-import type { Character, Problem, Relationship } from '../_model';
+import type { Character, EmotionUpdate, Problem, Relationship } from '../_model';
 import {
   ActivityType,
   ItemType,
@@ -8,12 +8,13 @@ import {
   RelationshipStatus,
 } from '../_model/model-sim.enums';
 import { gs } from '../_state';
-import { describeEmotion, getItemsByTypeAndOwner, getMoodLabel } from '../sim';
+import { describeEmotion, getItemsByTypeAndOwner, getMoodLabel, stringifyProblem } from '../sim';
 import { getChatsByActivityType } from './index-db';
 
 export const activityTypeToContext: Partial<Record<ActivityType, string>> = {
   [ActivityType.Chat]: 'Casual socializing',
   [ActivityType.Play]: 'Playing a game together',
+  [ActivityType.AskForHelp]: 'Your character is asking for help',
 };
 
 export function getGroupDescription(characters: Character[]) {
@@ -151,4 +152,56 @@ export async function getPastHelpHistory(requester: Character, helper: Character
     console.error('Error fetching past help history:', error);
     return [];
   }
+}
+
+export function getActivityContext(activityType: ActivityType, characters: Character[]) {
+  if (activityType === ActivityType.AskForHelp) {
+    const characterAskingForHelp = characters.find(
+      (c) => c.activities.length > 0 && c.activities[0].type === ActivityType.AskForHelp
+    );
+    if (characterAskingForHelp) {
+      const problem = characterAskingForHelp.problems[0];
+      return characterAskingForHelp.name + ' ' + stringifyProblem(problem);
+    }
+  }
+  return activityTypeToContext[activityType] || '';
+}
+
+export function describeEmotionChanges(emotionUpdates: EmotionUpdate[]) {
+  // Filter for major updates (delta >= 0.7)
+  const majorUpdates = emotionUpdates.filter((update) => Math.abs(update.delta) >= 0.7);
+
+  if (majorUpdates.length === 0) {
+    return '';
+  }
+
+  // Group updates by character
+  const updatesByCharacter = new Map<string, EmotionUpdate[]>();
+  majorUpdates.forEach((update) => {
+    if (!updatesByCharacter.has(update.characterName)) {
+      updatesByCharacter.set(update.characterName, []);
+    }
+    updatesByCharacter.get(update.characterName)!.push(update);
+  });
+
+  // Create descriptions for each character
+  const characterDescriptions: string[] = [];
+
+  for (const [characterName, updates] of updatesByCharacter) {
+    const emotionDescriptions: string[] = [];
+
+    updates.forEach((update) => {
+      const emotionName = update.type;
+      const direction = update.delta > 0 ? 'more' : 'less';
+      emotionDescriptions.push(`${direction} ${emotionName}`);
+    });
+
+    if (emotionDescriptions.length === 1) {
+      characterDescriptions.push(`${characterName} became ${emotionDescriptions[0]}`);
+    } else {
+      characterDescriptions.push(`${characterName} became ${emotionDescriptions.join(', ')}`);
+    }
+  }
+
+  return characterDescriptions.join(', ');
 }

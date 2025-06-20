@@ -15,3 +15,7 @@ export function promptUser(prompt: UserPrompt) {
   uiState.isPaused = true;
   uiState.userPrompt = prompt;
 }
+
+export function closePrompt() {
+  uiState.userPrompt = null;
+}

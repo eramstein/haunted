@@ -27,6 +27,7 @@ export const initialState: State = {
     byLocationId: {},
     byTypeAndOwner: {},
   },
+  chat: null,
 };
 
 function initCharacter(character: CharacterBase, index: number): Character {

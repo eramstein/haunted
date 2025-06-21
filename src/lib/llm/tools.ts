@@ -23,11 +23,14 @@ async function getToolsFromText(message: string, character: Character) {
   return response;
 }
 
-export async function getToolCallsFromText(actionText: string): Promise<{
+export async function getToolCallsFromText(
+  actionText: string,
+  character: Character
+): Promise<{
   toolType: ToolType;
   args: Record<string, any>;
 }> {
-  const llmResponse = await getToolsFromText(actionText);
+  const llmResponse = await getToolsFromText(actionText, character);
   const toolCalls = llmService.getTools(llmResponse);
   console.log('getToolCallsFromText toolCalls', toolCalls);
   if (toolCalls === undefined || toolCalls.length === 0) {

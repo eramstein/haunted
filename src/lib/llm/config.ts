@@ -4,3 +4,4 @@
 export const LLM_MODEL = 'mannix/llama3.1-8b-abliterated';
 
 export const MEMORY_COLLECTION = 'memories';
+export const TOOLS_COLLECTION = 'tools';

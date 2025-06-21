@@ -1,11 +1,10 @@
 import type { Character, Item } from '@/lib/_model/model-sim';
-import { RelationshipFeeling } from '@/lib/_model/model-sim.enums';
-import { increaseFeelingValue } from '../relationships';
 import { getItemsByTypeAndOwner, transferItem } from '../items';
 import { ItemType } from '@/lib/_model/model-sim.enums';
 
 export function giftMoney(from: Character, to: Character, amount: number): number {
   if (from.money < amount) {
+    console.log('not enough money to gift', from.name, amount);
     return 0;
   }
   from.money -= amount;

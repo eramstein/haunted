@@ -12,7 +12,7 @@ export enum ToolType {
   RefuseHelp = 'refuseHelp',
 }
 
-const goTo: Tool = {
+const goTo = () => ({
   type: 'function',
   function: {
     name: ToolType.GoTo,
@@ -29,15 +29,16 @@ const goTo: Tool = {
       },
     },
   },
-};
+});
 
 export function getTools(character: Character): Tool[] {
-  return [goTo, ...getHelpTools(character)];
+  return [goTo(), ...getHelpTools(character)];
 }
 
 export const getHelpTools: (helper: Character) => Tool[] = (helper) => {
   const foodItems = getItemsByTypeAndOwner(ItemType.FoodIngredient, helper.id);
   const mealItems = getItemsByTypeAndOwner(ItemType.Meal, helper.id);
+  const recipients = gs.characters.filter((c) => c.id !== helper.id).map((c) => c.name);
   const moneyTool: Tool = {
     type: 'function',
     function: {
@@ -45,9 +46,14 @@ export const getHelpTools: (helper: Character) => Tool[] = (helper) => {
       description: 'Give money to another character',
       parameters: {
         type: 'object',
-        required: ['amount'],
+        required: ['amount', 'recipient'],
         properties: {
           amount: { type: 'number', description: 'The amount of money to give' },
+          recipient: {
+            type: 'string',
+            description: 'The character who is receiving the money',
+            enum: recipients,
+          },
         },
       },
     },
@@ -73,12 +79,17 @@ export const getHelpTools: (helper: Character) => Tool[] = (helper) => {
       description: 'Give food to another character',
       parameters: {
         type: 'object',
-        required: ['item'],
+        required: ['item', 'recipient'],
         properties: {
           item: {
             type: 'string',
             enum: [...foodItems, ...mealItems].map((i) => i.description),
             description: 'The food ingredient or meal to give',
+          },
+          recipient: {
+            type: 'string',
+            description: 'The character who is receiving the food',
+            enum: recipients,
           },
         },
       },

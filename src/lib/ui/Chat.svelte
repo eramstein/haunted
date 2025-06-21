@@ -2,6 +2,10 @@
   import { gs, uiState } from '../_state';
   import { playerSendChat } from '../llm/chat';
   import { getCharacterImage } from './_helpers/images.svelte';
+  import { queryToolVectors } from '../llm/tools-vectors';
+  import { lookupToolUsage } from '../llm/tools-lookup';
+  import { useTool } from '../sim/tool-use';
+  import { ActivityType } from '../_model/model-sim.enums';
 
   let messageInput = $state('');
   let isSending = $state(false);
@@ -21,9 +25,37 @@
     messageInput = '';
     isSending = true;
 
+    const toolType = await queryToolVectors(message);
+    let toolOutcome = '';
+
+    // TODO: let user confirm tool usage, it's sometimes wrong
+    if (toolType) {
+      // check for obvious tool usage with Typescript (no param, or number lookup, or string lookup)
+      const defaultParameterValues: Record<string, any> = {};
+      // todo: this is a hack to get the recipient for the ask for help activity
+      if (gs.chat.activityType === ActivityType.AskForHelp) {
+        defaultParameterValues.recipient = gs.chat.otherCharacters[0].name;
+      }
+      const toolUsage = lookupToolUsage(
+        message,
+        toolType,
+        gs.chat.playingAsCharacter,
+        defaultParameterValues
+      );
+      if (toolUsage) {
+        toolOutcome = useTool(
+          gs.chat.playingAsCharacter,
+          toolUsage.tool.function.name || '',
+          toolUsage.parameterValues
+        );
+      }
+      // TODO: in case of doubt, send toolcall message to LLM
+    }
+
+    const fullMessage = toolOutcome ? message + ' \n\n(' + toolOutcome + ')' : message;
     try {
       await playerSendChat(
-        message,
+        fullMessage,
         gs.chat.playingAsCharacter,
         gs.chat.otherCharacters,
         gs.chat.activityType
@@ -49,31 +81,19 @@
 <div class="chat-container">
   <!-- Characters Section -->
   <div class="characters-section">
-    <h3>Chat Participants</h3>
     <div class="characters-grid">
       <!-- Playing as character -->
-      <div class="character-card playing-as">
-        <div
-          class="character-portrait"
-          style="background-image: url({getCharacterImage(gs.chat?.playingAsCharacter.name || '')})"
-        ></div>
-        <div class="character-info">
-          <span class="character-name">{gs.chat?.playingAsCharacter.name}</span>
-          <span class="character-role">(You)</span>
-        </div>
-      </div>
+      <div
+        class="character-card playing-as"
+        style="background-image: url({getCharacterImage(gs.chat?.playingAsCharacter.name || '')})"
+      ></div>
 
       <!-- Other characters -->
       {#each gs.chat?.otherCharacters || [] as character}
-        <div class="character-card">
-          <div
-            class="character-portrait"
-            style="background-image: url({getCharacterImage(character.name)})"
-          ></div>
-          <div class="character-info">
-            <span class="character-name">{character.name}</span>
-          </div>
-        </div>
+        <div
+          class="character-card"
+          style="background-image: url({getCharacterImage(character.name)})"
+        ></div>
       {/each}
     </div>
   </div>
@@ -133,64 +153,36 @@
   }
 
   .characters-section {
-    padding: 1rem;
+    padding-left: 0.5rem;
     background-color: #2a2a2a;
     border-bottom: 1px solid #444;
-  }
-
-  .characters-section h3 {
-    margin: 0 0 1rem 0;
-    color: #fff;
-    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
   }
 
   .characters-grid {
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
+    align-items: center;
   }
 
   .character-card {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: center;
     padding: 0.5rem;
-    background-color: #333;
     border-radius: 6px;
-    min-width: 120px;
-  }
-
-  .character-card.playing-as {
-    background-color: #4a5568;
-    border: 2px solid #63b3ed;
-  }
-
-  .character-portrait {
-    width: 40px;
-    height: 40px;
+    width: 120px;
+    height: 120px;
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
-    border-radius: 50%;
-    border: 2px solid #555;
   }
 
-  .character-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .character-name {
-    color: #fff;
-    font-weight: 500;
-    font-size: 0.9rem;
-  }
-
-  .character-role {
-    color: #63b3ed;
-    font-size: 0.8rem;
-    font-style: italic;
+  .character-card.playing-as {
+    border: 2px solid #63b3ed;
+    border-radius: 10px;
   }
 
   .chat-messages-section {

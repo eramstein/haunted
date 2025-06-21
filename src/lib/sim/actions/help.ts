@@ -14,6 +14,7 @@ import { solveProblem } from '../problems';
 import { generateUniqueId } from '../_utils/random';
 import { aiInitiatesChat, characterAskingForHelp, saveChat, ToolType } from '@/lib/llm';
 import { llmService } from '@/lib/llm/llm-service';
+import { useTool } from '../tool-use';
 
 export function askForHelp(character: Character, activity: Activity<ActivityType.AskForHelp>) {
   if (character.problems.length === 0) {
@@ -83,34 +84,14 @@ async function letLLMSolve(character: Character, helper: Character, problem: Pro
     return;
   }
   const toolCall = response.toolCalls[0];
-  let didHelp = '';
-  let didNotHelp = '';
-  switch (toolCall.function.name) {
-    case ToolType.GiveFood:
-      const food = giftFood(helper, character);
-      if (food) {
-        didHelp = helper.name + ' gave ' + character.name + ' food (' + food.description + ')';
-      }
-      break;
-    case ToolType.GiveMoney:
-      const moneyGifted = giftMoney(
-        helper,
-        character,
-        +llmService.getToolArguments(toolCall.function.arguments).amount
-      );
-      if (moneyGifted > 0) {
-        didHelp = helper.name + ' gave ' + character.name + ' money (' + moneyGifted + '$)';
-      }
-      break;
-    case ToolType.RefuseHelp:
-      didNotHelp =
-        helper.name +
-        ' refused to help ' +
-        character.name +
-        ' because ' +
-        llmService.getToolArguments(toolCall.function.arguments).reason;
-      break;
-  }
+  const outcome = useTool(
+    helper,
+    toolCall.function.name,
+    llmService.getToolArguments(toolCall.function.arguments)
+  );
+  const didHelp = toolCall.function.name !== ToolType.RefuseHelp ? outcome : '';
+  const didNotHelp = toolCall.function.name === ToolType.RefuseHelp ? outcome : '';
+
   // update feelings and solve problem
   resolveHelpRequest(character, helper, problem, didHelp, didNotHelp, response.conversation);
 }

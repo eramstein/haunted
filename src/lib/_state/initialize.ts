@@ -10,29 +10,29 @@ import { ARTICLES } from '@/data/world/items';
 
 export async function createNewSimState(): Promise<State> {
   // add some initial items
-  // const kitchenId = PLACES_IDS_BY_TYPE.kitchen;
-  // if (kitchenId) {
-  //   initialState.characters.forEach((c, charIndex) => {
-  //     Array.from({ length: 1 }, () =>
-  //       addItem({
-  //         type: ItemType.Meal,
-  //         owner: charIndex,
-  //         location: kitchenId,
-  //         ...getRandomItemFromArray(ARTICLES[ItemType.Meal] || []),
-  //       })
-  //     );
-  //     Array.from({ length: 3 }, () =>
-  //       addItem({
-  //         type: ItemType.FoodIngredient,
-  //         owner: charIndex,
-  //         location: kitchenId,
-  //         ...getRandomItemFromArray(ARTICLES[ItemType.FoodIngredient] || []),
-  //       })
-  //     );
-  //   });
-  // } else {
-  //   throw new Error('Kitchen not found for initial items');
-  // }
+  const kitchenId = PLACES_IDS_BY_TYPE.kitchen;
+  if (kitchenId) {
+    initialState.characters.slice(0, 1).forEach((c, charIndex) => {
+      Array.from({ length: 1 }, () =>
+        addItem({
+          type: ItemType.Meal,
+          owner: charIndex,
+          location: kitchenId,
+          ...getRandomItemFromArray(ARTICLES[ItemType.Meal] || []),
+        })
+      );
+      Array.from({ length: 3 }, () =>
+        addItem({
+          type: ItemType.FoodIngredient,
+          owner: charIndex,
+          location: kitchenId,
+          ...getRandomItemFromArray(ARTICLES[ItemType.FoodIngredient] || []),
+        })
+      );
+    });
+  } else {
+    throw new Error('Kitchen not found for initial items');
+  }
 
   //reset vector database and IndexDB
   await resetVectorDatabase();

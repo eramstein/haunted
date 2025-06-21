@@ -7,7 +7,7 @@ export const NPC_EMMA: CharacterBase = {
     bio: '30, female, lawyer',
     traits: ['smart', 'competitive', 'confident', 'playful', 'attractive'],
   },
-  money: 0,
+  money: 1000,
   work: {
     description: 'Lawyer',
     place: 9,

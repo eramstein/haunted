@@ -1,8 +1,37 @@
 import { ChromaClient } from 'chromadb';
-import { initChromaCollection } from './memory-vectors';
-import { MEMORY_COLLECTION } from './config';
+import { MEMORY_COLLECTION, TOOLS_COLLECTION } from './config';
+import { NPCS } from '@/data/npcs';
+import { TOOLS_VECTORS } from './tools-vectors';
 
 export const vectorDatabaseClient = new ChromaClient();
+
+export async function initChromaCollections() {
+  const memoriesCollection = await vectorDatabaseClient.getOrCreateCollection({
+    name: MEMORY_COLLECTION,
+  });
+  NPCS.forEach(async (character, index) => {
+    await memoriesCollection.upsert({
+      documents: character.initialMemories,
+      metadatas: character.initialMemories.map(() => ({
+        type: 'npc_lore',
+        characters: '|' + String(index) + '|',
+      })),
+      ids: character.initialMemories.map((_, i) => index + ' lore ' + i),
+    });
+  });
+  console.log('NPCs memory initialized');
+  const toolsCollection = await vectorDatabaseClient.getOrCreateCollection({
+    name: TOOLS_COLLECTION,
+  });
+  TOOLS_VECTORS.forEach(async (tool) => {
+    await toolsCollection.upsert({
+      documents: tool.descriptions,
+      metadatas: Array(tool.descriptions.length).fill({ type: 'tool', tool: tool.tool }),
+      ids: tool.descriptions.map((_, i) => tool.tool + ' ' + i),
+    });
+  });
+  console.log('Tool vectors initialized');
+}
 
 export async function resetVectorDatabase(reinitialize = true) {
   await vectorDatabaseClient.deleteCollection({ name: MEMORY_COLLECTION });
@@ -10,7 +39,7 @@ export async function resetVectorDatabase(reinitialize = true) {
   console.log('Vector database collections emptied');
 
   if (reinitialize) {
-    await initChromaCollection();
+    await initChromaCollections();
   }
 }
 

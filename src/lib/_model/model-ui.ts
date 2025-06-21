@@ -9,6 +9,8 @@ export type UiState = {
   selectedItem: Item | null;
   userPrompt: UserPrompt | null;
   userPromptFeedback: string;
+  isStreaming: boolean;
+  streamingContent: string;
 };
 
 export interface UserPrompt {

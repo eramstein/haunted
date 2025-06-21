@@ -18,7 +18,6 @@
 
   let characterName = $derived(gs.characters[props.characterId].name);
   let activities = $state<GroupActivityLog[]>([]);
-  let streamingChats = $state<Record<string, string>>({});
   let activityTabs = $state<Record<string, Tab>>({});
 
   function getEmotionDeltaColor(type: EmotionType, delta: number): string {
@@ -64,23 +63,17 @@
 
     if (!participants.length) return;
 
-    streamingChats[activity.id] = '';
-
     try {
       await groupChat(
         activity.id,
         activity.timestamp,
         participants,
         gs.places[activity.location],
-        activity.activityType,
-        (chunk) => {
-          streamingChats[activity.id] += chunk;
-        }
+        activity.activityType
       );
       getChats();
     } catch (error) {
       console.error('Failed to generate chat:', error);
-      streamingChats[activity.id] = 'Failed to generate chat log.';
     }
   }
 </script>
@@ -206,9 +199,9 @@
                     </div>
                   {/if}
                 </div>
-              {:else if streamingChats[activity.id]}
+              {:else if uiState.isStreaming && uiState.streamingContent}
                 <div class="chat-log streaming">
-                  {streamingChats[activity.id]}
+                  {uiState.streamingContent}
                 </div>
               {:else}
                 <button class="generate-chat-button" onclick={() => generateActivityChat(activity)}>

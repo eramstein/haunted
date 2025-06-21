@@ -1,11 +1,10 @@
 <script lang="ts">
-  import { gs } from '../_state';
+  import { gs, uiState } from '../_state';
   import { playerSendChat } from '../llm/chat';
   import { getCharacterImage } from './_helpers/images.svelte';
 
   let messageInput = $state('');
   let isSending = $state(false);
-  let streamingResponse = $state('');
 
   $effect(() => {
     // Scroll to bottom when new messages are added or streaming
@@ -21,24 +20,18 @@
     const message = messageInput.trim();
     messageInput = '';
     isSending = true;
-    streamingResponse = '';
 
     try {
       await playerSendChat(
         message,
         gs.chat.playingAsCharacter,
         gs.chat.otherCharacters,
-        gs.chat.activityType,
-        (chunk) => {
-          streamingResponse += chunk;
-        }
+        gs.chat.activityType
       );
     } catch (error) {
       console.error('Failed to send message:', error);
-      streamingResponse = 'Error: Failed to send message';
     } finally {
       isSending = false;
-      streamingResponse = '';
     }
   }
 
@@ -97,10 +90,10 @@
       {/each}
 
       <!-- Streaming response -->
-      {#if streamingResponse}
+      {#if uiState.isStreaming && uiState.streamingContent}
         <div class="message assistant streaming">
           <div class="message-content">
-            {streamingResponse}
+            {uiState.streamingContent}
             <span class="typing-indicator">...</span>
           </div>
         </div>

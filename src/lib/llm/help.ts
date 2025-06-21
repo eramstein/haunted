@@ -4,6 +4,7 @@ import { getCharacterDescription, getCharacterResources, getPastHelpHistory } fr
 import { stringifyProblem } from '../sim/problems';
 import { llmService } from './llm-service';
 import { type ToolCall } from 'ollama';
+import { uiState } from '../_state/state-ui.svelte';
 
 export async function characterAskingForHelp(
   character: Character,
@@ -44,6 +45,10 @@ export async function characterAskingForHelp(
     `,
   };
 
+  // Start streaming
+  uiState.isStreaming = true;
+  uiState.streamingContent = '';
+
   const stream = await llmService.chat({
     messages: [systemMessage, userMessage],
     stream: true,
@@ -53,8 +58,13 @@ export async function characterAskingForHelp(
   for await (const chunk of stream) {
     const convertedChunk = llmService.getStreamChunk(chunk);
     transcript += convertedChunk;
+    uiState.streamingContent = transcript;
     onStream?.(convertedChunk);
   }
+
+  // End streaming
+  uiState.isStreaming = false;
+  uiState.streamingContent = '';
 
   // 2nd call: generate the tool calls based on the conversation
   const systemToolsMessage = {

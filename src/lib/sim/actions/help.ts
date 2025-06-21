@@ -31,13 +31,11 @@ export function askForHelp(character: Character, activity: Activity<ActivityType
       },
       {
         label: 'Let LLM solve',
-        action: (onStream) => letLLMSolve(character, helper, problem, onStream),
-        stream: true,
+        action: () => letLLMSolve(character, helper, problem),
       },
       {
         label: 'Play as helper',
-        action: (onStream) => playAsHelper(character, helper, onStream),
-        stream: true,
+        action: () => playAsHelper(character, helper),
       },
     ],
   });
@@ -77,13 +75,8 @@ function quickResolution(
   resolveHelpRequest(character, helper, problem, didHelp, didNotHelp, transcript || '');
 }
 
-async function letLLMSolve(
-  character: Character,
-  helper: Character,
-  problem: Problem,
-  onStream?: (chunk: string) => void
-) {
-  const response = await characterAskingForHelp(character, helper, problem, onStream);
+async function letLLMSolve(character: Character, helper: Character, problem: Problem) {
+  const response = await characterAskingForHelp(character, helper, problem);
   if (response.toolCalls.length === 0) {
     console.error('help request: LLM failure, no tool calls, revert on auto resolve');
     quickResolution(character, helper, problem, response.conversation);
@@ -122,9 +115,9 @@ async function letLLMSolve(
   resolveHelpRequest(character, helper, problem, didHelp, didNotHelp, response.conversation);
 }
 
-function playAsHelper(character: Character, helper: Character, onStream?: (chunk: string) => void) {
+function playAsHelper(character: Character, helper: Character) {
   closePrompt();
-  aiInitiatesChat(helper, character, ActivityType.AskForHelp, onStream);
+  aiInitiatesChat(helper, character, ActivityType.AskForHelp);
   // help request will be resolved on chat end
 }
 

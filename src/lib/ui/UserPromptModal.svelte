@@ -1,18 +1,13 @@
 <script lang="ts">
-  import { uiState } from '../_state';
+  import { uiState, gs } from '../_state';
 
   let prompt = $derived(() => uiState.userPrompt);
   let feedback = $derived(() => uiState.userPromptFeedback);
-  let streamingChat = $state<string>('');
 
   function closeModal() {
     uiState.userPrompt = null;
     uiState.userPromptFeedback = '';
   }
-
-  const onStream = (chunk: string) => {
-    streamingChat += chunk;
-  };
 </script>
 
 {#if prompt()}
@@ -24,21 +19,12 @@
     {#if feedback() === ''}
       <div class="options">
         {#each p.options as option}
-          <button
-            class="option-button"
-            onclick={() => {
-              if (option.stream) {
-                option.action(onStream);
-              } else {
-                option.action();
-              }
-            }}
-          >
+          <button class="option-button" onclick={() => option.action()}>
             {option.label}
           </button>
         {/each}
       </div>
-      <div class="feedback">{@html streamingChat.replace(/\n/g, '<br>')}</div>
+      <div class="feedback">{@html (uiState.streamingContent || '').replace(/\n/g, '<br>')}</div>
     {:else}
       <div class="feedback">
         {@html feedback().replace(/\n/g, '<br>')}

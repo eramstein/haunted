@@ -9,6 +9,8 @@ export const uiState: UiState = $state({
   selectedItem: null,
   userPrompt: null,
   userPromptFeedback: '',
+  isStreaming: false,
+  streamingContent: '',
 });
 
 export function promptUser(prompt: UserPrompt) {

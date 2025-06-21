@@ -14,6 +14,7 @@ import {
   getGroupDescription,
 } from './chat-helpers';
 import { gs, saveStateToLocalStorage } from '../_state';
+import { uiState } from '../_state/state-ui.svelte';
 import { updateRelationships } from '../sim/relationships';
 import { addGroupActivityMemory } from './memory-vectors';
 import { getTimeOfDay } from '../sim/time';
@@ -26,8 +27,7 @@ export async function groupChat(
   timestamp: number,
   characters: Character[],
   place: Place,
-  activityType: ActivityType,
-  onStream: (chunk: string) => void
+  activityType: ActivityType
 ): Promise<string> {
   const memories = await getSystemPromptMemories(timestamp, characters, place, activityType);
   const memoriesPrompt = memories
@@ -55,6 +55,10 @@ export async function groupChat(
     `,
   };
 
+  // Start streaming
+  uiState.isStreaming = true;
+  uiState.streamingContent = '';
+
   const stream = await llmService.chat({
     messages: [systemPrompt, userPrompt],
     stream: true,
@@ -70,8 +74,12 @@ export async function groupChat(
   for await (const chunk of stream) {
     const convertedChunk = llmService.getStreamChunk(chunk);
     transcript += convertedChunk;
-    onStream?.(convertedChunk);
+    uiState.streamingContent = transcript;
   }
+
+  // End streaming
+  uiState.isStreaming = false;
+  uiState.streamingContent = '';
 
   const postProcessing = await generateSummary(transcript);
 
@@ -153,8 +161,7 @@ export async function playerSendChat(
   message: string,
   playerCharacter: Character,
   otherCharacters: Character[],
-  activityType: ActivityType,
-  onStream: (chunk: string) => void
+  activityType: ActivityType
 ): Promise<string> {
   if (!gs.chat) {
     initPlayerChat(playerCharacter, otherCharacters, activityType);
@@ -212,6 +219,10 @@ export async function playerSendChat(
 
   gs.chat!.history.push(userPrompt);
 
+  // Start streaming
+  uiState.isStreaming = true;
+  uiState.streamingContent = '';
+
   const stream = await llmService.chat({
     messages: gs.chat!.history.slice(-6),
     stream: true,
@@ -227,8 +238,12 @@ export async function playerSendChat(
   for await (const chunk of stream) {
     const convertedChunk = llmService.getStreamChunk(chunk);
     transcript += convertedChunk;
-    onStream?.(convertedChunk);
+    uiState.streamingContent = transcript;
   }
+
+  // End streaming
+  uiState.isStreaming = false;
+  uiState.streamingContent = '';
 
   gs.chat!.history.push({
     role: 'assistant',
@@ -268,8 +283,7 @@ export async function playerSendChat(
 export async function aiInitiatesChat(
   playerCharacter: Character,
   aiCharacter: Character,
-  activityType: ActivityType,
-  onStream?: (chunk: string) => void
+  activityType: ActivityType
 ): Promise<string> {
   if (!gs.chat) {
     initPlayerChat(playerCharacter, [aiCharacter], activityType);
@@ -305,6 +319,10 @@ export async function aiInitiatesChat(
   // reset initial system prompt
   gs.chat!.history[0] = systemPrompt;
 
+  // Start streaming
+  uiState.isStreaming = true;
+  uiState.streamingContent = '';
+
   const stream = await llmService.chat({
     messages: gs.chat!.history,
     stream: true,
@@ -314,8 +332,12 @@ export async function aiInitiatesChat(
   for await (const chunk of stream) {
     const convertedChunk = llmService.getStreamChunk(chunk);
     transcript += convertedChunk;
-    onStream?.(convertedChunk);
+    uiState.streamingContent = transcript;
   }
+
+  // End streaming
+  uiState.isStreaming = false;
+  uiState.streamingContent = '';
 
   gs.chat!.history.push({
     role: 'assistant',

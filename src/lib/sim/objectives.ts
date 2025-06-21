@@ -25,7 +25,7 @@ function getPriorityObjective(character: Character): Objective | null {
     return { type: ObjectiveType.HaveMeal };
   }
   if (character.problems.length > 0) {
-    return { type: ObjectiveType.SolveProblem, target: character.problems[0].type };
+    return { type: ObjectiveType.SolveProblem, target: character.problems[0] };
   }
   if (
     character.needs.sleep > config.needs.sleep &&
@@ -64,7 +64,7 @@ export function checkIfObjectiveIsSatisfied(character: Character, objective: Obj
     case ObjectiveType.GetMoney:
       return character.money >= (objective.target || 0);
     case ObjectiveType.SolveProblem:
-      return character.problems.findIndex((p) => p.type === objective.target) === -1;
+      return character.problems.findIndex((p) => p.type === objective.target.type) === -1;
   }
 }
 

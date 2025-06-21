@@ -18,7 +18,7 @@ import { updateRelationships } from '../sim/relationships';
 import { addGroupActivityMemory } from './memory-vectors';
 import { getTimeOfDay } from '../sim/time';
 import { getSystemPromptMemories } from './memory';
-import { updateEmotions } from '../sim';
+import { checkIfProblemSolved, updateEmotions } from '../sim';
 import { generateUniqueId } from '../sim/_utils/random';
 
 export async function groupChat(
@@ -394,5 +394,13 @@ export async function endPlayerChat() {
     activityType: gs.chat!.activityType,
     content: summary,
   });
+
+  // if activity was ask for help, check if the problem is soved
+  if (gs.chat!.activityType === ActivityType.AskForHelp) {
+    checkIfProblemSolved(
+      gs.chat!.otherCharacters[0],
+      gs.chat!.otherCharacters[0].objective?.target
+    );
+  }
   gs.chat = null;
 }

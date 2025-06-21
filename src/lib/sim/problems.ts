@@ -2,6 +2,7 @@ import type { Character, Objective, Problem } from '@/lib/_model/model-sim';
 import {
   ActivityType,
   EmotionType,
+  ItemType,
   ObjectiveType,
   ProblemReason,
   ProblemType,
@@ -10,6 +11,7 @@ import { config } from '../_config/config';
 import { updateEmotionValue } from './emotions';
 import { getBestFriend } from './relationships';
 import { setCharactersObjectives } from './objectives';
+import { getItemsByTypeAndOwner } from './items';
 
 export function recordProblem(character: Character, objective: Objective) {
   let problemReason = ProblemReason.NoReason;
@@ -75,4 +77,22 @@ export function solveProblem(character: Character, problem: Problem) {
   );
   character.failedObjectives = {};
   setCharactersObjectives([character]);
+}
+
+export function checkIfProblemSolved(character: Character, problem: Problem) {
+  let solved = false;
+  switch (problem.type) {
+    case ProblemType.NoFood:
+      const meal = getItemsByTypeAndOwner(ItemType.Meal, character.id);
+      const food = getItemsByTypeAndOwner(ItemType.FoodIngredient, character.id);
+      solved = meal.length > 0 || food.length > 0;
+      break;
+    case ProblemType.NoMoney:
+      solved = character.money >= 100;
+      break;
+  }
+  if (solved) {
+    solveProblem(character, problem);
+  }
+  return solved;
 }

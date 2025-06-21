@@ -1,8 +1,9 @@
 import { type ToolCall } from 'ollama';
 import { getTools, ToolType } from './tools-definitions';
 import { llmService } from './llm-service';
+import type { Character } from '../_model';
 
-async function getToolsFromText(message: string) {
+async function getToolsFromText(message: string, character: Character) {
   const systemMessage = {
     role: 'system',
     content: `You are a tool selection assistant. Your task is to carefully analyze the user's intent and select the most appropriate tool among those presented.`,
@@ -13,7 +14,7 @@ async function getToolsFromText(message: string) {
   };
   const response = await llmService.chat({
     messages: [systemMessage, query],
-    tools: getTools(),
+    tools: getTools(character),
     options: {
       temperature: 0.1, // Lower temperature for more deterministic responses
     },

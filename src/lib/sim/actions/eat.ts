@@ -5,6 +5,7 @@ import { config } from '@/lib/_config/config';
 import { gs } from '@/lib/_state';
 import { PLACES_IDS_BY_TYPE } from '@/data/world/places';
 import { changeObjective } from '../objectives';
+import { progressActivity } from '../activities';
 
 export function eat(character: Character, activity: Activity<ActivityType.Eat>) {
   activity.progress += config.actionSpeed.eat;
@@ -25,6 +26,7 @@ export function cook(character: Character, activity: Activity<ActivityType.Cook>
       progress: 0,
       target: PLACES_IDS_BY_TYPE.kitchen,
     });
+    progressActivity(character);
     return;
   }
 

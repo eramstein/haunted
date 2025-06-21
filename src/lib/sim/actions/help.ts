@@ -20,7 +20,7 @@ export function askForHelp(character: Character, activity: Activity<ActivityType
     finishActivity(character);
     return;
   }
-  const problem = character.problems[0];
+  const problem = character.objective?.target as Problem;
   const helper = gs.characters[activity.target];
   promptUser({
     title: `${character.name} asks ${helper.name} for help`,
@@ -125,6 +125,7 @@ async function letLLMSolve(
 function playAsHelper(character: Character, helper: Character, onStream?: (chunk: string) => void) {
   closePrompt();
   aiInitiatesChat(helper, character, ActivityType.AskForHelp, onStream);
+  // help request will be resolved on chat end
 }
 
 function resolveHelpRequest(

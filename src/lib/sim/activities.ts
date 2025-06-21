@@ -59,7 +59,7 @@ function setActivityFromObjective(character: Character) {
   }
 }
 
-function progressActivity(character: Character) {
+export function progressActivity(character: Character) {
   if (character.activities.length === 0) return;
   const activity = character.activities[0];
   switch (activity.type) {

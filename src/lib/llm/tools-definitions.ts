@@ -12,29 +12,27 @@ export enum ToolType {
   RefuseHelp = 'refuseHelp',
 }
 
-const goTo: () => Tool = () => {
-  return {
-    type: 'function',
-    function: {
-      name: ToolType.GoTo,
-      description: 'Go somewhere',
-      parameters: {
-        type: 'object',
-        required: ['destinationPlace'],
-        properties: {
-          destinationPlace: {
-            type: 'string',
-            description: 'The place where the person is going to',
-            enum: gs.places.map((p) => p.name),
-          },
+const goTo: Tool = {
+  type: 'function',
+  function: {
+    name: ToolType.GoTo,
+    description: 'Go somewhere',
+    parameters: {
+      type: 'object',
+      required: ['destinationPlace'],
+      properties: {
+        destinationPlace: {
+          type: 'string',
+          description: 'The place where the person is going to',
+          enum: gs.places.map((p) => p.name),
         },
       },
     },
-  };
+  },
 };
 
-export function getTools(): Tool[] {
-  return [goTo].map((f) => f());
+export function getTools(character: Character): Tool[] {
+  return [goTo, ...getHelpTools(character)];
 }
 
 export const getHelpTools: (helper: Character) => Tool[] = (helper) => {

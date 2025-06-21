@@ -12,6 +12,7 @@
   } from './_helpers/images.svelte';
   import { uiState } from '../_state/state-ui.svelte';
   import ActivityIcon from './ActivityIcon.svelte';
+  import { ActivityType } from '../_model/model-sim.enums';
 
   const mapImage = $derived(getMapImage('mansion'));
   const debug = false;
@@ -111,13 +112,15 @@
         {/if}
         <div class="characters">
           {#each characters as character (character.id)}
-            <div class="character-container">
+            <div
+              class="character-container"
+              in:receive={{ key: character.id }}
+              out:send={{ key: character.id }}
+            >
               <img
                 src={getCharacterImage(character.name)}
                 class="character-portrait"
                 onclick={(e) => onCharacterClick(e, character)}
-                in:receive={{ key: character.id }}
-                out:send={{ key: character.id }}
               />
               {#if character.activities.length}
                 <ActivityIcon

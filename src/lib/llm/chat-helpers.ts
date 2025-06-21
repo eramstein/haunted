@@ -160,7 +160,7 @@ export function getActivityContext(activityType: ActivityType, characters: Chara
       (c) => c.activities.length > 0 && c.activities[0].type === ActivityType.AskForHelp
     );
     if (characterAskingForHelp) {
-      const problem = characterAskingForHelp.problems[0];
+      const problem = characterAskingForHelp.objective?.target as Problem;
       return characterAskingForHelp.name + ' ' + stringifyProblem(problem);
     }
   }

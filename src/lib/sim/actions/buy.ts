@@ -6,6 +6,7 @@ import { getRandomItemFromArray } from '../_utils/random';
 import { ActivityType, ObjectiveType } from '@/lib/_model/model-sim.enums';
 import { PLACES_IDS_BY_TYPE } from '@/data/world/places';
 import { changeObjective } from '../objectives';
+import { progressActivity } from '..';
 
 export function buy(character: Character, activity: Activity<ActivityType.Buy>) {
   // check if character is in the grocery store
@@ -15,6 +16,7 @@ export function buy(character: Character, activity: Activity<ActivityType.Buy>) 
       progress: 0,
       target: PLACES_IDS_BY_TYPE.groceryStore,
     });
+    progressActivity(character);
     return;
   }
 

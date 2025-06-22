@@ -188,10 +188,19 @@ export async function playerSendChat(
 
     Player Character:
       - The player controls ${playerCharacter.name}.
-      - Do not write ${playerCharacter.name}'s dialogue or actions.
-      - Only describe what the NPCs say, do, think, or feel in response to the player's input.
+      - Do not write any dialogue, actions, body language, thoughts, or emotions for ${playerCharacter.name}.
+      - The player will describe ${playerCharacter.name}'s dialogue and actions.
 
-    ${playerChatSystemPrompt.style}
+    NPC Control:
+    - You control all other characters (NPCs).
+    - Only write dialogue, actions, thoughts, emotions, and reactions for the NPCs.
+    - NPCs should respond naturally and believably to ${playerCharacter.name} actions and words.
+
+    Narrative Style:
+    - Use immersive third-person narration for the NPCs you control.
+    - Include their body language, tone of voice, emotions, and internal thoughts.
+    - Do not include any narrative prose describing ${playerCharacter.name}.
+    - If NPCs react to ${playerCharacter.name} actions or emotions, describe their perception or interpretation (e.g., “Lise noticed the tension in ${playerCharacter.name}'s voice.”), but do not narrate ${playerCharacter.name}'s state directly.
 
     Scene Context:
       - Location: ${locationDescription}
@@ -205,7 +214,14 @@ export async function playerSendChat(
 
     ${currentSummary}
 
-    ${playerChatSystemPrompt.instruction}`,
+    ${playerChatSystemPrompt.instruction}
+    
+    Example Output Style (NPC-only):
+    Lise’s eyes darted nervously toward ${playerCharacter.name}. She took a shaky breath, her voice trembling.
+    “I… I really hope I’m not imposing,” she whispered, twisting her fingers anxiously.
+
+    She glanced down at the tiled floor, her cheeks flushed with embarrassment, awaiting ${playerCharacter.name}’s response.
+    `,
   };
   console.log('systemPrompt', systemPrompt);
 
@@ -419,10 +435,8 @@ export async function endPlayerChat() {
 
   // if activity was ask for help, check if the problem is soved
   if (gs.chat!.activityType === ActivityType.AskForHelp) {
-    checkIfProblemSolved(
-      gs.chat!.otherCharacters[0],
-      gs.chat!.otherCharacters[0].objective?.target
-    );
+    const character = gs.characters[gs.chat!.otherCharacters[0].id];
+    checkIfProblemSolved(character, character.objective?.target);
   }
   gs.chat = null;
 }

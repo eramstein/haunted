@@ -81,16 +81,21 @@ export function solveProblem(character: Character, problem: Problem) {
 
 export function checkIfProblemSolved(character: Character, problem: Problem) {
   let solved = false;
+  console.log('checkIfProblemSolved', character, problem);
   switch (problem.type) {
     case ProblemType.NoFood:
       const meal = getItemsByTypeAndOwner(ItemType.Meal, character.id);
       const food = getItemsByTypeAndOwner(ItemType.FoodIngredient, character.id);
-      solved = meal.length > 0 || food.length > 0;
+      solved =
+        (problem.reason === ProblemReason.NoIncome && character.money >= 30) ||
+        meal.length > 0 ||
+        food.length > 0;
       break;
     case ProblemType.NoMoney:
       solved = character.money >= 100;
       break;
   }
+  console.log('solved', solved);
   if (solved) {
     solveProblem(character, problem);
   }

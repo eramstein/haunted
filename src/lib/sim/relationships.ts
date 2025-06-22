@@ -19,11 +19,8 @@ export function updateRelationships(relationUpdates: RelationshipUpdate[]) {
     }
 
     // Update feeling value and clamp between -100 and 100
-    relationship.feelings[feeling] = clamp(
-      (relationship.feelings[feeling] as number) + delta,
-      -100,
-      100
-    );
+    relationship.feelings[feeling] =
+      Math.round(clamp((relationship.feelings[feeling] as number) + delta, -100, 100) * 10) / 10;
   });
 
   // TODO: handle relationship status, derived from feelings? or mix with LLM

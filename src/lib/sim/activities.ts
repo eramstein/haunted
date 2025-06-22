@@ -28,7 +28,7 @@ function workOnActivity(character: Character) {
     setActivityFromObjective(character);
   } else {
     progressActivity(character);
-    if (character.activities[0].progress >= 100) {
+    if (character.activities[0]?.progress >= 100) {
       finishActivity(character);
     }
   }

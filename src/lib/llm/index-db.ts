@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie';
-import { ActivityType } from '../_model/model-sim.enums';
+import { ActivityType, RelationshipFeeling, EmotionType } from '../_model/model-sim.enums';
 import type { GroupActivityLog, GroupActivitySummary } from '../_model';
 
 // Initialize Dexie database
@@ -58,19 +58,53 @@ export async function updateChatContent(
     activityType: ActivityType.Chat,
   }
 ): Promise<string> {
+  console.log('updateChatContent', id, content, metadata);
   try {
+    // Create deep copies to ensure serializability
+    const serializableContent: GroupActivitySummary = {
+      transcript: content.transcript || '',
+      summary: content.summary || '',
+      relationUpdates: Array.isArray(content.relationUpdates)
+        ? content.relationUpdates.map((update) => ({
+            from: String(update.from),
+            toward: String(update.toward),
+            feeling: update.feeling as RelationshipFeeling,
+            delta: Number(update.delta),
+            reason: String(update.reason),
+          }))
+        : [],
+      emotionUpdates: Array.isArray(content.emotionUpdates)
+        ? content.emotionUpdates.map((update) => ({
+            characterName: String(update.characterName),
+            type: update.type as EmotionType,
+            delta: Number(update.delta),
+            reason: String(update.reason),
+            subtype: update.subtype ? String(update.subtype) : undefined,
+          }))
+        : [],
+    };
+
+    const serializableMetadata = {
+      timestamp: Number(metadata.timestamp),
+      participants: Array.isArray(metadata.participants)
+        ? metadata.participants.map((p) => Number(p))
+        : [],
+      location: Number(metadata.location),
+      activityType: metadata.activityType as ActivityType,
+    };
+
     // First try to get the existing chat to preserve other fields
     const existingChat = await chats.where('id').equals(id).first();
 
     if (existingChat) {
       // Update existing chat
-      await chats.where('id').equals(id).modify({ content });
+      await chats.where('id').equals(id).modify({ content: serializableContent });
     } else {
       // Create new chat with minimal required fields
       await chats.put({
         id,
-        content,
-        ...metadata,
+        content: serializableContent,
+        ...serializableMetadata,
       });
     }
 

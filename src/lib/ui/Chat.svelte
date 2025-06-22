@@ -17,48 +17,58 @@
     // Scroll to bottom when new messages are added or streaming
     const chatContainer = document.querySelector('.chat-messages');
     if (chatContainer) {
-      chatContainer.scrollTop = chatContainer.scrollHeight;
+      // Access reactive values to make the effect track them
+      const messageCount = displayMessages.length;
+      const isCurrentlyStreaming = uiState.streamingContent;
+
+      // Use requestAnimationFrame to ensure DOM is updated
+      requestAnimationFrame(() => {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      });
     }
   });
 
-  async function sendMessage() {
+  async function sendMessage(checkTools?: boolean) {
     if (!messageInput.trim() || !gs.chat || isSending) return;
 
     const message = messageInput.trim();
     messageInput = '';
     isSending = true;
 
-    const toolType = await queryToolVectors(message);
-    let toolOutcome = '';
+    if (checkTools) {
+      await setToolsUsageState(message);
+      if (showToolConfirmation) {
+        return;
+      }
+    }
 
+    await sendMessageWithToolOutcome(message, '');
+  }
+
+  async function setToolsUsageState(message: string) {
+    const toolType = await queryToolVectors(message);
     if (toolType) {
       // check for obvious tool usage with Typescript (no param, or number lookup, or string lookup)
       const defaultParameterValues: Record<string, any> = {};
       // todo: this is a hack to get the recipient for the ask for help activity
-      if (gs.chat.activityType === ActivityType.AskForHelp) {
-        defaultParameterValues.recipient = gs.chat.otherCharacters[0].name;
+      if (gs.chat!.activityType === ActivityType.AskForHelp) {
+        defaultParameterValues.recipient = gs.chat!.otherCharacters[0].name;
       }
       const toolUsage = lookupToolUsage(
         message,
         toolType,
-        gs.chat.playingAsCharacter,
+        gs.chat!.playingAsCharacter,
         defaultParameterValues
       );
       if (toolUsage) {
         // Store pending tool usage and show confirmation
-        console.log(toolUsage);
-
         pendingToolUsage = toolUsage;
         pendingMessage = message;
         showToolConfirmation = true;
         isSending = false;
-        // wait for user to confirm tool usage
-        return;
       }
       // TODO: in case of doubt, send toolcall message to LLM
     }
-
-    await sendMessageWithToolOutcome(message, toolOutcome);
   }
 
   async function sendMessageWithToolOutcome(message: string, toolOutcome: string) {
@@ -106,9 +116,9 @@
   }
 
   function handleKeyPress(event: KeyboardEvent) {
-    if (event.key === 'Enter' && !event.shiftKey) {
+    if (event.key === 'Enter') {
       event.preventDefault();
-      sendMessage();
+      sendMessage(event.shiftKey);
     }
   }
 
@@ -190,7 +200,7 @@
         rows="3"
       ></textarea>
       <button
-        onclick={sendMessage}
+        onclick={() => sendMessage(true)}
         disabled={!messageInput.trim() || isSending}
         class="send-button"
       >

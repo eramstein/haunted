@@ -99,4 +99,14 @@ export const TOOLS_VECTORS: { tool: ToolType; descriptions: string[] }[] = [
       'Offering nourishment or a snack',
     ],
   },
+  {
+    tool: ToolType.GoTo,
+    descriptions: [
+      'Go to a specific location',
+      'Move to a specific place',
+      'Travel to a specific location',
+      'Move to a specific place',
+      'Come somewhere',
+    ],
+  },
 ];

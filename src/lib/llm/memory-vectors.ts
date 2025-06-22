@@ -37,6 +37,8 @@ export async function queryNpcMemory(characterIds: number[], message: string) {
 }
 
 export async function addGroupActivityMemory(activityLog: GroupActivityLog) {
+  console.log(activityLog);
+
   const collection = await vectorDatabaseClient.getOrCreateCollection({
     name: MEMORY_COLLECTION,
   });
@@ -65,16 +67,23 @@ export async function addGroupActivityMemory(activityLog: GroupActivityLog) {
     .filter((update) => Math.abs(update.delta) > 0.6)
     .forEach((update) => {
       const uid = Date.now().toString(36) + Math.random().toString(36).substr(2);
-      collection.add({
-        ids: [uid],
-        metadatas: [
-          {
-            timestamp: activityLog.timestamp,
-            type: 'relationship_update',
-            characters: '|' + nameToId[update.from] + '|' + nameToId[update.toward] + '|',
-          },
-        ],
-        documents: [update.reason],
-      });
+      // Get character IDs for the relationship update
+      const fromId = nameToId[update.from];
+      const towardId = nameToId[update.toward];
+
+      // Only create memory if both characters are found
+      if (fromId !== undefined && towardId !== undefined) {
+        collection.add({
+          ids: [uid],
+          metadatas: [
+            {
+              timestamp: activityLog.timestamp,
+              type: 'relationship_update',
+              characters: '|' + fromId + '|' + towardId + '|',
+            },
+          ],
+          documents: [update.reason],
+        });
+      }
     });
 }

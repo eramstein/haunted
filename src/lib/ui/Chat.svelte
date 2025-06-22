@@ -112,6 +112,10 @@
     }
   }
 
+  function closeChat() {
+    gs.chat = null;
+  }
+
   // Filter out system messages for display
   let displayMessages = $derived(gs.chat?.history.filter((msg) => msg.role !== 'system') || []);
 </script>
@@ -134,6 +138,7 @@
         ></div>
       {/each}
     </div>
+    <button onclick={closeChat} class="close-button" title="Close Chat">×</button>
   </div>
 
   <!-- Chat Messages Section -->
@@ -168,7 +173,7 @@
             <button onclick={confirmToolUsage} class="confirm-button">Use Tool</button>
             <button onclick={cancelToolUsage} class="cancel-button">Nope</button>
           </div>
-          <div>{pendingMessage}</div>
+          <div class="confirmation-message">{pendingMessage}</div>
         </div>
       {/if}
     </div>
@@ -206,11 +211,11 @@
   }
 
   .characters-section {
-    padding-left: 0.5rem;
     background-color: #2a2a2a;
     border-bottom: 1px solid #444;
     display: flex;
     align-items: center;
+    justify-content: space-between;
   }
 
   .characters-grid {
@@ -379,7 +384,8 @@
     font-size: 0.9rem;
   }
 
-  .confirmation-content {
+  .confirmation-content,
+  .confirmation-message {
     color: #fff;
     font-size: 0.8rem;
   }
@@ -418,6 +424,24 @@
   }
 
   .cancel-button:hover {
+    background-color: #444;
+  }
+
+  .close-button {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-right: 0.5rem;
+    border-radius: 4px;
+    transition: color 0.2s;
+  }
+
+  .close-button:hover {
+    color: #fff;
     background-color: #444;
   }
 </style>

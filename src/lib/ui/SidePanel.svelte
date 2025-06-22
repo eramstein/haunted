@@ -2,23 +2,19 @@
   import { uiState, gs } from '../_state';
   import CharacterPanel from './CharacterPanel.svelte';
   import PlacePanel from './PlacePanel.svelte';
-  import Chat from './Chat.svelte';
 
-  let isVisible = $derived(!!uiState.selectedPlace || !!uiState.selectedCharacter || !!gs.chat);
+  let isVisible = $derived(!!uiState.selectedPlace || !!uiState.selectedCharacter);
 
   function closePanel() {
     uiState.selectedPlace = null;
     uiState.selectedCharacter = null;
-    // Note: gs.chat should be cleared by the chat system itself when ending the chat
   }
 </script>
 
 {#if isVisible}
   <div class="side-panel" class:visible={isVisible}>
     <button class="close-button" onclick={closePanel}>×</button>
-    {#if gs.chat}
-      <Chat />
-    {:else if uiState.selectedPlace}
+    {#if uiState.selectedPlace}
       <PlacePanel place={uiState.selectedPlace} />
     {:else if uiState.selectedCharacter}
       <CharacterPanel character={uiState.selectedCharacter} />

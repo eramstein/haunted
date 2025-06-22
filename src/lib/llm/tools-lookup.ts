@@ -57,7 +57,7 @@ export function lookupToolUsage(
               bestMatch = option;
             }
           }
-          const targetScore = defaultParameterValues[parameter.name] ? 0.5 : 0.3;
+          const targetScore = defaultParameterValues[parameter.name] ? 0.8 : 0.3;
           // Only use the match if it's above a certain threshold
           if (bestScore > targetScore) {
             parameterValues[parameter.name] = bestMatch;

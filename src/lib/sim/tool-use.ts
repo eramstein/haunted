@@ -22,7 +22,7 @@ export function useTool(
       if (!characterGiftedFoodTo) {
         return '';
       }
-      const food = giftFood(actingCharacter, characterGiftedFoodTo);
+      const food = giftFood(actingCharacter, characterGiftedFoodTo, params.item);
       if (food) {
         outcome =
           actingCharacter.name + ' gave ' + params.recipient + ' food (' + food.description + ')';

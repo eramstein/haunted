@@ -9,6 +9,9 @@
 
   let messageInput = $state('');
   let isSending = $state(false);
+  let pendingToolUsage = $state<any>(null);
+  let pendingMessage = $state('');
+  let showToolConfirmation = $state(false);
 
   $effect(() => {
     // Scroll to bottom when new messages are added or streaming
@@ -28,7 +31,6 @@
     const toolType = await queryToolVectors(message);
     let toolOutcome = '';
 
-    // TODO: let user confirm tool usage, it's sometimes wrong
     if (toolType) {
       // check for obvious tool usage with Typescript (no param, or number lookup, or string lookup)
       const defaultParameterValues: Record<string, any> = {};
@@ -43,14 +45,24 @@
         defaultParameterValues
       );
       if (toolUsage) {
-        toolOutcome = useTool(
-          gs.chat.playingAsCharacter,
-          toolUsage.tool.function.name || '',
-          toolUsage.parameterValues
-        );
+        // Store pending tool usage and show confirmation
+        console.log(toolUsage);
+
+        pendingToolUsage = toolUsage;
+        pendingMessage = message;
+        showToolConfirmation = true;
+        isSending = false;
+        // wait for user to confirm tool usage
+        return;
       }
       // TODO: in case of doubt, send toolcall message to LLM
     }
+
+    await sendMessageWithToolOutcome(message, toolOutcome);
+  }
+
+  async function sendMessageWithToolOutcome(message: string, toolOutcome: string) {
+    if (!gs.chat) return;
 
     const fullMessage = toolOutcome ? message + ' \n\n(' + toolOutcome + ')' : message;
     try {
@@ -65,6 +77,32 @@
     } finally {
       isSending = false;
     }
+  }
+
+  function confirmToolUsage() {
+    if (pendingToolUsage && gs.chat) {
+      const toolOutcome = useTool(
+        gs.chat.playingAsCharacter,
+        pendingToolUsage.tool.function.name || '',
+        pendingToolUsage.parameterValues
+      );
+
+      // Reset confirmation state
+      showToolConfirmation = false;
+      pendingToolUsage = null;
+
+      // Send the message with tool outcome
+      sendMessageWithToolOutcome(pendingMessage, toolOutcome);
+      pendingMessage = '';
+    }
+  }
+
+  function cancelToolUsage() {
+    // Reset confirmation state and send message without tool
+    showToolConfirmation = false;
+    pendingToolUsage = null;
+    sendMessageWithToolOutcome(pendingMessage, '');
+    pendingMessage = '';
   }
 
   function handleKeyPress(event: KeyboardEvent) {
@@ -116,6 +154,21 @@
             {uiState.streamingContent}
             <span class="typing-indicator">...</span>
           </div>
+        </div>
+      {/if}
+
+      <!-- Tool Confirmation -->
+      {#if showToolConfirmation && pendingToolUsage}
+        <div class="tool-confirmation">
+          <div class="confirmation-content">
+            <div class="confirmation-action-name">{pendingToolUsage.tool.function.name}</div>
+            <div>{JSON.stringify(pendingToolUsage.parameterValues, null, 2)}</div>
+          </div>
+          <div class="confirmation-actions">
+            <button onclick={confirmToolUsage} class="confirm-button">Use Tool</button>
+            <button onclick={cancelToolUsage} class="cancel-button">Nope</button>
+          </div>
+          <div>{pendingMessage}</div>
         </div>
       {/if}
     </div>
@@ -305,5 +358,66 @@
   .send-button:disabled {
     background-color: #555;
     cursor: not-allowed;
+  }
+
+  /* Tool Confirmation Styles */
+  .tool-confirmation {
+    margin-top: 0.2rem;
+    padding: 0.75rem;
+    background-color: #2a2a2a;
+    border-radius: 6px;
+    border: 1px solid #444;
+    display: flex;
+    gap: 40px;
+    align-items: center;
+    height: 40px;
+  }
+
+  .confirmation-action-name {
+    font-weight: bold;
+    color: #3182ce;
+    font-size: 0.9rem;
+  }
+
+  .confirmation-content {
+    color: #fff;
+    font-size: 0.8rem;
+  }
+
+  .confirmation-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    height: 30px;
+  }
+
+  .confirm-button {
+    padding: 0.4rem 0.8rem;
+    background-color: #3182ce;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.8rem;
+  }
+
+  .confirm-button:hover {
+    background-color: #2c5aa0;
+  }
+
+  .cancel-button {
+    padding: 0.4rem 0.8rem;
+    background-color: #555;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.8rem;
+  }
+
+  .cancel-button:hover {
+    background-color: #444;
   }
 </style>

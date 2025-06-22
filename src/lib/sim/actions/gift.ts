@@ -1,5 +1,5 @@
 import type { Character, Item } from '@/lib/_model/model-sim';
-import { getItemsByTypeAndOwner, transferItem } from '../items';
+import { getItemsByOwner, getItemsByTypeAndOwner, transferItem } from '../items';
 import { ItemType } from '@/lib/_model/model-sim.enums';
 
 export function giftMoney(from: Character, to: Character, amount: number): number {
@@ -12,7 +12,19 @@ export function giftMoney(from: Character, to: Character, amount: number): numbe
   return amount;
 }
 
-export function giftFood(from: Character, to: Character): Item | undefined {
+export function giftFood(
+  from: Character,
+  to: Character,
+  itemDescription?: string
+): Item | undefined {
+  // if an item desc is passed, use it
+  if (itemDescription) {
+    const item = getItemsByOwner(from.id).find((item) => item.description === itemDescription);
+    if (item) {
+      transferItem(item.id, to.id);
+      return item;
+    }
+  }
   // Try to find a Meal owned by 'from'
   const meals = getItemsByTypeAndOwner(ItemType.Meal, from.id);
   if (meals.length > 0) {

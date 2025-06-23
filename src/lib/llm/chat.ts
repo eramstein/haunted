@@ -180,7 +180,13 @@ export async function playerSendChat(
   }
   const place = gs.places[playerCharacter.place];
   const timestamp = gs.time.ellapsedTime;
-  const memories = await getSystemPromptMemories(timestamp, otherCharacters, place, activityType);
+  const memories = await getSystemPromptMemories(
+    timestamp,
+    otherCharacters,
+    place,
+    activityType,
+    message
+  );
   const memoriesPrompt = memories ? `Relevant Memories:\n"${memories}"` : '';
   const context = getActivityContext(activityType, [playerCharacter, ...otherCharacters]);
   const locationDescription = place.name + ', ' + place.description || '';

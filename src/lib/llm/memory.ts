@@ -22,15 +22,18 @@ export async function getSystemPromptMemories(
   timestamp: number,
   characters: Character[],
   place: Place,
-  activityType: ActivityType
+  activityType: ActivityType,
+  message: string = ''
 ) {
   const characterIds = characters.map((c) => c.id);
   const characterNames = characters.map((c) => c.name);
 
   const vectorDbMemories = await queryNpcMemory(
     characterIds,
-    `Upcoming ${activityType} with ${characterNames.join(', ')} at ${place.name}`
+    message || `Upcoming ${activityType} with ${characterNames.join(', ')} at ${place.name}`
   );
+  console.log('vectorDbMemories', vectorDbMemories);
+
   const indexDbMemories = await getChatsForCharacters(characterIds, 0, timestamp);
 
   // Create a Map to store unique memories by ID
@@ -43,7 +46,7 @@ export async function getSystemPromptMemories(
         id: memory.id,
         summary: memory.document,
         semanticScore: memory.score,
-        participants: (memory.metadata?.characters as string).split('|').slice(1, -1).map(Number),
+        participants: memory.participants,
       });
     }
   });

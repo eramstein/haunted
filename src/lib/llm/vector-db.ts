@@ -6,15 +6,15 @@ import { TOOLS_VECTORS } from './tools-vectors';
 export const vectorDatabaseClient = new ChromaClient();
 
 export async function initChromaCollections() {
-  const memoriesCollection = await vectorDatabaseClient.getOrCreateCollection({
-    name: MEMORY_COLLECTION,
-  });
+  // create one memories collection for each character
   NPCS.forEach(async (character, index) => {
+    const memoriesCollection = await vectorDatabaseClient.getOrCreateCollection({
+      name: MEMORY_COLLECTION + '_' + index,
+    });
     await memoriesCollection.upsert({
       documents: character.initialMemories,
       metadatas: character.initialMemories.map(() => ({
         type: 'npc_lore',
-        characters: '|' + String(index) + '|',
       })),
       ids: character.initialMemories.map((_, i) => index + ' lore ' + i),
     });
@@ -34,10 +34,11 @@ export async function initChromaCollections() {
 }
 
 export async function resetVectorDatabase(reinitialize = true) {
-  await vectorDatabaseClient.deleteCollection({ name: MEMORY_COLLECTION });
-  await vectorDatabaseClient.createCollection({ name: MEMORY_COLLECTION });
-  console.log('Vector database collections emptied');
-
+  const collections = await vectorDatabaseClient.listCollections();
+  for (const collectionName of collections) {
+    await vectorDatabaseClient.deleteCollection({ name: collectionName });
+  }
+  console.log('All vector database collections emptied');
   if (reinitialize) {
     await initChromaCollections();
   }

@@ -4,57 +4,86 @@ import type { GroupActivityLog } from '../_model/model-sim';
 import { MEMORY_COLLECTION } from './config';
 
 export async function queryNpcMemory(characterIds: number[], message: string) {
-  // Query character's personal memories
-  const collection = await vectorDatabaseClient.getOrCreateCollection({
-    name: MEMORY_COLLECTION,
-  });
-  const results = await collection.query({
-    queryTexts: message,
-    nResults: 3,
-    where:
-      characterIds.length === 1
-        ? {
-            characters: { $in: [`|${characterIds[0]}|`] },
-          }
-        : {
-            $or: characterIds.map((id) => ({
-              characters: { $in: [`|${id}|`] },
-            })),
-          },
-  });
+  const documents: (string | null)[] = [];
+  const scores: number[] = [];
+  const ids: string[] = [];
+  const participants: number[] = [];
 
-  const documents = results.documents?.[0] || [];
-  const scores = results.distances?.[0] || documents.map(() => 2);
-  const metadatas = results.metadatas?.[0] || documents.map(() => ({}));
-  const ids = results.ids?.[0] || documents.map((_, i) => i);
+  for (const characterId of characterIds) {
+    const collection = await vectorDatabaseClient.getOrCreateCollection({
+      name: MEMORY_COLLECTION + '_' + characterId,
+    });
+    const results = await collection.query({
+      queryTexts: message,
+      nResults: 3,
+    });
+    const resultDocs = results.documents?.[0] || [];
+    const resultScores = results.distances?.[0] || resultDocs.map(() => 2);
+    const resultIds = results.ids?.[0] || resultDocs.map((_, i) => i);
 
-  return documents.map((doc, i) => ({
-    document: doc,
-    score: scores[i],
-    metadata: metadatas[i],
-    id: ids[i],
+    documents.push(...resultDocs);
+    scores.push(...resultScores);
+    ids.push(...resultIds);
+    participants.push(...resultDocs.map(() => characterId));
+  }
+
+  // Merge duplicate IDs
+  const mergedMap = new Map<
+    string,
+    {
+      document: string | null;
+      score: number;
+      participants: number[];
+    }
+  >();
+
+  for (let i = 0; i < ids.length; i++) {
+    const id = ids[i];
+    const existing = mergedMap.get(id);
+
+    if (existing) {
+      // Merge: keep first document, highest score, combine participants
+      mergedMap.set(id, {
+        document: existing.document, // Keep first document
+        score: Math.min(existing.score, scores[i]), // Keep highest score (lower distance = better)
+        participants: [...new Set([...existing.participants, participants[i]])], // Combine and deduplicate
+      });
+    } else {
+      // First occurrence
+      mergedMap.set(id, {
+        document: documents[i],
+        score: scores[i],
+        participants: [participants[i]],
+      });
+    }
+  }
+
+  return Array.from(mergedMap.entries()).map(([id, data]) => ({
+    document: data.document,
+    score: data.score,
+    id,
+    participants: data.participants,
   }));
 }
 
 export async function addGroupActivityMemory(activityLog: GroupActivityLog) {
-  console.log(activityLog);
-
-  const collection = await vectorDatabaseClient.getOrCreateCollection({
-    name: MEMORY_COLLECTION,
-  });
   // one collective memory about the event
-  collection.add({
-    ids: [activityLog.id],
-    metadatas: [
-      {
-        timestamp: activityLog.timestamp,
-        type: 'group_activity',
-        characters: '|' + activityLog.participants.join('|') + '|',
-      },
-    ],
-    documents: [activityLog.content.summary],
+  activityLog.participants.forEach(async (id) => {
+    const collection = await vectorDatabaseClient.getOrCreateCollection({
+      name: MEMORY_COLLECTION + '_' + id,
+    });
+    collection.add({
+      ids: [activityLog.id],
+      metadatas: [
+        {
+          timestamp: activityLog.timestamp,
+          type: 'group_activity',
+        },
+      ],
+      documents: [activityLog.content.summary],
+    });
   });
-  // individual memories in case of high emotional impact
+
   const nameToId = activityLog.participants.reduce(
     (acc, id) => {
       const name = gs.characters.find((c) => c.id === id)?.name || 'unknown';
@@ -63,27 +92,46 @@ export async function addGroupActivityMemory(activityLog: GroupActivityLog) {
     },
     {} as Record<string, number>
   );
+
+  // individual memories in case of high relational or emotional impact
   activityLog.content.relationUpdates
     .filter((update) => Math.abs(update.delta) > 0.6)
-    .forEach((update) => {
+    .forEach(async (update) => {
       const uid = Date.now().toString(36) + Math.random().toString(36).substr(2);
-      // Get character IDs for the relationship update
       const fromId = nameToId[update.from];
       const towardId = nameToId[update.toward];
-
-      // Only create memory if both characters are found
       if (fromId !== undefined && towardId !== undefined) {
+        const collection = await vectorDatabaseClient.getOrCreateCollection({
+          name: MEMORY_COLLECTION + '_' + fromId,
+        });
         collection.add({
           ids: [uid],
           metadatas: [
             {
               timestamp: activityLog.timestamp,
               type: 'relationship_update',
-              characters: '|' + fromId + '|' + towardId + '|',
             },
           ],
           documents: [update.cause],
         });
       }
+    });
+  activityLog.content.emotionUpdates
+    .filter((update) => Math.abs(update.delta) > 0.6)
+    .forEach(async (update) => {
+      const uid = Date.now().toString(36) + Math.random().toString(36).substr(2);
+      const collection = await vectorDatabaseClient.getOrCreateCollection({
+        name: MEMORY_COLLECTION + '_' + nameToId[update.characterName],
+      });
+      collection.add({
+        ids: [uid],
+        metadatas: [
+          {
+            timestamp: activityLog.timestamp,
+            type: 'emotion_update',
+          },
+        ],
+        documents: [update.cause],
+      });
     });
 }

@@ -61,6 +61,12 @@ function getRelationships(character: CharacterBase) {
     relationships[index] = {
       status: RelationshipStatus.Unknown,
       feelings: {},
+      summary: {
+        description:
+          character.name + ' just met ' + otherCharacter.name + '. They live in the same mansion.',
+        lastUpdate: 0,
+        cumulatedFeelingChanges: 0,
+      },
     };
   });
   return relationships;

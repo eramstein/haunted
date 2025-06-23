@@ -83,6 +83,7 @@ export interface Work {
 
 export interface Relationship {
   status: RelationshipStatus;
+  summary: RelationshipSummary;
   feelings: Partial<Record<RelationshipFeeling, number>>; // -100 to 100
 }
 
@@ -151,6 +152,19 @@ export interface GroupActivitySummary {
   summary: string;
   relationUpdates: RelationshipUpdate[];
   emotionUpdates: EmotionUpdate[];
+}
+
+export interface RelationshipSummary {
+  description: string;
+  cumulatedFeelingChanges: number; // aggregation of all feeling changes since last update
+  lastUpdate: number; // ellapsed time when summary was generated
+}
+
+export interface RelationshipSummaryUpdate {
+  from: number;
+  toward: number;
+  description: string;
+  timestamp: number;
 }
 
 export interface RelationshipUpdate {

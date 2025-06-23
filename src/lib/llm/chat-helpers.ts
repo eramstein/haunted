@@ -17,14 +17,15 @@ export const activityTypeToContext: Partial<Record<ActivityType, string>> = {
   [ActivityType.AskForHelp]: 'Your character is asking for help',
 };
 
-export function getGroupDescription(characters: Character[]) {
+export function getGroupDescription(characters: Character[], includeRelationships = true) {
   let description = '';
   for (const character of characters) {
     description +=
       ' - ' +
       getCharacterDescription(
         character,
-        characters.filter((c) => c.id !== character.id)
+        characters.filter((c) => c.id !== character.id),
+        includeRelationships
       ) +
       '\n';
   }
@@ -33,10 +34,13 @@ export function getGroupDescription(characters: Character[]) {
 
 export function getCharacterDescription(
   character: Character,
-  otherCharactersInvolved: Character[]
+  otherCharactersInvolved: Character[],
+  includeRelationships = true
 ) {
   const traits = character.llm.traits.join(', ');
-  const relationships = getRelationshipsDescription(character, otherCharactersInvolved);
+  const relationships = includeRelationships
+    ? getRelationshipsDescription(character, otherCharactersInvolved)
+    : '';
   const mood = character.emotions.dominantEmotion
     ? describeEmotion(
         character.emotions.dominantEmotion.name,
@@ -204,4 +208,16 @@ export function describeEmotionChanges(emotionUpdates: EmotionUpdate[]) {
   }
 
   return characterDescriptions.join(', ');
+}
+
+export function getGroupRelationshipsDescription(characters: Character[]) {
+  let description = 'Relational Context:\n';
+  for (const character of characters) {
+    for (const [otherId, relationship] of Object.entries(character.relationships).filter(
+      ([otherId]) => characters.map((c) => c.id).includes(+otherId)
+    )) {
+      description += ` - ${character.name} -> ${gs.characters[+otherId].name}: ${relationship.summary.description}\n`;
+    }
+  }
+  return description;
 }

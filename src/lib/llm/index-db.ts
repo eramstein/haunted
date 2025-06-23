@@ -1,17 +1,26 @@
 import Dexie, { type Table } from 'dexie';
 import { ActivityType, RelationshipFeeling, EmotionType } from '../_model/model-sim.enums';
-import type { GroupActivityLog, GroupActivitySummary } from '../_model';
+import type { GroupActivityLog, GroupActivitySummary, RelationshipSummaryUpdate } from '../_model';
 
 // Initialize Dexie database
 const db = new Dexie('MansionSimDB');
 
+// Database-specific interface that includes the id field
+interface RelationshipSummaryUpdateDB extends RelationshipSummaryUpdate {
+  id: string;
+}
+
 // Define schema with numeric timestamp
 db.version(1).stores({
   chats: 'id,timestamp,activityType,[participants+timestamp]', // Indexes for querying
+  relationshipArcs: 'id,from,toward', // Indexes for querying
 });
 
 // Export the chats table
 const chats: Table<GroupActivityLog> = db.table('chats');
+
+// Export the relationshipArcs table
+const relationshipArcs: Table<RelationshipSummaryUpdateDB> = db.table('relationshipArcs');
 
 // Save a chat to the database
 export async function saveChat(
@@ -155,6 +164,7 @@ export async function deleteOldChats(olderThan: number): Promise<void> {
 
 export async function resetIndexDB(): Promise<void> {
   await chats.clear();
+  await relationshipArcs.clear();
 }
 
 // Fetch chats for specific activity type and participants
@@ -179,6 +189,58 @@ export async function getChatsByActivityType(
       .toArray();
   } catch (error) {
     console.error('Error fetching chats by activity type:', error);
+    throw error;
+  }
+}
+
+// Save a relationship summary update to the database
+export async function saveRelationshipSummaryUpdate(
+  id: string,
+  from: number,
+  toward: number,
+  description: string,
+  timestamp: number
+): Promise<number> {
+  try {
+    return await relationshipArcs.put({
+      id,
+      from,
+      toward,
+      description,
+      timestamp,
+    });
+  } catch (error) {
+    console.error('Error saving relationship summary update:', error);
+    throw error;
+  }
+}
+
+// Fetch relationship summary updates for a character pair within a time range
+export async function getRelationshipSummaryUpdates(
+  from: number,
+  toward: number,
+  startTime: number,
+  endTime: number
+): Promise<RelationshipSummaryUpdate[]> {
+  try {
+    return await relationshipArcs
+      .where('from')
+      .equals(from)
+      .and((arc) => arc.toward === toward)
+      .filter((arc) => arc.timestamp >= startTime && arc.timestamp <= endTime)
+      .toArray();
+  } catch (error) {
+    console.error('Error fetching relationship summary updates:', error);
+    throw error;
+  }
+}
+
+// Delete relationship summary updates older than a given timestamp
+export async function deleteOldRelationshipSummaryUpdates(olderThan: number): Promise<void> {
+  try {
+    await relationshipArcs.where('timestamp').below(olderThan).delete();
+  } catch (error) {
+    console.error('Error deleting old relationship summary updates:', error);
     throw error;
   }
 }

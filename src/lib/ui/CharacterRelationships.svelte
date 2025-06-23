@@ -1,13 +1,20 @@
 <script lang="ts">
   import { gs } from '../_state';
-  import type { Character, Relationship, RelationshipUpdate } from '../_model/model-sim';
+  import type {
+    Character,
+    Relationship,
+    RelationshipUpdate,
+    RelationshipSummaryUpdate,
+  } from '../_model/model-sim';
   import { getCharacterImage } from './_helpers/images.svelte';
-  import { getChatsForCharacters } from '../llm/index-db';
+  import { getChatsForCharacters, getRelationshipSummaryUpdates } from '../llm/index-db';
   import { LABELS_ACTIVITY_TYPES } from '../_config/labels';
   import { formatDate, getFeelingColor } from './_helpers';
   import { RelationshipFeeling } from '../_model/model-sim.enums';
-  import { updateFeelingValue } from '../sim/relationships';
+  import { getRelationChangeValue, updateFeelingValue } from '../sim/relationships';
   import { getTime } from '../sim';
+  import { config } from '../_config';
+  import { updateRelationshipSummary } from '../llm/relationships';
 
   let props = $props<{
     characterId: number;
@@ -25,9 +32,18 @@
   let relationshipUpdates = $state<
     Array<RelationshipUpdate & { timestamp: number; activityType: string }>
   >([]);
+  let relationshipHistory = $state<RelationshipSummaryUpdate[]>([]);
 
   $effect(() => {
     updateRelationships();
+  });
+
+  $effect(() => {
+    if (selectedCharacter) {
+      loadRelationshipHistory();
+    } else {
+      relationshipHistory = [];
+    }
   });
 
   function updateRelationships() {
@@ -40,6 +56,27 @@
         character: otherCharacter,
         relationship: character.relationships[otherCharacter.id],
       }));
+  }
+
+  async function loadRelationshipHistory() {
+    if (!selectedCharacter) return;
+
+    try {
+      const endTime = gs.time.ellapsedTime;
+      const startTime = 0;
+
+      const history = await getRelationshipSummaryUpdates(
+        props.characterId,
+        selectedCharacter.id,
+        startTime,
+        endTime
+      );
+
+      relationshipHistory = history.sort((a, b) => b.timestamp - a.timestamp); // Most recent first
+    } catch (error) {
+      console.error('Failed to fetch relationship history:', error);
+      relationshipHistory = [];
+    }
   }
 
   function updateFeeling(value: number) {
@@ -89,6 +126,10 @@
   function togglePortraitSelection(character: Character) {
     selectedCharacter = selectedCharacter?.id === character.id ? null : character;
   }
+
+  async function handleUpdateSummary(character: Character) {
+    await updateRelationshipSummary(props.characterId, character.id);
+  }
 </script>
 
 <div class="character-relationships">
@@ -109,6 +150,18 @@
           />
           <div class="character-name">{rel.character.name}</div>
           <div class="relationship-status">{rel.relationship.status}</div>
+          <div class="relationship-summary-container">
+            <div class="relationship-summary">{rel.relationship.summary.description}</div>
+            {#if rel.relationship.summary.cumulatedFeelingChanges > config.relationSummaryUpdateTreshold || (rel.relationship.summary.cumulatedFeelingChanges > 0 && rel.relationship.summary.lastUpdate === 0)}
+              <button
+                class="update-summary-btn"
+                onclick={() => handleUpdateSummary(rel.character)}
+                title="Update relationship summary"
+              >
+                Update
+              </button>
+            {/if}
+          </div>
           <div class="feelings">
             {#each Object.values(RelationshipFeeling) as feeling}
               {#if selectedCharacter?.id === rel.character.id || rel.relationship.feelings[feeling]}
@@ -129,6 +182,24 @@
           </div>
         </div>
       {/each}
+    </div>
+  {/if}
+
+  {#if selectedCharacter}
+    <div class="relationship-history-section">
+      <h4>Relationship History with {selectedCharacter.name}</h4>
+      {#if relationshipHistory.length === 0}
+        <p class="no-history">No relationship history found.</p>
+      {:else}
+        <div class="history-timeline">
+          {#each relationshipHistory as update}
+            <div class="history-item">
+              <div class="history-timestamp">{formatDate(getTime(update.timestamp))}</div>
+              <div class="history-description">{update.description}</div>
+            </div>
+          {/each}
+        </div>
+      {/if}
     </div>
   {/if}
 
@@ -169,7 +240,7 @@
                   class:positive={update.delta > 0}
                   class:negative={update.delta < 0}
                 >
-                  {update.delta > 0 ? '+' : ''}{update.delta}
+                  {update.delta > 0 ? '+' : ''}{getRelationChangeValue(update.delta)}
                 </td>
                 <td class="cause-cell">{update.cause}</td>
               </tr>
@@ -208,7 +279,7 @@
 
   .relationships-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 1rem;
   }
 
@@ -254,6 +325,38 @@
     font-size: 0.9rem;
     text-transform: capitalize;
     margin-bottom: 0.5rem;
+  }
+
+  .relationship-summary-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    width: 100%;
+  }
+
+  .relationship-summary {
+    flex: 1;
+    font-size: 0.85rem;
+    color: #ccc;
+    line-height: 1.3;
+  }
+
+  .update-summary-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .update-summary-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
   }
 
   .feelings {
@@ -371,5 +474,42 @@
   .feeling-update-controls input::-webkit-inner-spin-button,
   .feeling-update-controls input::-webkit-outer-spin-button {
     opacity: 1;
+  }
+
+  .relationship-history-section {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .no-history {
+    color: #888;
+    font-style: italic;
+  }
+
+  .history-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .history-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    padding: 0.75rem;
+    border-left: 3px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .history-timestamp {
+    color: #888;
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .history-description {
+    color: #ccc;
+    font-size: 0.9rem;
+    line-height: 1.4;
   }
 </style>

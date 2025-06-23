@@ -1,5 +1,8 @@
 import { EmotionType, RelationshipFeeling } from '../_model/model-sim.enums';
 
+const feelingsList = Object.values(RelationshipFeeling).join('\n- ');
+const emotionsList = Object.values(EmotionType).join('\n- ');
+
 export const groupActivityTranscriptSystemPrompt = `
 You are writing a short, naturalistic scene between a group of fictional characters inside a lightly story-driven simulation game. The scene should read like a slice of life excerpt from a novel — with narrative description, direct dialogue, character voice, body language, and subtle emotional cues.
 
@@ -31,9 +34,6 @@ Style Guidelines:
 - Ground the scene in its setting, but don’t over-describe — just enough to support mood or character behavior.
 - Keep it short: a complete but compact scene, about 6–10 exchanges, that feels like a real moment between people.
 `;
-
-const feelingsList = Object.values(RelationshipFeeling).join('\n- ');
-const emotionsList = Object.values(EmotionType).join('\n- ');
 
 export const summarySystemPrompt = `
 You are analyzing a fictional conversation between characters in a simulation game.
@@ -167,6 +167,37 @@ Example 2 (conflict):
       "delta": 0.4,
       "cause": "Emma felt annoyed having to confront Lise about her missed deadline.",
       "subtype": "impatience"
+    }
+  ]
+}
+
+Example 3 (unexpected support):
+
+{
+  "summary": "Joe unexpectedly defended Lise during a heated discussion with Sarah.",
+  "relationUpdates": [
+    {
+      "from": "Lise",
+      "toward": "Joe",
+      "feeling": "trust",
+      "delta": 0.5,
+      "cause": "Joe spoke up in support of Lise during Sarah’s accusations."
+    },
+    {
+      "from": "Joe",
+      "toward": "Lise",
+      "feeling": "affection",
+      "delta": 0.3,
+      "cause": "Joe felt protective toward Lise while defending her."
+    }
+  ],
+  "emotionUpdates": [
+    {
+      "characterName": "Lise",
+      "type": "relief",
+      "delta": 0.6,
+      "cause": "Lise was comforted by Joe taking her side.",
+      "subtype": "gratitude"
     }
   ]
 }

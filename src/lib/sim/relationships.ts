@@ -1,3 +1,4 @@
+import { config } from '../_config';
 import type { Character, RelationshipUpdate } from '../_model/model-sim';
 import { RelationshipStatus, type RelationshipFeeling } from '../_model/model-sim.enums';
 import { gs } from '../_state';
@@ -10,6 +11,7 @@ function getRelationship(fromId: number, towardId: number) {
 export function updateRelationships(relationUpdates: RelationshipUpdate[]) {
   const characterNamesToIds = Object.fromEntries(gs.characters.map((char) => [char.name, char.id]));
 
+  // update individual feelings
   relationUpdates.forEach(({ from, toward, feeling, delta }) => {
     const relationship = getRelationship(characterNamesToIds[from], characterNamesToIds[toward]);
 
@@ -18,9 +20,19 @@ export function updateRelationships(relationUpdates: RelationshipUpdate[]) {
       relationship.feelings[feeling] = 0;
     }
 
+    // we square delta to give more weight to larger changes, and have always positive values
+    const changeScale = getRelationChangeValue(delta);
+    const changeDirection = delta > 0 ? 1 : -1;
+
     // Update feeling value and clamp between -100 and 100
-    relationship.feelings[feeling] =
-      Math.round(clamp((relationship.feelings[feeling] as number) + delta, -100, 100) * 10) / 10;
+    relationship.feelings[feeling] = clamp(
+      (relationship.feelings[feeling] as number) + changeScale * changeDirection,
+      -100,
+      100
+    );
+
+    // aggregate feeling changes
+    relationship.summary.cumulatedFeelingChanges += changeScale;
   });
 
   // TODO: handle relationship status, derived from feelings? or mix with LLM
@@ -89,4 +101,9 @@ export function getBestFriend(character: Character): Character {
       }
     });
   return bestFriend || gs.characters[0];
+}
+
+export function getRelationChangeValue(delta: number) {
+  const changeDirection = delta > 0 ? 1 : -1;
+  return Math.round(delta * delta * config.relationSummaryVolatility * changeDirection * 10) / 10;
 }

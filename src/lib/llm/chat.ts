@@ -12,6 +12,7 @@ import {
   describeEmotionChanges,
   getActivityContext,
   getGroupDescription,
+  getGroupRelationshipsDescription,
 } from './chat-helpers';
 import { gs, saveStateToLocalStorage } from '../_state';
 import { uiState } from '../_state/state-ui.svelte';
@@ -31,17 +32,21 @@ export async function groupChat(
 ): Promise<string> {
   const memories = await getSystemPromptMemories(timestamp, characters, place, activityType);
   const memoriesPrompt = memories
-    ? `Relevant Memory:\nThe characters remember a past event that may influence today's conversation:\n"${memories}"`
+    ? `- Relevant Memory:\nThe characters remember a past event that may influence today's conversation:\n"${memories}"`
     : '';
 
   const systemPrompt = {
     role: 'system',
-    content: `${groupActivityTranscriptSystemPrompt}\n\n${memoriesPrompt}`,
+    content: `${groupActivityTranscriptSystemPrompt}`,
   };
 
   const context = activityTypeToContext[activityType] || '';
   const locationDescription = place.name + ', ' + place.description || '';
-  const charactersDescription = getGroupDescription(characters);
+  const detailedRelationships = characters.length === 2;
+  const charactersDescription = getGroupDescription(characters, !detailedRelationships);
+  const relationshipsDescription = detailedRelationships
+    ? getGroupRelationshipsDescription(characters)
+    : '';
   const timeOfDay = getTimeOfDay(timestamp);
 
   const userPrompt = {
@@ -51,7 +56,10 @@ export async function groupChat(
         ${charactersDescription}
       - Location: ${locationDescription}
       - Context: ${context}. Time of day ${timeOfDay}.
-      - Past Events: none.
+
+      ${memoriesPrompt}
+      
+      ${relationshipsDescription}
     `,
   };
 
@@ -176,10 +184,17 @@ export async function playerSendChat(
   const memoriesPrompt = memories ? `Relevant Memories:\n"${memories}"` : '';
   const context = getActivityContext(activityType, [playerCharacter, ...otherCharacters]);
   const locationDescription = place.name + ', ' + place.description || '';
-  const charactersDescription = getGroupDescription([playerCharacter, ...otherCharacters]);
+  const detailedRelationships = otherCharacters.length === 1;
+  const charactersDescription = getGroupDescription(
+    [playerCharacter, ...otherCharacters],
+    !detailedRelationships
+  );
   const timeOfDay = getTimeOfDay(timestamp);
   const currentSummary = gs.chat!.summary
     ? 'Previous Conversation Summary:\n' + gs.chat!.summary
+    : '';
+  const relationshipsDescription = detailedRelationships
+    ? getGroupRelationshipsDescription([playerCharacter, ...otherCharacters])
     : '';
 
   const systemPrompt = {
@@ -211,6 +226,8 @@ export async function playerSendChat(
     ${charactersDescription}
 
     ${memoriesPrompt}
+
+    ${relationshipsDescription}
 
     ${currentSummary}
 
@@ -315,8 +332,9 @@ export async function aiInitiatesChat(
   const memoriesPrompt = memories ? `Relevant Memories:\n"${memories}"` : '';
   const context = getActivityContext(activityType, [aiCharacter, playerCharacter]);
   const locationDescription = place.name + ', ' + place.description || '';
-  const charactersDescription = getGroupDescription([playerCharacter, aiCharacter]);
+  const charactersDescription = getGroupDescription([playerCharacter, aiCharacter], false);
   const timeOfDay = getTimeOfDay(timestamp);
+  const relationshipsDescription = getGroupRelationshipsDescription([playerCharacter, aiCharacter]);
 
   const systemPrompt = {
     role: 'system',
@@ -330,6 +348,8 @@ export async function aiInitiatesChat(
     ${charactersDescription}
 
     ${memoriesPrompt}
+
+    ${relationshipsDescription}
 
     ${aiCharacter.name} has come to see ${playerCharacter.name} because ${context}.
     Write what ${aiCharacter.name} says and does to begin the conversation.

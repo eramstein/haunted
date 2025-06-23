@@ -116,7 +116,7 @@ function resolveHelpRequest(
       from: character.name,
       toward: helper.name,
       feeling: RelationshipFeeling.Gratitude,
-      delta: 10,
+      delta: 1,
       cause: didHelp,
     });
     solveProblem(character, problem);
@@ -125,7 +125,7 @@ function resolveHelpRequest(
       from: character.name,
       toward: helper.name,
       feeling: RelationshipFeeling.Gratitude,
-      delta: -10,
+      delta: -1,
       cause: didNotHelp,
     });
   }

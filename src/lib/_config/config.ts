@@ -43,4 +43,7 @@ export const config = {
     [ItemType.Drink]: 10,
     [ItemType.Meal]: 20,
   },
+  // aggregation is adding feeling delta (-1 to +1) squared multiplied by relationSummaryVolatility, so a huge change counts for 10, a medium counts for 2.5
+  relationSummaryUpdateTreshold: 20,
+  relationSummaryVolatility: 10,
 };

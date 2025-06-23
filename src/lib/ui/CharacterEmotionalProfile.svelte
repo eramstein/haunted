@@ -192,7 +192,7 @@ Decay Rate: ${emotion.decayRate.toFixed(1)}`}
                   >
                     {update.delta > 0 ? '+' : ''}{update.delta}
                   </td>
-                  <td class="reason-cell">{update.reason}</td>
+                  <td class="cause-cell">{update.cause}</td>
                 </tr>
               {/each}
             </tbody>
@@ -374,7 +374,7 @@ Decay Rate: ${emotion.decayRate.toFixed(1)}`}
     color: #f44336;
   }
 
-  .reason-cell {
+  .cause-cell {
     color: #888;
     font-style: italic;
   }

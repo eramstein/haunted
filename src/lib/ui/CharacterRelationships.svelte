@@ -171,7 +171,7 @@
                 >
                   {update.delta > 0 ? '+' : ''}{update.delta}
                 </td>
-                <td class="reason-cell">{update.reason}</td>
+                <td class="cause-cell">{update.cause}</td>
               </tr>
             {/each}
           </tbody>
@@ -330,7 +330,7 @@
     color: #f44336;
   }
 
-  .reason-cell {
+  .cause-cell {
     color: #888;
     font-style: italic;
   }

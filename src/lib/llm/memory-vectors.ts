@@ -82,7 +82,7 @@ export async function addGroupActivityMemory(activityLog: GroupActivityLog) {
               characters: '|' + fromId + '|' + towardId + '|',
             },
           ],
-          documents: [update.reason],
+          documents: [update.cause],
         });
       }
     });

@@ -59,7 +59,7 @@ function quickResolution(
   const didNotHelp = helper.name + ' refused to help ' + character.name;
   switch (problem.type) {
     case ProblemType.NoFood:
-      if (problem.reason === ProblemReason.NoIncome) {
+      if (problem.cause === ProblemReason.NoIncome) {
         const moneyGifted = giftMoney(helper, character, 100);
         if (moneyGifted > 0) {
           didHelp = helper.name + ' gave ' + character.name + ' money';
@@ -117,7 +117,7 @@ function resolveHelpRequest(
       toward: helper.name,
       feeling: RelationshipFeeling.Gratitude,
       delta: 10,
-      reason: didHelp,
+      cause: didHelp,
     });
     solveProblem(character, problem);
   } else {
@@ -126,7 +126,7 @@ function resolveHelpRequest(
       toward: helper.name,
       feeling: RelationshipFeeling.Gratitude,
       delta: -10,
-      reason: didNotHelp,
+      cause: didNotHelp,
     });
   }
   finishActivity(character);

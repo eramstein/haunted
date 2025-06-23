@@ -158,7 +158,7 @@ export interface RelationshipUpdate {
   toward: string;
   feeling: RelationshipFeeling;
   delta: number;
-  reason: string;
+  cause: string;
 }
 
 export interface Emotion {
@@ -173,7 +173,7 @@ export interface EmotionUpdate {
   characterName: string;
   type: EmotionType;
   delta: number;
-  reason: string;
+  cause: string;
   subtype?: string; // for example, joy could have 'amusement', 'contentment', 'pride', 'relief'
 }
 
@@ -189,7 +189,7 @@ export interface DominantEmotion {
 
 export interface Problem {
   type: ProblemType;
-  reason: ProblemReason;
+  cause: ProblemReason;
 }
 
 export interface ChatState {

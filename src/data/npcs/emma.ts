@@ -15,7 +15,7 @@ export const NPC_EMMA: CharacterBase = {
   },
   initialMemories: [
     `        
-    CAREER_CHOICE: Emma dreamt of being an artist but ended up studying law for economic reasons. 
+    CAREER_CHOICE: Emma dreamt of being an artist but ended up studying law for economic causes. 
     FAMILY_BACKGROUND: Being raised in a poor family she had to make the pragmatic choice. 
     EMOTIONAL_STATE: She is still sometimes melancholic about it.
   `,

@@ -65,9 +65,9 @@ export const getHelpTools: (helper: Character) => Tool[] = (helper) => {
       description: 'Refuse to help and explain why',
       parameters: {
         type: 'object',
-        required: ['reason'],
+        required: ['cause'],
         properties: {
-          reason: { type: 'string', description: 'The reason for refusing to help' },
+          cause: { type: 'string', description: 'The cause for refusing to help' },
         },
       },
     },

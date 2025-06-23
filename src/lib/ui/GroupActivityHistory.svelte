@@ -170,7 +170,7 @@
                               <span class="update-delta"
                                 >({update.delta > 0 ? '+' : ''}{update.delta})</span
                               >
-                              <span class="update-reason">— {update.reason}</span>
+                              <span class="update-cause">— {update.cause}</span>
                             </li>
                           {/each}
                         </ul>
@@ -192,7 +192,7 @@
                               style="color: {getEmotionDeltaColor(update.type, update.delta)}"
                               >({update.delta > 0 ? '+' : ''}{update.delta})</span
                             >
-                            <span class="update-reason">— {update.reason}</span>
+                            <span class="update-cause">— {update.cause}</span>
                           </div>
                         {/each}
                       {/if}
@@ -404,7 +404,7 @@
     margin-left: 0.25em;
     margin-right: 0.25em;
   }
-  .update-reason {
+  .update-cause {
     color: #ccc;
     margin-left: 0.5em;
     font-style: italic;

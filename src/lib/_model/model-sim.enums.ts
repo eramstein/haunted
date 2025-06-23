@@ -65,7 +65,7 @@ export enum EmotionType {
 }
 
 export enum ProblemType {
-  NoProblem = 'just tilting for no reason',
+  NoProblem = 'just tilting for no cause',
   NoFood = 'has no food',
   NoMoney = 'has no money',
 }

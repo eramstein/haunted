@@ -49,7 +49,7 @@ export function useTool(
       break;
     case ToolType.RefuseHelp:
       outcome =
-        actingCharacter.name + ' refused to help ' + params.recipient + ' because ' + params.reason;
+        actingCharacter.name + ' refused to help ' + params.recipient + ' because ' + params.cause;
       break;
   }
   return outcome;

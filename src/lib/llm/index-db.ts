@@ -70,7 +70,7 @@ export async function updateChatContent(
             toward: String(update.toward),
             feeling: update.feeling as RelationshipFeeling,
             delta: Number(update.delta),
-            reason: String(update.reason),
+            cause: String(update.cause),
           }))
         : [],
       emotionUpdates: Array.isArray(content.emotionUpdates)
@@ -78,7 +78,7 @@ export async function updateChatContent(
             characterName: String(update.characterName),
             type: update.type as EmotionType,
             delta: Number(update.delta),
-            reason: String(update.reason),
+            cause: String(update.cause),
             subtype: update.subtype ? String(update.subtype) : undefined,
           }))
         : [],

@@ -1,6 +1,6 @@
 import ollama, { type Message, type Tool, type ToolCall } from 'ollama';
 import { Mistral } from '@mistralai/mistralai';
-import { LLM_MODEL } from './config';
+import { LLM_API_MODEL, LLM_MODEL } from './config';
 
 const mistralApiKey = import.meta.env.VITE_MISTRAL_API_KEY;
 
@@ -114,7 +114,7 @@ export class MistralService implements LLMService {
   ): Promise<MistralChatResponse | AsyncIterable<MistralStreamChunk>> {
     if (request.stream) {
       return mistralClient.chat.stream({
-        model: 'mistral-medium-2505',
+        model: LLM_API_MODEL,
         messages: request.messages,
         tools: request.tools,
         stream: true,
@@ -128,7 +128,7 @@ export class MistralService implements LLMService {
       }) as Promise<AsyncIterable<MistralStreamChunk>>;
     }
     return mistralClient.chat.complete({
-      model: 'mistral-medium-2505',
+      model: LLM_API_MODEL,
       messages: request.messages,
       tools: request.tools,
       toolChoice: request.tools ? 'any' : 'none',

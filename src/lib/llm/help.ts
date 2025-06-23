@@ -73,7 +73,7 @@ export async function characterAskingForHelp(
     You are an AI simulation controller.
     - Given a conversation between two characters, extract the outcome as a function call.
     - Pick the correct function from the provided tools.
-    - If the target refused help, call refuseHelp with a reason.
+    - If the target refused help, call refuseHelp with a cause.
     - If the target offered help, call the appropriate function with its parameters.
     - You must only call one function.
     - You must not invent any new functions.

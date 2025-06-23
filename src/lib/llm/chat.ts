@@ -306,7 +306,12 @@ export async function aiInitiatesChat(
   }
   const place = gs.places[playerCharacter.place];
   const timestamp = gs.time.ellapsedTime;
-  const memories = await getSystemPromptMemories(timestamp, [aiCharacter], place, activityType);
+  const memories = await getSystemPromptMemories(
+    timestamp,
+    [aiCharacter, playerCharacter],
+    place,
+    activityType
+  );
   const memoriesPrompt = memories ? `Relevant Memories:\n"${memories}"` : '';
   const context = getActivityContext(activityType, [aiCharacter, playerCharacter]);
   const locationDescription = place.name + ', ' + place.description || '';

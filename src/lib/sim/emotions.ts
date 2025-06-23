@@ -175,6 +175,10 @@ export function updateEmotions(emotionUpdates: EmotionUpdate[]) {
 export function applyEmotionUpdate(characterId: number, update: EmotionUpdate) {
   const character = gs.characters[characterId];
   const emotion = character.emotions.byType[update.type];
+  if (!emotion) {
+    console.error('Emotion not found', update.type, characterId);
+    return;
+  }
   const newValue = clamp(
     emotion.currentIntensity +
       update.delta * emotion.volatility * config.emotionBaseVolatility[update.type],

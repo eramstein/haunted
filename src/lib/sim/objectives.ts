@@ -68,7 +68,7 @@ export function checkIfObjectiveIsSatisfied(character: Character, objective: Obj
   }
 }
 
-export function changeObjective(character: Character, objective: Objective, reason: string = '') {
+export function changeObjective(character: Character, objective: Objective, cause: string = '') {
   // if the new objective is stuck, don't swap and fail the current one
   if (character.failedObjectives[objective.type]) {
     failObjective(character, character.objective!, false);
@@ -76,9 +76,9 @@ export function changeObjective(character: Character, objective: Objective, reas
   }
   // else, swap objective
   character.objective = objective;
-  if (reason) {
+  if (cause) {
     // TODO: log memory?
-    console.log(`${character.name} changed objective to ${objective.type} because ${reason}`);
+    console.log(`${character.name} changed objective to ${objective.type} because ${cause}`);
   }
 }
 

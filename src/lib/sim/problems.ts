@@ -32,18 +32,18 @@ export function recordProblem(character: Character, objective: Objective) {
 
   // add problem if not already recorded
   if (
-    character.problems.findIndex((p) => p.type === problemType && p.reason === problemReason) === -1
+    character.problems.findIndex((p) => p.type === problemType && p.cause === problemReason) === -1
   ) {
     character.problems.push({
       type: problemType,
-      reason: problemReason,
+      cause: problemReason,
     });
   }
   problemEmotionImpact(character, problemType);
 }
 
 export function stringifyProblem(problem: Problem) {
-  return problem.type + ' because ' + problem.reason;
+  return problem.type + ' because ' + problem.cause;
 }
 
 function problemEmotionImpact(character: Character, problemType: ProblemType) {
@@ -73,7 +73,7 @@ export function setSolveProblemTask(character: Character) {
 
 export function solveProblem(character: Character, problem: Problem) {
   character.problems = character.problems.filter(
-    (p) => p.type !== problem.type && p.reason !== problem.reason
+    (p) => p.type !== problem.type && p.cause !== problem.cause
   );
   character.failedObjectives = {};
   setCharactersObjectives([character]);
@@ -87,7 +87,7 @@ export function checkIfProblemSolved(character: Character, problem: Problem) {
       const meal = getItemsByTypeAndOwner(ItemType.Meal, character.id);
       const food = getItemsByTypeAndOwner(ItemType.FoodIngredient, character.id);
       solved =
-        (problem.reason === ProblemReason.NoIncome && character.money >= 30) ||
+        (problem.cause === ProblemReason.NoIncome && character.money >= 30) ||
         meal.length > 0 ||
         food.length > 0;
       break;

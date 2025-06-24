@@ -1,7 +1,9 @@
 import { gs } from '../_state';
 import { generateUniqueId } from '../sim/_utils/random';
+import { VECTOR_OPINION } from './config';
 import { getChatsForCharacters, saveRelationshipSummaryUpdate } from './index-db';
 import { llmService } from './llm-service';
+import { updateMemoryEntry } from './memory-vectors';
 
 export async function updateRelationshipSummary(fromCharacterId: number, toCharacterId: number) {
   const characterNames = gs.characters.map((c) => c.name);
@@ -55,6 +57,7 @@ export async function updateRelationshipSummary(fromCharacterId: number, toChara
       parsed.updatedArc,
       gs.time.ellapsedTime
     );
+    updateMemoryEntry(fromCharacterId, VECTOR_OPINION + toCharacterId, parsed.updatedArc);
   } catch (error) {
     console.error('Error updating relationship summary', error);
   }

@@ -93,7 +93,12 @@ export async function getSystemPromptMemories(
     return '';
   }
 
-  return scoredMemories.sort((a, b) => b.score - a.score)[0].summary;
+  // return top 2 memories summary with highest scores
+  return scoredMemories
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 2)
+    .map((memory) => memory.summary)
+    .join('\n');
 }
 
 function scoreMemory(

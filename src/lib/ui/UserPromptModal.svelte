@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { uiState, gs } from '../_state';
+  import { uiState } from '../_state';
 
   let prompt = $derived(() => uiState.userPrompt);
   let feedback = $derived(() => uiState.userPromptFeedback);
@@ -16,7 +16,7 @@
   <div class="modal">
     <button class="close-button" onclick={closeModal}>×</button>
     <h2>{p.title}</h2>
-    {#if feedback() === ''}
+    {#if feedback() === '' && !uiState.streamingContent}
       <div class="options">
         {#each p.options as option}
           <button class="option-button" onclick={() => option.action()}>
@@ -24,6 +24,7 @@
           </button>
         {/each}
       </div>
+    {:else if uiState.streamingContent}
       <div class="feedback">{@html (uiState.streamingContent || '').replace(/\n/g, '<br>')}</div>
     {:else}
       <div class="feedback">

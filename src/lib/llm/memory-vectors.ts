@@ -18,8 +18,6 @@ export async function queryNpcMemory(characterIds: number[], message: string) {
     ...charactersInScene.map((id) => VECTOR_OPINION + id),
   ];
 
-  console.log('redundantMemoriesIds', redundantMemoriesIds);
-
   for (const characterId of characterIds) {
     const collection = await vectorDatabaseClient.getOrCreateCollection({
       name: MEMORY_COLLECTION + '_' + characterId,
@@ -150,4 +148,24 @@ export async function addGroupActivityMemory(activityLog: GroupActivityLog) {
         documents: [update.cause],
       });
     });
+}
+
+export async function updateMemoryEntry(
+  characterId: number,
+  memoryId: string,
+  newDocument: string
+) {
+  const collection = await vectorDatabaseClient.getOrCreateCollection({
+    name: MEMORY_COLLECTION + '_' + characterId,
+  });
+  await collection.upsert({
+    ids: [memoryId],
+    documents: [newDocument],
+    metadatas: [
+      {
+        timestamp: Date.now(),
+        type: 'updated_memory',
+      },
+    ],
+  });
 }

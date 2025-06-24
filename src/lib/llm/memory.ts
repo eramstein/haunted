@@ -107,13 +107,13 @@ function scoreMemory(
 ) {
   const weights = {
     time: 0.25,
-    characters: 0.25,
-    location: 0.2,
-    activity: 0.2,
-    semantic: 0.1,
+    characters: 0.15,
+    location: 0.1,
+    activity: 0.1,
+    semantic: 0.4,
   };
 
-  const time = memory.timestamp ? timeScore(memory.timestamp, context.timestamp) : 0;
+  const time = timeScore(memory.timestamp, context.timestamp);
   const chars = memory.participants ? characterScore(memory.participants, context.characters) : 0;
   const loc = locationScore(memory.location, context.place.id);
   const act = activityScore(memory.activityType, context.activityType);
@@ -129,7 +129,7 @@ function scoreMemory(
 }
 
 // score between ~1 (recent) and 0 (old)
-function timeScore(memoryTime: number, now: number): number {
+function timeScore(memoryTime: number = 0, now: number = 0): number {
   const decay = 60 * 24 * 30; // 30 days
   const age = Math.abs(now - memoryTime);
   return Math.exp(-age / decay);
@@ -153,5 +153,5 @@ function activityScore(memType: ActivityType | undefined, currentType: ActivityT
 // convert cosine distance to similarity-style score
 function semanticScore(raw?: number): number {
   if (raw === undefined) return 0;
-  return 1 - Math.min(Math.max(raw, 0), 1);
+  return 1 - Math.abs(1 - raw);
 }

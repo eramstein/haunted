@@ -7,3 +7,6 @@ export const LLM_API_MODEL = 'mistral-small-2503';
 
 export const MEMORY_COLLECTION = 'memories';
 export const TOOLS_COLLECTION = 'tools';
+
+export const VECTOR_OPINION = 'opinion_of_';
+export const VECTOR_PUBLIC_NPC_INFO = 'public_npc_info_of_';

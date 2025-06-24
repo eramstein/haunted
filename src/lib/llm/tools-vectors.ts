@@ -2,6 +2,9 @@ import { TOOLS_COLLECTION } from './config';
 import { ToolType } from './tools-definitions';
 import { vectorDatabaseClient } from './vector-db';
 
+const TOOL_COUNT = 5;
+const TOOL_MAX_DISTANCE = 1.7;
+
 export async function queryToolVectors(message: string): Promise<ToolType | null> {
   // Check if a tool has been mentionned in the text
   const collection = await vectorDatabaseClient.getOrCreateCollection({
@@ -9,7 +12,7 @@ export async function queryToolVectors(message: string): Promise<ToolType | null
   });
   const results = await collection.query({
     queryTexts: message,
-    nResults: 5,
+    nResults: TOOL_COUNT,
   });
 
   const documents = results.documents?.[0] || [];
@@ -23,21 +26,23 @@ export async function queryToolVectors(message: string): Promise<ToolType | null
       score: scores[i],
       toolType: metadatas[i]?.tool as ToolType,
     }))
-    .filter((tool) => tool.score < 1.7);
+    .filter((tool) => tool.score < TOOL_MAX_DISTANCE);
 
-  // check if all results point ot the same tool, if yes, return that tool
-  let currentTooltype = null;
-  for (const tool of tools) {
-    if (!currentTooltype) {
-      currentTooltype = tool.toolType;
-    } else if (currentTooltype !== tool.toolType) {
-      currentTooltype = null;
-      break;
-    }
-  }
-  if (currentTooltype) {
-    console.log('all tool types are the same, returning the first one', currentTooltype);
-    return currentTooltype;
+  // check if at least 4 out of 5 results point to the same tool, if yes, return that tool
+  const toolTypeCounts = tools.reduce(
+    (acc, tool) => {
+      acc[tool.toolType] = (acc[tool.toolType] || 0) + 1;
+      return acc;
+    },
+    {} as Record<ToolType, number>
+  );
+
+  const mostCommonTool = Object.entries(toolTypeCounts).find(
+    ([_, count]) => count >= TOOL_COUNT - 1
+  );
+  if (mostCommonTool) {
+    console.log('at least 4 out of 5 results point to the same tool, returning', mostCommonTool[0]);
+    return mostCommonTool[0] as ToolType;
   }
 
   // the longer the message, the more the semantics of the embedded tool call are diluted
@@ -67,8 +72,8 @@ export async function queryToolVectors(message: string): Promise<ToolType | null
     },
     {} as Record<ToolType, number>
   );
-
-  return Object.entries(avgByType).sort((a, b) => b[1] - a[1])[0][0] as ToolType;
+  // return lowest average score
+  return Object.entries(avgByType).sort((a, b) => a[1] - b[1])[0][0] as ToolType;
 }
 
 // Used to detect tool usage in text

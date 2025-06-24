@@ -4,7 +4,7 @@ import { EmotionType } from '@/lib/_model/model-sim.enums';
 export const NPC_ANTOINE: CharacterBase = {
   name: 'Antoine',
   llm: {
-    bio: '27, male, architect',
+    bio: '27 yo, male, architect',
     traits: ['nerdy', 'ambitious', 'extroverted', 'funny'],
   },
   work: {

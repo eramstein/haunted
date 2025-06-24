@@ -1,13 +1,24 @@
 import { vectorDatabaseClient } from './vector-db';
 import { gs } from '../_state';
 import type { GroupActivityLog } from '../_model/model-sim';
-import { MEMORY_COLLECTION } from './config';
+import { MEMORY_COLLECTION, VECTOR_OPINION, VECTOR_PUBLIC_NPC_INFO } from './config';
 
 export async function queryNpcMemory(characterIds: number[], message: string) {
   const documents: (string | null)[] = [];
   const scores: number[] = [];
   const ids: string[] = [];
   const participants: number[] = [];
+
+  const charactersInScene = [...characterIds];
+  if (gs.chat?.playingAsCharacter.id) {
+    charactersInScene.push(gs.chat.playingAsCharacter.id);
+  }
+  const redundantMemoriesIds = [
+    ...charactersInScene.map((id) => VECTOR_PUBLIC_NPC_INFO + id),
+    ...charactersInScene.map((id) => VECTOR_OPINION + id),
+  ];
+
+  console.log('redundantMemoriesIds', redundantMemoriesIds);
 
   for (const characterId of characterIds) {
     const collection = await vectorDatabaseClient.getOrCreateCollection({
@@ -16,6 +27,11 @@ export async function queryNpcMemory(characterIds: number[], message: string) {
     const results = await collection.query({
       queryTexts: message,
       nResults: 3,
+      where: {
+        id: {
+          $nin: redundantMemoriesIds,
+        },
+      },
     });
     const resultDocs = results.documents?.[0] || [];
     const resultScores = results.distances?.[0] || resultDocs.map(() => 2);

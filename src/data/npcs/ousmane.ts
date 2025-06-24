@@ -4,7 +4,7 @@ import { EmotionType } from '@/lib/_model/model-sim.enums';
 export const NPC_OUSMANE: CharacterBase = {
   name: 'Ousmane',
   llm: {
-    bio: '29, male, retired footballer turned professional trading card game player',
+    bio: '29 yo, male, retired footballer turned professional trading card game player',
     traits: ['competitive', 'charismatic', 'resilient', 'strategic', 'nostalgic'],
   },
   work: null,

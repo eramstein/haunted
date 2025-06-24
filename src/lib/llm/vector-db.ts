@@ -1,5 +1,10 @@
 import { ChromaClient } from 'chromadb';
-import { MEMORY_COLLECTION, TOOLS_COLLECTION } from './config';
+import {
+  MEMORY_COLLECTION,
+  TOOLS_COLLECTION,
+  VECTOR_OPINION,
+  VECTOR_PUBLIC_NPC_INFO,
+} from './config';
 import { NPCS } from '@/data/npcs';
 import { TOOLS_VECTORS } from './tools-vectors';
 
@@ -11,12 +16,32 @@ export async function initChromaCollections() {
     const memoriesCollection = await vectorDatabaseClient.getOrCreateCollection({
       name: MEMORY_COLLECTION + '_' + index,
     });
+    const otherNpcs = NPCS.map((npc, i) => ({ ...npc, id: i })).filter((npc) => npc.id !== index);
+    // personal memories
     await memoriesCollection.upsert({
       documents: character.initialMemories,
       metadatas: character.initialMemories.map(() => ({
         type: 'npc_lore',
       })),
-      ids: character.initialMemories.map((_, i) => index + ' lore ' + i),
+      ids: character.initialMemories.map((_, i) => 'lore_' + i),
+    });
+    // public knowledge
+    await memoriesCollection.upsert({
+      documents: otherNpcs.map((npc) => npc.name + ' is ' + npc.llm.bio),
+      metadatas: otherNpcs.map((c) => ({
+        id: VECTOR_PUBLIC_NPC_INFO + c.id,
+        type: 'npc_common_knowledge',
+      })),
+      ids: otherNpcs.map((c) => VECTOR_PUBLIC_NPC_INFO + c.id),
+    });
+    // initial opinions of other NPCs
+    await memoriesCollection.upsert({
+      documents: otherNpcs.map((npc) => npc.name + ' is living in the same house.'),
+      metadatas: otherNpcs.map((c) => ({
+        id: VECTOR_OPINION + c.id,
+        type: 'npc_opinion',
+      })),
+      ids: otherNpcs.map((c) => VECTOR_OPINION + c.id),
     });
   });
   console.log('NPCs memory initialized');

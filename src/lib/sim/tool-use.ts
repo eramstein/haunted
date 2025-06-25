@@ -30,6 +30,7 @@ export function useTool(
       break;
     case ToolType.GiveMoney:
       if (!params.recipient || !params.amount) {
+        console.error('giveMoney: missing recipient or amount', params);
         return '';
       }
       const characterGiftedMoneyTo = getCharacterByName(params.recipient);

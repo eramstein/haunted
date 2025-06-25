@@ -52,7 +52,7 @@ function simulationTick() {
   }
 
   // progress current activity
-  workOnActivities(gs.characters);
+  workOnActivities(gs.characters, gs.time.ellapsedTime);
 
   // every 60 minutes, decay emotions
   if (gs.time.ellapsedTime % 60 === 0) {
@@ -116,4 +116,19 @@ export function getTimeOfDay(timestamp: number) {
     minute: '2-digit',
     hour12: false,
   });
+}
+
+export function isDuringSleepHours(timestamp: number): boolean {
+  const date = getTime(timestamp);
+  const hour = date.getHours();
+  return hour >= 0 && hour < 7;
+}
+
+export function skipToNextMorningTime(timestamp: number): number {
+  const date = getTime(timestamp);
+  const hour = date.getHours();
+  if (hour < 7) {
+    return timestamp + (7 - hour) * 60;
+  }
+  return timestamp + (24 - hour) * 60;
 }

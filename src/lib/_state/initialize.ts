@@ -9,6 +9,10 @@ import { getRandomItemFromArray } from '../sim/_utils/random';
 import { ARTICLES } from '@/data/world/items';
 
 export async function createNewSimState(): Promise<State> {
+  //reset vector database and IndexDB
+  await resetVectorDatabase();
+  await resetIndexDB();
+
   // add some initial items
   const kitchenId = PLACES_IDS_BY_TYPE.kitchen;
   if (kitchenId) {
@@ -33,10 +37,6 @@ export async function createNewSimState(): Promise<State> {
   } else {
     throw new Error('Kitchen not found for initial items');
   }
-
-  //reset vector database and IndexDB
-  await resetVectorDatabase();
-  await resetIndexDB();
 
   return {
     ...initialState,

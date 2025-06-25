@@ -5,23 +5,26 @@ import { gs } from '../_state';
 import { generateUniqueId } from './_utils/random';
 import { saveChat } from '../llm/index-db';
 import { activityAffinityWeights, config } from '../_config/config';
-import { failObjective } from './objectives';
+import { putObjectiveOnHold } from './objectives';
+import { getActivityTypeDuration } from './activities';
+import { scheduleActivity, willBeAvailableAt } from './schedule';
 
 export function proposeActivity(
   fromCharacter: Character,
   characters: Character[],
   activityType: ActivityType,
-  target: ActivityTargets[ActivityType] = null
+  target: ActivityTargets[ActivityType] = null,
+  timestamp: number = 0
 ) {
   const acceptedCharacters = characters.filter((character) =>
-    acceptActivity(character, fromCharacter, activityType, target)
+    acceptActivity(character, fromCharacter, activityType, target, timestamp)
   );
   console.log(
-    `${fromCharacter.name} proposes ${activityType} to ${characters.map((character) => character.name).join(', ')}.
+    `${fromCharacter.name} proposes ${activityType} to ${characters.map((character) => character.name).join(', ')} at time ${timestamp}.
     Accepted: ${acceptedCharacters.map((character) => character.name).join(', ')}`
   );
   if (acceptedCharacters.length === 0) {
-    failObjective(fromCharacter);
+    putObjectiveOnHold(fromCharacter);
     return;
   }
   const groupActivity = {
@@ -31,33 +34,49 @@ export function proposeActivity(
     participants: [fromCharacter.id, ...acceptedCharacters.map((character) => character.id)],
   };
   [fromCharacter, ...acceptedCharacters].forEach((character) => {
-    // for now we assume that for group activities, the target is the place
-    character.activities.push({
-      type: ActivityType.GoTo,
-      progress: 0,
-      target,
-    });
-    character.activities.push(groupActivity);
+    if (timestamp > 0) {
+      scheduleActivity(character, groupActivity, timestamp);
+    } else {
+      character.activities.push(groupActivity);
+    }
   });
-  recordGroupActivity(activityType, groupActivity.participants, target as number);
+  recordGroupActivity(activityType, groupActivity.participants, target as number, timestamp);
 }
 
 export function recordGroupActivity(
   activityType: ActivityType,
   participants: number[],
-  location: number
+  location: number,
+  timestamp: number = 0
 ) {
   // store a schrodinger's chat: empty reference with meatadata for new, actual generated when user looks at it
   const id = generateUniqueId();
-  saveChat(id, gs.time.ellapsedTime, participants, location, activityType);
+  console.log(
+    'recordGroupActivity',
+    id,
+    timestamp || gs.time.ellapsedTime,
+    participants,
+    location,
+    activityType
+  );
+
+  saveChat(id, timestamp || gs.time.ellapsedTime, participants, location, activityType);
 }
 
 function acceptActivity(
   character: Character,
   fromCharacter: Character,
   activityType: ActivityType,
-  target: ActivityTargets[ActivityType]
+  target: ActivityTargets[ActivityType],
+  timestamp: number = 0
 ) {
+  if (
+    timestamp > 0 &&
+    !willBeAvailableAt(character, timestamp, getActivityTypeDuration(activityType))
+  ) {
+    console.log('Character is not available at the requested timestamp', character, timestamp);
+    return false;
+  }
   return motivatedByActivity(character, fromCharacter, activityType, target) >= 0.333;
 }
 
@@ -123,7 +142,7 @@ export function getInviteList(character: Character, activityType: ActivityType):
     .sort((a, b) => b.score - a.score);
 
   if (partners.length === 0) {
-    failObjective(character);
+    putObjectiveOnHold(character);
     return [];
   }
 

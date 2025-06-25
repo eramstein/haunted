@@ -25,7 +25,7 @@ function getPriorityObjective(character: Character): Objective | null {
   // schedules can include invitations
   if (
     character.needs.food > config.needs.food &&
-    !character.failedObjectives[ObjectiveType.HaveMeal]
+    !character.onHoldObjectives[ObjectiveType.HaveMeal]
   ) {
     return { type: ObjectiveType.HaveMeal };
   }
@@ -34,23 +34,23 @@ function getPriorityObjective(character: Character): Objective | null {
   }
   if (
     character.needs.sleep > config.needs.sleep &&
-    !character.failedObjectives[ObjectiveType.Rest]
+    !character.onHoldObjectives[ObjectiveType.Rest]
   ) {
     return { type: ObjectiveType.Rest };
   }
   if (
     character.needs.social > config.needs.social &&
-    !character.failedObjectives[ObjectiveType.Socialize]
+    !character.onHoldObjectives[ObjectiveType.Socialize]
   ) {
     return { type: ObjectiveType.Socialize };
   }
   if (
     character.needs.fun > config.needs.fun &&
-    !character.failedObjectives[ObjectiveType.HaveFun]
+    !character.onHoldObjectives[ObjectiveType.HaveFun]
   ) {
     return { type: ObjectiveType.HaveFun };
   }
-  if (character.money < 1000 && !character.failedObjectives[ObjectiveType.GetMoney]) {
+  if (character.money < 1000 && !character.onHoldObjectives[ObjectiveType.GetMoney]) {
     return { type: ObjectiveType.GetMoney, target: character.money + 100 };
   }
   return null;
@@ -75,8 +75,8 @@ export function checkIfObjectiveIsSatisfied(character: Character, objective: Obj
 
 export function changeObjective(character: Character, objective: Objective, cause: string = '') {
   // if the new objective is stuck, don't swap and fail the current one
-  if (character.failedObjectives[objective.type]) {
-    failObjective(character);
+  if (character.onHoldObjectives[objective.type]) {
+    putObjectiveOnHold(character);
     return;
   }
   // else, swap objective
@@ -87,20 +87,27 @@ export function changeObjective(character: Character, objective: Objective, caus
   }
 }
 
-export function failObjective(character: Character, isProblem: boolean = false) {
+export function putObjectiveOnHold(character: Character, isProblem: boolean = false) {
   const objective = character.objective;
   if (!objective) {
     return;
   }
-  character.failedObjectives[objective.type] = true;
+  character.onHoldObjectives[objective.type] = true;
   character.objective = null;
   if (isProblem) {
     recordProblem(character, objective);
   }
 }
 
+export function objectiveTypeIsScheduled(character: Character, objectiveType: ObjectiveType) {
+  if (character.objective?.type === objectiveType) {
+    character.objective = null;
+  }
+  character.onHoldObjectives[objectiveType] = true;
+}
+
 export function resetFailedObjectives() {
   gs.characters.forEach((character) => {
-    character.failedObjectives = {};
+    character.onHoldObjectives = {};
   });
 }

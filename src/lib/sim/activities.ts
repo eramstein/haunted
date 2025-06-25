@@ -1,3 +1,4 @@
+import { config } from '../_config';
 import type { Activity, Character } from '../_model/model-sim';
 import { ActivityType, ItemType, ObjectiveType } from '../_model/model-sim.enums';
 import {
@@ -18,12 +19,16 @@ import {
 } from './actions';
 import { checkIfObjectiveIsSatisfied } from './objectives';
 import { setSolveProblemTask } from './problems';
+import { startScheduledActivity } from './schedule';
 
-export function workOnActivities(characters: Character[]) {
-  characters.forEach(workOnActivity);
+export function workOnActivities(characters: Character[], time: number) {
+  characters.forEach((character) => workOnActivity(character, time));
 }
 
-function workOnActivity(character: Character) {
+function workOnActivity(character: Character, time: number) {
+  if (character.activitiesScheduled[time]) {
+    startScheduledActivity(character, time);
+  }
   if (character.activities.length === 0) {
     setActivityFromObjective(character);
   } else {
@@ -103,4 +108,17 @@ export function finishActivity(character: Character) {
       character.objective = null;
     }
   }
+}
+
+export function getActivityRemainingDuration(activity: Activity): number {
+  const actionSpeed = config.actionSpeed[activity.type as keyof typeof config.actionSpeed];
+  if (!actionSpeed) return 0;
+  const remainingPercent = 1 - activity.progress / 100;
+  return Math.ceil((100 / actionSpeed) * remainingPercent); // Duration in minutes
+}
+
+export function getActivityTypeDuration(activityType: ActivityType): number {
+  const actionSpeed = config.actionSpeed[activityType as keyof typeof config.actionSpeed];
+  if (!actionSpeed) return 0;
+  return Math.ceil(100 / actionSpeed);
 }

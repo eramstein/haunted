@@ -34,9 +34,9 @@
   });
 
   function getChats() {
-    // Fetch chats for the last 24 hours
-    const endTime = gs.time.ellapsedTime;
-    const startTime = endTime - 24 * 60 * 60; // 24 hours ago
+    // Fetch chats for the last and next 24 hours
+    const endTime = gs.time.ellapsedTime + 24 * 60 * 60;
+    const startTime = gs.time.ellapsedTime - 24 * 60 * 60;
     getChatsForCharacters([props.characterId], startTime, endTime)
       .then((chats) => {
         activities = chats.sort((a, b) => b.timestamp - a.timestamp);
@@ -85,7 +85,7 @@
   {:else}
     <div class="activities-list">
       {#each activities as activity}
-        <div class="activity-item">
+        <div class="activity-item" class:upcoming={activity.timestamp > gs.time.ellapsedTime}>
           <div class="activity-header">
             <div class="activity-info">
               <div class="activity-type-location">
@@ -110,36 +110,40 @@
               </div>
             </div>
             <div class="activity-header-right">
-              <span class="activity-time">{formatDate(getTime(activity.timestamp))}</span>
-              <div class="tabs">
-                <button
-                  class="tab-button"
-                  class:active={activityTabs[activity.id] === 'summary'}
-                  onclick={() =>
-                    (activityTabs[activity.id] =
-                      activityTabs[activity.id] === 'summary' ? 'none' : 'summary')}
-                >
-                  Summary
-                </button>
-                <button
-                  class="tab-button"
-                  class:active={activityTabs[activity.id] === 'transcript'}
-                  onclick={() =>
-                    (activityTabs[activity.id] =
-                      activityTabs[activity.id] === 'transcript' ? 'none' : 'transcript')}
-                >
-                  Transcript
-                </button>
-                <button
-                  class="tab-button"
-                  class:active={activityTabs[activity.id] === 'updates'}
-                  onclick={() =>
-                    (activityTabs[activity.id] =
-                      activityTabs[activity.id] === 'updates' ? 'none' : 'updates')}
-                >
-                  Updates
-                </button>
-              </div>
+              <span class="activity-time" class:upcoming={activity.timestamp > gs.time.ellapsedTime}
+                >{formatDate(getTime(activity.timestamp))}</span
+              >
+              {#if activity.timestamp <= gs.time.ellapsedTime}
+                <div class="tabs">
+                  <button
+                    class="tab-button"
+                    class:active={activityTabs[activity.id] === 'summary'}
+                    onclick={() =>
+                      (activityTabs[activity.id] =
+                        activityTabs[activity.id] === 'summary' ? 'none' : 'summary')}
+                  >
+                    Summary
+                  </button>
+                  <button
+                    class="tab-button"
+                    class:active={activityTabs[activity.id] === 'transcript'}
+                    onclick={() =>
+                      (activityTabs[activity.id] =
+                        activityTabs[activity.id] === 'transcript' ? 'none' : 'transcript')}
+                  >
+                    Transcript
+                  </button>
+                  <button
+                    class="tab-button"
+                    class:active={activityTabs[activity.id] === 'updates'}
+                    onclick={() =>
+                      (activityTabs[activity.id] =
+                        activityTabs[activity.id] === 'updates' ? 'none' : 'updates')}
+                  >
+                    Updates
+                  </button>
+                </div>
+              {/if}
             </div>
           </div>
           <div class="activity-details">
@@ -203,7 +207,7 @@
                 <div class="chat-log streaming">
                   {uiState.streamingContent}
                 </div>
-              {:else}
+              {:else if activity.timestamp <= gs.time.ellapsedTime}
                 <button class="generate-chat-button" onclick={() => generateActivityChat(activity)}>
                   Generate Chat Log
                 </button>
@@ -245,6 +249,11 @@
     background: rgba(255, 255, 255, 0.1);
     border-radius: 4px;
     padding: 0.5rem 0.75rem 0.75rem 0.75rem;
+  }
+
+  .activity-item.upcoming {
+    background: rgba(135, 206, 250, 0.15);
+    border: 1px solid rgba(135, 206, 250, 0.3);
   }
 
   .activity-header {
@@ -294,6 +303,11 @@
   .activity-time {
     color: #888;
     font-size: 0.9em;
+  }
+
+  .activity-time.upcoming {
+    color: #87ceeb;
+    font-weight: 500;
   }
 
   .activity-details {

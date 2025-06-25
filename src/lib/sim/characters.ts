@@ -8,6 +8,7 @@ export function getCharactersByActivityType(characters: Character[], activityTyp
   }
   return characters.filter((character) => character.activities[0]?.type === activityType);
 }
+
 export function getCharacterByName(name: string) {
   return gs.characters.find((character) => character.name === name);
 }

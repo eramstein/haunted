@@ -1,6 +1,6 @@
 import type { Character } from '@/lib/_model/model-sim';
 import { ActivityType, ObjectiveType } from '@/lib/_model/model-sim.enums';
-import { failObjective } from '../objectives';
+import { putObjectiveOnHold } from '../objectives';
 
 export function setGetMoneyTask(character: Character) {
   if (character.work) {
@@ -15,6 +15,6 @@ export function setGetMoneyTask(character: Character) {
       target: character.objective?.target || 0,
     });
   } else {
-    failObjective(character, true);
+    putObjectiveOnHold(character, true);
   }
 }

@@ -6,3 +6,6 @@ export * from './actions';
 export * from './activities';
 export * from './items';
 export * from './problems';
+export * from './activities-group';
+export * from './characters';
+export * from './schedule';

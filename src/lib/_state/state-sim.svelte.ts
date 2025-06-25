@@ -36,6 +36,7 @@ function initCharacter(character: CharacterBase, index: number): Character {
     id: index,
     place: 0, // Default to first place
     activities: [],
+    activitiesScheduled: {},
     objective: null,
     needs: {
       food: 0,
@@ -49,7 +50,7 @@ function initCharacter(character: CharacterBase, index: number): Character {
       dominantEmotion: null,
       byType: character.emotionalProfile,
     },
-    failedObjectives: {},
+    onHoldObjectives: {},
     problems: [],
   };
 }

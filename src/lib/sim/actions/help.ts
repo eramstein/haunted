@@ -19,6 +19,7 @@ import { useTool } from '../tool-use';
 export function askForHelp(character: Character, activity: Activity<ActivityType.AskForHelp>) {
   if (character.problems.length === 0) {
     finishActivity(character);
+    uiState.userPrompt = null;
     return;
   }
   const problem = character.objective?.target as Problem;

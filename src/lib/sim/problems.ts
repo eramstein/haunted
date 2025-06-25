@@ -75,7 +75,7 @@ export function solveProblem(character: Character, problem: Problem) {
   character.problems = character.problems.filter(
     (p) => p.type !== problem.type && p.cause !== problem.cause
   );
-  character.failedObjectives = {};
+  character.onHoldObjectives = {};
   setCharactersObjectives([character]);
 }
 

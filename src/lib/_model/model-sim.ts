@@ -58,8 +58,9 @@ export interface Character extends CharacterBase {
   id: number;
   place: number;
   activities: Activity[]; // character will do these in order
+  activitiesScheduled: Record<number, Activity>; // key is the timestamp, value is activity
   objective: Objective | null;
-  failedObjectives: Partial<Record<ObjectiveType, boolean>>; // don't retry until unlocked
+  onHoldObjectives: Partial<Record<ObjectiveType, boolean>>; // don't retry until unlocked
   problems: Problem[]; // issues the character can't solve by themselves using normal activities
   needs: {
     food: number;

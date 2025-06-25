@@ -45,11 +45,15 @@ function simulationTick() {
   gs.time.ellapsedTime += 1;
   setComputedTimes();
   updateCharactersNeeds();
-  workOnActivities(gs.characters);
+
   // every 10 minutes, check if any characters have an objective
   if (gs.time.ellapsedTime % 10 === 0) {
     setCharactersObjectives(gs.characters);
   }
+
+  // progress current activity
+  workOnActivities(gs.characters);
+
   // every 60 minutes, decay emotions
   if (gs.time.ellapsedTime % 60 === 0) {
     decayEmotionsForAllCharacters();

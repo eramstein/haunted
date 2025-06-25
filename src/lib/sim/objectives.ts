@@ -18,6 +18,11 @@ export function setCharactersObjectives(characters: Character[]) {
 
 // follow pyramid of needs
 function getPriorityObjective(character: Character): Objective | null {
+  // don't necessarily try to do it right now, if it's not super urgent plan it
+  // (e.g. if Socliaze doesn't have friends available, schedule it for later)
+  // use typical hours when applicable (e.g. if super sleepy at 2pm take a nap, but if it's 8pm wait for a couple hours)
+  // when an objective is planned, block it until then
+  // schedules can include invitations
   if (
     character.needs.food > config.needs.food &&
     !character.failedObjectives[ObjectiveType.HaveMeal]
@@ -71,7 +76,7 @@ export function checkIfObjectiveIsSatisfied(character: Character, objective: Obj
 export function changeObjective(character: Character, objective: Objective, cause: string = '') {
   // if the new objective is stuck, don't swap and fail the current one
   if (character.failedObjectives[objective.type]) {
-    failObjective(character, character.objective!, false);
+    failObjective(character);
     return;
   }
   // else, swap objective
@@ -82,11 +87,11 @@ export function changeObjective(character: Character, objective: Objective, caus
   }
 }
 
-export function failObjective(
-  character: Character,
-  objective: Objective,
-  isProblem: boolean = true
-) {
+export function failObjective(character: Character, isProblem: boolean = false) {
+  const objective = character.objective;
+  if (!objective) {
+    return;
+  }
   character.failedObjectives[objective.type] = true;
   character.objective = null;
   if (isProblem) {

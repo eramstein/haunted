@@ -1,4 +1,9 @@
-import { EmotionType, ItemType } from '../_model/model-sim.enums';
+import {
+  ActivityType,
+  EmotionType,
+  ItemType,
+  RelationshipFeeling,
+} from '../_model/model-sim.enums';
 
 export const config = {
   actionSpeed: {
@@ -46,4 +51,35 @@ export const config = {
   // aggregation is adding feeling delta (-1 to +1) squared multiplied by relationSummaryVolatility, so a huge change counts for 10, a medium counts for 2.5
   relationSummaryUpdateTreshold: 20,
   relationSummaryVolatility: 10,
+};
+
+export const activityAffinityWeights: Partial<
+  Record<ActivityType, Partial<Record<RelationshipFeeling, number>>>
+> = {
+  [ActivityType.Chat]: {
+    affection: 0.8,
+    trust: 0.6,
+    gratitude: 0.4,
+    respect: 0.3,
+    admiration: 0.2,
+
+    annoyance: -0.8,
+    resentment: -0.7,
+    suspicion: -0.5,
+    jealousy: -0.3,
+  },
+
+  [ActivityType.Play]: {
+    trust: 0.7,
+    rivalry: 0.5,
+    admiration: 0.4,
+    affection: 0.3,
+    respect: 0.3,
+
+    annoyance: -0.7,
+    resentment: -0.6,
+    suspicion: -0.5,
+    intimidation: -0.4,
+    envy: -0.3,
+  },
 };

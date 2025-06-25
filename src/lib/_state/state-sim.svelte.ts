@@ -38,10 +38,10 @@ function initCharacter(character: CharacterBase, index: number): Character {
     activities: [],
     objective: null,
     needs: {
-      food: config.needs.food,
+      food: 0,
       sleep: 0,
       fun: config.needs.fun - 180,
-      social: config.needs.social - 120,
+      social: config.needs.social,
     },
     relationships: getRelationships(character),
     emotions: {
@@ -60,7 +60,9 @@ function getRelationships(character: CharacterBase) {
     if (otherCharacter.name === character.name) return;
     relationships[index] = {
       status: RelationshipStatus.Unknown,
-      feelings: {},
+      feelings: {
+        affection: character.name === 'Emma' && otherCharacter.name === 'Molly' ? 100 : 0,
+      },
       summary: {
         description:
           character.name + ' just met ' + otherCharacter.name + '. They live in the same mansion.',

@@ -13,6 +13,7 @@ export async function queryNpcMemory(characterIds: number[], message: string) {
   if (gs.chat?.playingAsCharacter.id) {
     charactersInScene.push(gs.chat.playingAsCharacter.id);
   }
+  // bios and opinions about present characters are already in the system prompt
   const redundantMemoriesIds = [
     ...charactersInScene.map((id) => VECTOR_PUBLIC_NPC_INFO + id),
     ...charactersInScene.map((id) => VECTOR_OPINION + id),

@@ -15,6 +15,6 @@ export function setGetMoneyTask(character: Character) {
       target: character.objective?.target || 0,
     });
   } else {
-    failObjective(character, { type: ObjectiveType.GetMoney });
+    failObjective(character, true);
   }
 }

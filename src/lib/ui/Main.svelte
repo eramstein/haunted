@@ -8,6 +8,7 @@
   import SidePanel from './SidePanel.svelte';
   import UserPromptModal from './UserPromptModal.svelte';
   import Chat from './Chat.svelte';
+  import GroupActivityCalendar from './GroupActivityCalendar.svelte';
 </script>
 
 <UserPromptModal />
@@ -23,6 +24,9 @@
     {/if}
     {#if uiState.currentView === UiView.MansionMap}
       <MansionMap />
+    {/if}
+    {#if uiState.currentView === UiView.Calendar}
+      <GroupActivityCalendar />
     {/if}
   </div>
   <SidePanel />

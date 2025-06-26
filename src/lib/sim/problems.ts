@@ -10,7 +10,7 @@ import {
 import { config } from '../_config/config';
 import { updateEmotionValue } from './emotions';
 import { getBestFriend } from './relationships';
-import { setCharactersObjectives } from './objectives';
+import { putObjectiveOnHold, setCharactersObjectives } from './objectives';
 import { getItemsByTypeAndOwner } from './items';
 
 export function recordProblem(character: Character, objective: Objective) {
@@ -37,6 +37,7 @@ export function recordProblem(character: Character, objective: Objective) {
     character.problems.push({
       type: problemType,
       cause: problemReason,
+      alreadyAsked: {},
     });
   }
   problemEmotionImpact(character, problemType);
@@ -58,7 +59,16 @@ function problemEmotionImpact(character: Character, problemType: ProblemType) {
 }
 
 export function setSolveProblemTask(character: Character) {
-  const askedForHelp = getBestFriend(character);
+  if (character.objective?.type !== ObjectiveType.SolveProblem || !character.problems.length) {
+    return;
+  }
+  const problem = character.objective.target;
+  const askedForHelp = getBestFriend(character, problem.alreadyAsked);
+  if (!askedForHelp) {
+    console.log('no best friend to ask for help');
+    putObjectiveOnHold(character);
+    return;
+  }
   character.activities.push({
     type: ActivityType.GoTo,
     progress: 0,

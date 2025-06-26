@@ -205,6 +205,7 @@ export interface DominantEmotion {
 export interface Problem {
   type: ProblemType;
   cause: ProblemReason;
+  alreadyAsked: Record<number, boolean>; // key is character id, value is true if already asked for help
 }
 
 export interface ChatState {

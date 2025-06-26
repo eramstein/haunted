@@ -174,7 +174,7 @@
                     class="feeling-value"
                     style="color: {getFeelingColor(rel.relationship.feelings[feeling] || 0)}"
                   >
-                    {rel.relationship.feelings[feeling] || 0}
+                    {Math.round(rel.relationship.feelings[feeling] || 0)}
                   </span>
                 </div>
               {/if}

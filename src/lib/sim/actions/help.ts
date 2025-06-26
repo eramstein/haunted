@@ -17,6 +17,8 @@ import { llmService } from '@/lib/llm/llm-service';
 import { useTool } from '../tool-use';
 
 export function askForHelp(character: Character, activity: Activity<ActivityType.AskForHelp>) {
+  console.log('askForHelp', character);
+
   if (character.problems.length === 0) {
     finishActivity(character);
     uiState.userPrompt = null;
@@ -24,6 +26,7 @@ export function askForHelp(character: Character, activity: Activity<ActivityType
   }
   const problem = character.objective?.target as Problem;
   const helper = gs.characters[activity.target];
+  problem.alreadyAsked[helper.id] = true;
   promptUser({
     title: `${character.name} asks ${helper.name} for help`,
     options: [

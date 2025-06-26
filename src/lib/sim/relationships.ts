@@ -78,16 +78,19 @@ export function increaseFeelingValue(
   );
 }
 
-export function getBestFriend(character: Character): Character {
+export function getBestFriend(
+  character: Character,
+  notIn: Record<number, boolean> = {}
+): Character | null {
   Object.entries(character.relationships).forEach(([towardId, relationship]) => {
-    if (relationship.status === RelationshipStatus.CloseFriend) {
+    if (relationship.status === RelationshipStatus.CloseFriend && !notIn[+towardId]) {
       return gs.characters[+towardId];
     }
   });
   let maxScore = -Infinity;
   let bestFriend: Character | null = null;
   gs.characters
-    .filter((c) => c.id !== character.id)
+    .filter((c) => c.id !== character.id && !notIn[c.id])
     .forEach((other) => {
       const feelings = other.relationships[character.id].feelings;
       const score =
@@ -100,7 +103,7 @@ export function getBestFriend(character: Character): Character {
         bestFriend = other;
       }
     });
-  return bestFriend || gs.characters[0];
+  return bestFriend;
 }
 
 export function getRelationChangeValue(delta: number) {

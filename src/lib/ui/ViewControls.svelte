@@ -5,6 +5,7 @@
   const views = [
     { id: UiView.MansionMap, label: 'Mansion Map' },
     { id: UiView.Place, label: 'Place' },
+    { id: UiView.Calendar, label: 'Calendar' },
   ];
 </script>
 

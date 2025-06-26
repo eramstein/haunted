@@ -25,4 +25,5 @@ export interface UserPrompt {
 export enum UiView {
   MansionMap = 'MansionMap',
   Place = 'Place',
+  Calendar = 'Calendar',
 }

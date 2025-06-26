@@ -22,6 +22,7 @@ import { getTimeOfDay } from '../sim/time';
 import { getSystemPromptMemories } from './memory';
 import { checkIfProblemSolved, updateEmotions } from '../sim';
 import { generateUniqueId } from '../sim/_utils/random';
+import { finishActivity } from '../sim/activities';
 
 export async function groupChat(
   chatId: string,
@@ -468,6 +469,7 @@ export async function endPlayerChat() {
   if (gs.chat!.activityType === ActivityType.AskForHelp) {
     const character = gs.characters[gs.chat!.otherCharacters[0].id];
     checkIfProblemSolved(character, character.objective?.target);
+    finishActivity(character);
   }
   gs.chat = null;
 }

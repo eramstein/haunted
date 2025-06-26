@@ -8,7 +8,7 @@ export const NPC_LISE: CharacterBase = {
     traits: ['creative', 'introspective', 'resilient', 'dreamy', 'sensitive'],
   },
   work: null,
-  money: 50,
+  money: 5000,
   initialMemories: [
     'CAREER_STRUGGLE: Lise dreams of becoming a published author, but her short stories have yet to gain traction, leaving her financially strained.',
     'FAMILY_BACKGROUND: Growing up in a working-class family that valued practical careers, she feels unsupported in her pursuit of writing.',

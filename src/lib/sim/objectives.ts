@@ -18,11 +18,6 @@ export function setCharactersObjectives(characters: Character[]) {
 
 // follow pyramid of needs
 function getPriorityObjective(character: Character): Objective | null {
-  // don't necessarily try to do it right now, if it's not super urgent plan it
-  // (e.g. if Socliaze doesn't have friends available, schedule it for later)
-  // use typical hours when applicable (e.g. if super sleepy at 2pm take a nap, but if it's 8pm wait for a couple hours)
-  // when an objective is planned, block it until then
-  // schedules can include invitations
   if (
     character.needs.food > config.needs.food &&
     !character.onHoldObjectives[ObjectiveType.HaveMeal]

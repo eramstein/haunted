@@ -101,7 +101,9 @@ export function progressActivity(character: Character) {
 }
 
 export function finishActivity(character: Character) {
+  console.log('finishActivity', character);
   character.activities.shift();
+  console.log('character.activities', character.activities);
   if (character.objective) {
     const objectiveCompleted = checkIfObjectiveIsSatisfied(character, character.objective);
     if (objectiveCompleted) {

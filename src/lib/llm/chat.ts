@@ -29,7 +29,8 @@ export async function groupChat(
   timestamp: number,
   characters: Character[],
   place: Place,
-  activityType: ActivityType
+  activityType: ActivityType,
+  instructions: string = ''
 ): Promise<string> {
   const memories = await getSystemPromptMemories(timestamp, characters, place, activityType);
   const memoriesPrompt = memories
@@ -49,6 +50,7 @@ export async function groupChat(
     ? getGroupRelationshipsDescription(characters)
     : '';
   const timeOfDay = getTimeOfDay(timestamp);
+  const instructionsPrompt = instructions ? `- Instructions: ${instructions}` : '';
 
   const userPrompt = {
     role: 'user',
@@ -57,6 +59,7 @@ export async function groupChat(
         ${charactersDescription}
       - Location: ${locationDescription}
       - Context: ${context}. Time of day ${timeOfDay}.
+      ${instructionsPrompt}
 
       ${memoriesPrompt}
       

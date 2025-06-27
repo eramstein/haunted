@@ -3,6 +3,11 @@ ghost interactions:
   - Antoine must use the word "crocodile"
   - Antoine will make a tantrum
   - The group is going to do something silly
+- prompt to trigger action:
+  - cause a hallucination, suggest something, and do a LLM toolcall about what the character does
+- make up new memories
+- make items appear
+- update relationship summaries
 
 NPC "emotional moments" triggers:
 - emotion blending (e.g. joy && anticipation > 70 -> the NPC gets a big hope, anger > 0.9 -> conflict)

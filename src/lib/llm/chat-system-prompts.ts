@@ -23,6 +23,8 @@ Input Parameters:
 
 - Past Events: Any recent shared experiences that might shape this interaction.
 
+- Instructions: Actions, events or dialogue that must happen during that scene.
+
 Style Guidelines:
 
 - Write in third-person limited narration with light, engaging prose — like a modern novel.

@@ -91,7 +91,6 @@ export async function groupChat(
 
   // End streaming
   uiState.isStreaming = false;
-  uiState.streamingContent = '';
 
   const postProcessing = await generateSummary(transcript);
 
@@ -286,7 +285,6 @@ export async function playerSendChat(
 
   // End streaming
   uiState.isStreaming = false;
-  uiState.streamingContent = '';
 
   gs.chat!.history.push({
     role: 'assistant',
@@ -388,7 +386,6 @@ export async function aiInitiatesChat(
 
   // End streaming
   uiState.isStreaming = false;
-  uiState.streamingContent = '';
 
   gs.chat!.history.push({
     role: 'assistant',

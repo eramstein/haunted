@@ -2,13 +2,13 @@
   import { gs, uiState } from '../_state';
   import { LABELS_ACTIVITY_TYPES } from '../_config/labels';
   import type { GroupActivityLog, Character } from '../_model/model-sim';
-  import { groupChat } from '../llm/chat';
   import { getChatsForCharacters } from '../llm/index-db';
   import { getCharacterImage } from './_helpers/images.svelte';
   import { formatDate } from './_helpers/date.svelte';
   import { getTime } from '../sim';
   import { POSITIVE_EMOTIONS, NEGATIVE_EMOTIONS } from '../sim/emotions';
   import { EmotionType } from '../_model/model-sim.enums';
+  import GenerateActivityChatModal from './GenerateActivityChatModal.svelte';
 
   let props = $props<{
     characterId: number;
@@ -19,6 +19,7 @@
   let characterName = $derived(gs.characters[props.characterId].name);
   let activities = $state<GroupActivityLog[]>([]);
   let activityTabs = $state<Record<string, Tab>>({});
+  let selectedActivity = $state<GroupActivityLog | null>(null);
 
   function getEmotionDeltaColor(type: EmotionType, delta: number): string {
     if (POSITIVE_EMOTIONS.includes(type)) {
@@ -53,28 +54,13 @@
       });
   }
 
-  async function generateActivityChat(activity: GroupActivityLog) {
-    if (activity.content?.transcript) return;
-    activityTabs[activity.id] = 'transcript';
+  function openGenerateChatModal(activity: GroupActivityLog) {
+    selectedActivity = activity;
+  }
 
-    const participants = activity.participants
-      .map((id: number) => gs.characters.find((c) => c.id === id))
-      .filter((c): c is Character => c !== undefined);
-
-    if (!participants.length) return;
-
-    try {
-      await groupChat(
-        activity.id,
-        activity.timestamp,
-        participants,
-        gs.places[activity.location],
-        activity.activityType
-      );
-      getChats();
-    } catch (error) {
-      console.error('Failed to generate chat:', error);
-    }
+  function closeGenerateChatModal() {
+    selectedActivity = null;
+    getChats(); // Refresh the data after modal closes
   }
 </script>
 
@@ -203,12 +189,11 @@
                     </div>
                   {/if}
                 </div>
-              {:else if uiState.isStreaming && uiState.streamingContent}
-                <div class="chat-log streaming">
-                  {uiState.streamingContent}
-                </div>
               {:else if activity.timestamp <= gs.time.ellapsedTime}
-                <button class="generate-chat-button" onclick={() => generateActivityChat(activity)}>
+                <button
+                  class="generate-chat-button"
+                  onclick={() => openGenerateChatModal(activity)}
+                >
                   Generate Chat Log
                 </button>
               {/if}
@@ -219,6 +204,10 @@
     </div>
   {/if}
 </div>
+
+{#if selectedActivity}
+  <GenerateActivityChatModal activity={selectedActivity} onClose={closeGenerateChatModal} />
+{/if}
 
 <style>
   .group-activity-history {

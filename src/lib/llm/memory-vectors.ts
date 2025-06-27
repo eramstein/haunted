@@ -20,26 +20,31 @@ export async function queryNpcMemory(characterIds: number[], message: string) {
   ];
 
   for (const characterId of characterIds) {
-    const collection = await vectorDatabaseClient.getOrCreateCollection({
-      name: MEMORY_COLLECTION + '_' + characterId,
-    });
-    const results = await collection.query({
-      queryTexts: message,
-      nResults: 3,
-      where: {
-        id: {
-          $nin: redundantMemoriesIds,
+    try {
+      const collection = await vectorDatabaseClient.getOrCreateCollection({
+        name: MEMORY_COLLECTION + '_' + characterId,
+      });
+      const results = await collection.query({
+        queryTexts: message,
+        nResults: 3,
+        where: {
+          id: {
+            $nin: redundantMemoriesIds,
+          },
         },
-      },
-    });
-    const resultDocs = results.documents?.[0] || [];
-    const resultScores = results.distances?.[0] || resultDocs.map(() => 2);
-    const resultIds = results.ids?.[0] || resultDocs.map((_, i) => i);
+      });
+      const resultDocs = results.documents?.[0] || [];
+      const resultScores = results.distances?.[0] || resultDocs.map(() => 2);
+      const resultIds = results.ids?.[0] || resultDocs.map((_, i) => i);
 
-    documents.push(...resultDocs);
-    scores.push(...resultScores);
-    ids.push(...resultIds);
-    participants.push(...resultDocs.map(() => characterId));
+      documents.push(...resultDocs);
+      scores.push(...resultScores);
+      ids.push(...resultIds);
+      participants.push(...resultDocs.map(() => characterId));
+    } catch (error) {
+      console.error(`Error querying memory for character ${characterId}:`, error);
+      // Continue with other characters even if one fails
+    }
   }
 
   // Merge duplicate IDs
@@ -83,21 +88,26 @@ export async function queryNpcMemory(characterIds: number[], message: string) {
 
 export async function addGroupActivityMemory(activityLog: GroupActivityLog) {
   // one collective memory about the event
-  activityLog.participants.forEach(async (id) => {
-    const collection = await vectorDatabaseClient.getOrCreateCollection({
-      name: MEMORY_COLLECTION + '_' + id,
-    });
-    collection.add({
-      ids: [activityLog.id],
-      metadatas: [
-        {
-          timestamp: activityLog.timestamp,
-          type: 'group_activity',
-        },
-      ],
-      documents: [activityLog.content.summary],
-    });
-  });
+  for (const id of activityLog.participants) {
+    try {
+      const collection = await vectorDatabaseClient.getOrCreateCollection({
+        name: MEMORY_COLLECTION + '_' + id,
+      });
+      await collection.add({
+        ids: [activityLog.id],
+        metadatas: [
+          {
+            timestamp: activityLog.timestamp,
+            type: 'group_activity',
+          },
+        ],
+        documents: [activityLog.content.summary],
+      });
+    } catch (error) {
+      console.error(`Error adding group activity memory for character ${id}:`, activityLog, error);
+      // Continue with other participants even if one fails
+    }
+  }
 
   const nameToId = activityLog.participants.reduce(
     (acc, id) => {
@@ -109,9 +119,10 @@ export async function addGroupActivityMemory(activityLog: GroupActivityLog) {
   );
 
   // individual memories in case of high relational or emotional impact
-  activityLog.content.relationUpdates
-    .filter((update) => Math.abs(update.delta) > 0.6)
-    .forEach(async (update) => {
+  for (const update of activityLog.content.relationUpdates.filter(
+    (update) => Math.abs(update.delta) > 0.6
+  )) {
+    try {
       const uid = Date.now().toString(36) + Math.random().toString(36).substr(2);
       const fromId = nameToId[update.from];
       const towardId = nameToId[update.toward];
@@ -119,7 +130,7 @@ export async function addGroupActivityMemory(activityLog: GroupActivityLog) {
         const collection = await vectorDatabaseClient.getOrCreateCollection({
           name: MEMORY_COLLECTION + '_' + fromId,
         });
-        collection.add({
+        await collection.add({
           ids: [uid],
           metadatas: [
             {
@@ -130,25 +141,38 @@ export async function addGroupActivityMemory(activityLog: GroupActivityLog) {
           documents: [update.cause],
         });
       }
-    });
-  activityLog.content.emotionUpdates
-    .filter((update) => Math.abs(update.delta) > 0.6)
-    .forEach(async (update) => {
+    } catch (error) {
+      console.error(`Error adding relationship update memory for ${update.from}:`, error);
+      // Continue with other updates even if one fails
+    }
+  }
+
+  for (const update of activityLog.content.emotionUpdates.filter(
+    (update) => Math.abs(update.delta) > 0.6
+  )) {
+    try {
       const uid = Date.now().toString(36) + Math.random().toString(36).substr(2);
-      const collection = await vectorDatabaseClient.getOrCreateCollection({
-        name: MEMORY_COLLECTION + '_' + nameToId[update.characterName],
-      });
-      collection.add({
-        ids: [uid],
-        metadatas: [
-          {
-            timestamp: activityLog.timestamp,
-            type: 'emotion_update',
-          },
-        ],
-        documents: [update.cause],
-      });
-    });
+      const characterId = nameToId[update.characterName];
+      if (characterId !== undefined) {
+        const collection = await vectorDatabaseClient.getOrCreateCollection({
+          name: MEMORY_COLLECTION + '_' + characterId,
+        });
+        await collection.add({
+          ids: [uid],
+          metadatas: [
+            {
+              timestamp: activityLog.timestamp,
+              type: 'emotion_update',
+            },
+          ],
+          documents: [update.cause],
+        });
+      }
+    } catch (error) {
+      console.error(`Error adding emotion update memory for ${update.characterName}:`, error);
+      // Continue with other updates even if one fails
+    }
+  }
 }
 
 export async function updateMemoryEntry(
@@ -156,17 +180,22 @@ export async function updateMemoryEntry(
   memoryId: string,
   newDocument: string
 ) {
-  const collection = await vectorDatabaseClient.getOrCreateCollection({
-    name: MEMORY_COLLECTION + '_' + characterId,
-  });
-  await collection.upsert({
-    ids: [memoryId],
-    documents: [newDocument],
-    metadatas: [
-      {
-        timestamp: Date.now(),
-        type: 'updated_memory',
-      },
-    ],
-  });
+  try {
+    const collection = await vectorDatabaseClient.getOrCreateCollection({
+      name: MEMORY_COLLECTION + '_' + characterId,
+    });
+    await collection.upsert({
+      ids: [memoryId],
+      documents: [newDocument],
+      metadatas: [
+        {
+          timestamp: Date.now(),
+          type: 'updated_memory',
+        },
+      ],
+    });
+  } catch (error) {
+    console.error(`Error updating memory entry ${memoryId} for character ${characterId}:`, error);
+    throw error; // Re-throw to let caller handle the error
+  }
 }

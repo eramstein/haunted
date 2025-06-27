@@ -10,6 +10,11 @@ import { TOOLS_VECTORS } from './tools-vectors';
 
 export const vectorDatabaseClient = new ChromaClient();
 
+// Helper function to trim line breaks from documents
+function trimDocuments(documents: string[]): string[] {
+  return documents.map((doc) => doc.trim());
+}
+
 export async function initChromaCollections() {
   // create one memories collection for each character
   NPCS.forEach(async (character, index) => {
@@ -19,7 +24,7 @@ export async function initChromaCollections() {
     const otherNpcs = NPCS.map((npc, i) => ({ ...npc, id: i })).filter((npc) => npc.id !== index);
     // personal memories
     await memoriesCollection.upsert({
-      documents: character.initialMemories,
+      documents: trimDocuments(character.initialMemories),
       metadatas: character.initialMemories.map(() => ({
         type: 'npc_lore',
       })),
@@ -27,7 +32,7 @@ export async function initChromaCollections() {
     });
     // public knowledge
     await memoriesCollection.upsert({
-      documents: otherNpcs.map((npc) => npc.name + ' is ' + npc.llm.bio),
+      documents: trimDocuments(otherNpcs.map((npc) => npc.name + ' is ' + npc.llm.bio)),
       metadatas: otherNpcs.map((c) => ({
         id: VECTOR_PUBLIC_NPC_INFO + c.id,
         type: 'npc_common_knowledge',
@@ -36,7 +41,7 @@ export async function initChromaCollections() {
     });
     // initial opinions of other NPCs
     await memoriesCollection.upsert({
-      documents: otherNpcs.map((npc) => npc.name + ' is living in the same house.'),
+      documents: trimDocuments(otherNpcs.map((npc) => npc.name + ' is living in the same house.')),
       metadatas: otherNpcs.map((c) => ({
         id: VECTOR_OPINION + c.id,
         type: 'npc_opinion',
@@ -50,7 +55,7 @@ export async function initChromaCollections() {
   });
   TOOLS_VECTORS.forEach(async (tool) => {
     await toolsCollection.upsert({
-      documents: tool.descriptions,
+      documents: trimDocuments(tool.descriptions),
       metadatas: Array(tool.descriptions.length).fill({ type: 'tool', tool: tool.tool }),
       ids: tool.descriptions.map((_, i) => tool.tool + ' ' + i),
     });

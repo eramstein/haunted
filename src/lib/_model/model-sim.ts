@@ -216,6 +216,7 @@ export interface ChatState {
   summary: string;
   previousUpdates: GroupActivitySummary[];
   lastSummaryMessageIndex: number;
+  activityId?: string;
 }
 
 export interface ChatMessage {

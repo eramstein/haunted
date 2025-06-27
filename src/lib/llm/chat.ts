@@ -398,7 +398,8 @@ export async function aiInitiatesChat(
 export function initPlayerChat(
   character: Character,
   otherCharacters: Character[],
-  activityType: ActivityType = ActivityType.Chat
+  activityType: ActivityType = ActivityType.Chat,
+  activityId?: string
 ) {
   gs.chat = {
     playingAsCharacter: character,
@@ -408,11 +409,12 @@ export function initPlayerChat(
     summary: '',
     previousUpdates: [],
     lastSummaryMessageIndex: 0,
+    activityId,
   };
 }
 
 export async function endPlayerChat() {
-  const chatId = generateUniqueId();
+  const chatId = gs.chat!.activityId || generateUniqueId();
   // complete the summary with last messages
   const currentSummary = gs.chat!.summary;
   const messagesToSummarize = gs

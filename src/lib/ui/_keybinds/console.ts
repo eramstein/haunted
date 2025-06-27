@@ -1,6 +1,7 @@
 import { listCollectionsWithContent, resetVectorDatabase } from '@/lib/llm';
 import { gs } from '../../_state';
 import { resetIndexDB } from '../../llm/index-db';
+import { getSystemPromptMemories } from '@/lib/llm/memory';
 import { ActivityType } from '@/lib/_model/model-sim.enums';
 
 export const consoleCommands = {
@@ -16,10 +17,6 @@ export const consoleCommands = {
     console.log(JSON.stringify(gs, null, 2));
   },
   t: () => {
-    gs.characters[2].activities[0] = {
-      type: ActivityType.Eat,
-      target: 0,
-      progress: 0,
-    };
+    console.log(getSystemPromptMemories(10, gs.characters, gs.places[0], ActivityType.Chat));
   },
 };

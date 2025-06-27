@@ -1,10 +1,11 @@
 <script lang="ts">
   import { gs, uiState } from '../_state';
-  import { groupChat } from '../llm/chat';
+  import { groupChat, initPlayerChat } from '../llm/chat';
   import { LABELS_ACTIVITY_TYPES } from '../_config/labels';
   import { formatDate } from './_helpers/date.svelte';
   import { getTime } from '../sim';
   import type { GroupActivityLog, Character } from '../_model/model-sim';
+  import { ActivityType } from '../_model/model-sim.enums';
 
   let props = $props<{
     activity: GroupActivityLog;
@@ -18,6 +19,17 @@
 
   function closeModal() {
     props.onClose();
+  }
+
+  function playAsCharacter(character: Character) {
+    const otherCharacters = props.activity.participants
+      .map((id: number) => gs.characters.find((c: Character) => c.id === id))
+      .filter(
+        (c: Character | undefined): c is Character => c !== undefined && c.id !== character.id
+      );
+
+    initPlayerChat(character, otherCharacters, props.activity.activityType, props.activity.id);
+    closeModal();
   }
 
   async function generateActivityChat() {
@@ -75,21 +87,40 @@
 
   {#if !isGenerating && !uiState.streamingContent && !generationComplete}
     <div class="modal-content">
-      <div class="instructions-section">
-        <label for="instructions">Custom Instructions (Optional):</label>
-        <textarea
-          id="instructions"
-          bind:value={customInstructions}
-          placeholder="Add specific instructions for how the characters should interact, what topics to discuss, or any particular mood or tone you'd like..."
-          rows="3"
-        ></textarea>
+      <div class="character-selection">
+        <h3>Play as a Character</h3>
+        <div class="character-buttons">
+          {#each props.activity.participants as participantId}
+            {@const character = gs.characters.find((c: Character) => c.id === participantId)}
+            {#if character}
+              <button class="character-button" onclick={() => playAsCharacter(character)}>
+                {character.name}
+              </button>
+            {/if}
+          {/each}
+        </div>
       </div>
 
-      <div class="options">
-        <button class="option-button primary" onclick={generateActivityChat}>
-          Generate Chat Transcript
-        </button>
-        <button class="option-button secondary" onclick={closeModal}> Cancel </button>
+      <div class="divider">
+        <div class="horizontal-line"></div>
+      </div>
+
+      <div class="generate-section">
+        <h3>Let the LLM write</h3>
+        <div class="instructions-section">
+          <textarea
+            id="instructions"
+            bind:value={customInstructions}
+            placeholder="Add specific instructions for how the characters should interact, what topics to discuss, or any particular mood or tone you'd like..."
+            rows="3"
+          ></textarea>
+        </div>
+
+        <div class="options">
+          <button class="option-button primary" onclick={generateActivityChat}>
+            Generate Transcript
+          </button>
+        </div>
       </div>
     </div>
   {:else if uiState.streamingContent && !generationComplete}
@@ -194,16 +225,66 @@
     text-align: center;
   }
 
-  .instructions-section {
+  .character-selection {
     margin-bottom: 2rem;
     text-align: left;
   }
 
-  .instructions-section label {
-    display: block;
-    margin-bottom: 0.5rem;
+  .character-selection h3 {
+    margin: 0 0 0.5rem 0;
     color: #fff;
+  }
+
+  .character-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .character-button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
     font-weight: 500;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    min-width: 120px;
+  }
+
+  .character-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .divider {
+    margin: 2rem 0;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .horizontal-line {
+    width: 100%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .generate-section {
+    margin-bottom: 2rem;
+    text-align: left;
+  }
+
+  .generate-section h3 {
+    margin: 0 0 0.5rem 0;
+    color: #fff;
+  }
+
+  .instructions-section {
+    margin-bottom: 2rem;
+    text-align: left;
   }
 
   .instructions-section textarea {
@@ -231,16 +312,14 @@
 
   .options {
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin-top: 2rem;
+    margin-top: 1rem;
   }
 
   .option-button {
-    padding: 0.75rem 1.5rem;
+    padding: 0.5rem 1rem;
     border: none;
     border-radius: 0.5rem;
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.2s;
     font-weight: 500;

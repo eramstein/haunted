@@ -42,7 +42,15 @@ export async function queryNpcMemory(characterIds: number[], message: string) {
       ids.push(...resultIds);
       participants.push(...resultDocs.map(() => characterId));
     } catch (error) {
-      console.error(`Error querying memory for character ${characterId}:`, error);
+      console.error(`Error querying memory for character ${characterId}:`, error, {
+        queryTexts: message,
+        nResults: 3,
+        where: {
+          id: {
+            $nin: redundantMemoriesIds,
+          },
+        },
+      });
       // Continue with other characters even if one fails
     }
   }

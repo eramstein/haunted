@@ -14,17 +14,9 @@ export const NPC_EMMA: CharacterBase = {
     salary: 500,
   },
   initialMemories: [
-    `        
-    CAREER_CHOICE: Emma dreamt of being an artist but ended up studying law for economic causes. 
-    FAMILY_BACKGROUND: Being raised in a poor family she had to make the pragmatic choice. 
-    EMOTIONAL_STATE: She is still sometimes melancholic about it.
-  `,
-    `
-    PERSONAL_SECRET: Emma secretly kept her childhood toys, it a source of confort for her but she's worried people would make fun of her because of it.
-  `,
-    `        
-    FOOD_PREFERENCES: Emma's favorite food is red meat and potatoes.
-  `,
+    'CAREER_CHOICE: Emma dreamt of being an artist but ended up studying law for economic causes. Being raised in a poor family she had to make the pragmatic choice. She is still sometimes melancholic about it.',
+    'PERSONAL_SECRET: Emma secretly kept her childhood toys, it a source of confort for her but she is worried people would make fun of her because of it.',
+    'FOOD_PREFERENCES: Emma loves red meat and potatoes.',
   ],
   emotionalProfile: {
     [EmotionType.Joy]: {

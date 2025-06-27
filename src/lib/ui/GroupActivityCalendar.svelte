@@ -5,6 +5,8 @@
   import { getChatsForCharacters } from '../llm/index-db';
   import { getCharacterImage } from './_helpers/images.svelte';
   import { getTime } from '../sim/time';
+  import ActivityContentDisplay from './ActivityContentDisplay.svelte';
+  import GenerateActivityChatModal from './GenerateActivityChatModal.svelte';
 
   interface DayActivities {
     date: Date;
@@ -13,6 +15,8 @@
 
   let activities = $state<GroupActivityLog[]>([]);
   let calendarDays = $state<DayActivities[]>([]);
+  let expandedActivityId = $state<string | null>(null);
+  let selectedActivity = $state<GroupActivityLog | null>(null);
 
   $effect(() => {
     loadActivities();
@@ -120,6 +124,29 @@
   function isActivityPast(activity: GroupActivityLog): boolean {
     return activity.timestamp <= gs.time.ellapsedTime;
   }
+
+  function toggleActivityExpansion(activityId: string) {
+    console.log('toggleActivityExpansion called with:', activityId);
+    if (expandedActivityId === activityId) {
+      expandedActivityId = null;
+    } else {
+      expandedActivityId = activityId;
+    }
+    console.log('expandedActivityId after toggle:', expandedActivityId);
+  }
+
+  function isActivityExpanded(activityId: string): boolean {
+    return expandedActivityId === activityId;
+  }
+
+  function openGenerateChatModal(activity: GroupActivityLog) {
+    selectedActivity = activity;
+  }
+
+  function closeGenerateChatModal() {
+    selectedActivity = null;
+    loadActivities(); // Refresh the data after modal closes
+  }
 </script>
 
 <div class="group-activity-calendar">
@@ -141,6 +168,8 @@
                 class="activity-card"
                 class:upcoming={isActivityUpcoming(activity)}
                 class:past={isActivityPast(activity)}
+                class:expanded={isActivityExpanded(activity.id)}
+                onclick={() => toggleActivityExpansion(activity.id)}
               >
                 <div class="activity-header">
                   <div class="activity-type">
@@ -155,16 +184,40 @@
                   at {gs.places[activity.location]?.name || 'Unknown location'}
                 </div>
 
-                <div class="activity-participants">
-                  {#each getActivityParticipants(activity) as participant}
-                    <img
-                      src={getCharacterImage(participant.name)}
-                      alt={participant.name}
-                      class="participant-portrait"
-                      title={participant.name}
-                    />
-                  {/each}
+                <div class="activity-bottom">
+                  <div class="activity-participants">
+                    {#each getActivityParticipants(activity) as participant}
+                      <img
+                        src={getCharacterImage(participant.name)}
+                        alt={participant.name}
+                        class="participant-portrait"
+                        title={participant.name}
+                      />
+                    {/each}
+                  </div>
+                  {#if isActivityPast(activity) && !activity.content?.transcript && !activity.content?.summary}
+                    <button
+                      class="generate-chat-button-small"
+                      onclick={(e) => {
+                        e.stopPropagation();
+                        openGenerateChatModal(activity);
+                      }}
+                      title="Generate Chat Log"
+                    >
+                      💬
+                    </button>
+                  {/if}
                 </div>
+
+                {#if isActivityExpanded(activity.id)}
+                  <div class="activity-expanded-content" onclick={(e) => e.stopPropagation()}>
+                    <ActivityContentDisplay
+                      {activity}
+                      showGenerateButton={false}
+                      onRefresh={loadActivities}
+                    />
+                  </div>
+                {/if}
               </div>
             {/each}
           {/if}
@@ -173,6 +226,10 @@
     {/each}
   </div>
 </div>
+
+{#if selectedActivity}
+  <GenerateActivityChatModal activity={selectedActivity} onClose={closeGenerateChatModal} />
+{/if}
 
 <style>
   .group-activity-calendar {
@@ -232,6 +289,13 @@
     border-radius: 4px;
     padding: 0.5rem;
     border-left: 3px solid #666;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .activity-card:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
   }
 
   .activity-card.upcoming {
@@ -239,10 +303,24 @@
     border-left-color: #87ceeb;
   }
 
+  .activity-card.upcoming:hover {
+    background: rgba(135, 206, 250, 0.25);
+  }
+
   .activity-card.past {
     background: rgba(255, 255, 255, 0.08);
     border-left-color: #888;
     opacity: 0.8;
+  }
+
+  .activity-card.past:hover {
+    background: rgba(255, 255, 255, 0.12);
+    opacity: 1;
+  }
+
+  .activity-card.expanded {
+    background: rgba(255, 255, 255, 0.2);
+    border-left-color: #fff;
   }
 
   .activity-header {
@@ -269,6 +347,12 @@
     margin-bottom: 0.5rem;
   }
 
+  .activity-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
   .activity-participants {
     display: flex;
     gap: 0.25rem;
@@ -281,6 +365,32 @@
     border-radius: 50%;
     object-fit: cover;
     border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .generate-chat-button-small {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
+
+  .generate-chat-button-small:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+  }
+
+  .activity-expanded-content {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   /* Responsive design */

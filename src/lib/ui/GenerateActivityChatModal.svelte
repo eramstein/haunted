@@ -5,7 +5,6 @@
   import { formatDate } from './_helpers/date.svelte';
   import { getTime } from '../sim';
   import type { GroupActivityLog, Character } from '../_model/model-sim';
-  import { ActivityType } from '../_model/model-sim.enums';
 
   let props = $props<{
     activity: GroupActivityLog;

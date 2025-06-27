@@ -6,29 +6,14 @@
   import { getCharacterImage } from './_helpers/images.svelte';
   import { formatDate } from './_helpers/date.svelte';
   import { getTime } from '../sim';
-  import { POSITIVE_EMOTIONS, NEGATIVE_EMOTIONS } from '../sim/emotions';
-  import { EmotionType } from '../_model/model-sim.enums';
-  import GenerateActivityChatModal from './GenerateActivityChatModal.svelte';
+  import ActivityContentDisplay from './ActivityContentDisplay.svelte';
 
   let props = $props<{
     characterId: number;
   }>();
 
-  type Tab = 'none' | 'transcript' | 'summary' | 'updates';
-
   let characterName = $derived(gs.characters[props.characterId].name);
   let activities = $state<GroupActivityLog[]>([]);
-  let activityTabs = $state<Record<string, Tab>>({});
-  let selectedActivity = $state<GroupActivityLog | null>(null);
-
-  function getEmotionDeltaColor(type: EmotionType, delta: number): string {
-    if (POSITIVE_EMOTIONS.includes(type)) {
-      return delta > 0 ? '#afa' : '#F44336'; // Green for positive delta, red for negative
-    } else if (NEGATIVE_EMOTIONS.includes(type)) {
-      return delta < 0 ? '#afa' : '#F44336'; // Green for negative delta, red for positive
-    }
-    return '#9E9E9E'; // Gray for neutral emotions
-  }
 
   $effect(() => {
     getChats();
@@ -41,26 +26,10 @@
     getChatsForCharacters([props.characterId], startTime, endTime)
       .then((chats) => {
         activities = chats.sort((a, b) => b.timestamp - a.timestamp);
-        activityTabs = activities.reduce(
-          (acc, activity) => {
-            acc[activity.id] = 'summary';
-            return acc;
-          },
-          {} as Record<string, Tab>
-        );
       })
       .catch((error) => {
         console.error('Failed to fetch chats:', error);
       });
-  }
-
-  function openGenerateChatModal(activity: GroupActivityLog) {
-    selectedActivity = activity;
-  }
-
-  function closeGenerateChatModal() {
-    selectedActivity = null;
-    getChats(); // Refresh the data after modal closes
   }
 </script>
 
@@ -99,115 +68,20 @@
               <span class="activity-time" class:upcoming={activity.timestamp > gs.time.ellapsedTime}
                 >{formatDate(getTime(activity.timestamp))}</span
               >
-              {#if activity.timestamp <= gs.time.ellapsedTime}
-                <div class="tabs">
-                  <button
-                    class="tab-button"
-                    class:active={activityTabs[activity.id] === 'summary'}
-                    onclick={() =>
-                      (activityTabs[activity.id] =
-                        activityTabs[activity.id] === 'summary' ? 'none' : 'summary')}
-                  >
-                    Summary
-                  </button>
-                  <button
-                    class="tab-button"
-                    class:active={activityTabs[activity.id] === 'transcript'}
-                    onclick={() =>
-                      (activityTabs[activity.id] =
-                        activityTabs[activity.id] === 'transcript' ? 'none' : 'transcript')}
-                  >
-                    Transcript
-                  </button>
-                  <button
-                    class="tab-button"
-                    class:active={activityTabs[activity.id] === 'updates'}
-                    onclick={() =>
-                      (activityTabs[activity.id] =
-                        activityTabs[activity.id] === 'updates' ? 'none' : 'updates')}
-                  >
-                    Updates
-                  </button>
-                </div>
-              {/if}
             </div>
           </div>
-          <div class="activity-details">
-            <div class="chat-section">
-              {#if activity.content?.transcript || activity.content?.summary}
-                <div class="chat-content">
-                  {#if activityTabs[activity.id] === 'transcript' && activity.content?.transcript}
-                    <div class="chat-log">
-                      {activity.content.transcript}
-                    </div>
-                  {:else if activityTabs[activity.id] === 'summary' && activity.content?.summary}
-                    <div class="chat-summary">
-                      {activity.content.summary}
-                    </div>
-                  {:else if activityTabs[activity.id] === 'updates' && activity.content?.relationUpdates}
-                    <div class="update-summary">
-                      {#if activity.content.relationUpdates.length === 0}
-                        <div>No relationship relationUpdates.</div>
-                      {:else}
-                        <div class="update-section-title">Relationship Updates</div>
-                        <ul class="relation-updates-list">
-                          {#each activity.content.relationUpdates.filter((u) => u.from === characterName || u.toward === characterName) as update}
-                            <li class="update-item">
-                              <span>
-                                {update.from} → {update.toward}
-                              </span>:
-                              <span class="update-feeling">{update.feeling}</span>
-                              <span class="update-delta"
-                                >({update.delta > 0 ? '+' : ''}{update.delta})</span
-                              >
-                              <span class="update-cause">— {update.cause}</span>
-                            </li>
-                          {/each}
-                        </ul>
-                      {/if}
-                    </div>
-                    <div class="update-summary">
-                      {#if activity.content.emotionUpdates.length === 0}
-                        <div>No emotion updates.</div>
-                      {:else}
-                        <div class="update-section-title">Emotions Updates</div>
-                        {#each activity.content.emotionUpdates.filter((u) => u.characterName === characterName) as update}
-                          <div class="update-item">
-                            <span class="update-feeling">{update.type}</span>
-                            {#if update.subtype}
-                              <span class="update-subtype">({update.subtype})</span>
-                            {/if}
-                            <span
-                              class="update-delta"
-                              style="color: {getEmotionDeltaColor(update.type, update.delta)}"
-                              >({update.delta > 0 ? '+' : ''}{update.delta})</span
-                            >
-                            <span class="update-cause">— {update.cause}</span>
-                          </div>
-                        {/each}
-                      {/if}
-                    </div>
-                  {/if}
-                </div>
-              {:else if activity.timestamp <= gs.time.ellapsedTime}
-                <button
-                  class="generate-chat-button"
-                  onclick={() => openGenerateChatModal(activity)}
-                >
-                  Generate Chat Log
-                </button>
-              {/if}
-            </div>
-          </div>
+
+          <ActivityContentDisplay
+            {activity}
+            {characterName}
+            showGenerateButton={true}
+            onRefresh={getChats}
+          />
         </div>
       {/each}
     </div>
   {/if}
 </div>
-
-{#if selectedActivity}
-  <GenerateActivityChatModal activity={selectedActivity} onClose={closeGenerateChatModal} />
-{/if}
 
 <style>
   .group-activity-history {

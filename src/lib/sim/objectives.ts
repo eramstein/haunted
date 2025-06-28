@@ -1,5 +1,5 @@
 import type { Character, Objective } from '@/lib/_model/model-sim';
-import { ObjectiveType } from '../_model/model-sim.enums';
+import { ActivityType, ObjectiveType } from '../_model/model-sim.enums';
 import { gs } from '../_state';
 import { config } from '../_config';
 import { recordProblem } from './problems';
@@ -48,6 +48,7 @@ function getPriorityObjective(character: Character): Objective | null {
   if (character.money < 1000 && !character.onHoldObjectives[ObjectiveType.GetMoney]) {
     return { type: ObjectiveType.GetMoney, target: character.money + 100 };
   }
+  console.log('no objective found', character.name);
   return null;
 }
 
@@ -82,11 +83,25 @@ export function changeObjective(character: Character, objective: Objective, caus
   }
 }
 
-export function putObjectiveOnHold(character: Character, isProblem: boolean = false) {
+export function putObjectiveOnHold(
+  character: Character,
+  isProblem: boolean = false,
+  activityType: ActivityType | null = null
+) {
   const objective = character.objective;
   if (!objective) {
     return;
   }
+  if (activityType) {
+    objective.pastAttempts = objective.pastAttempts || {};
+    objective.pastAttempts[activityType] = (objective.pastAttempts[activityType] || 0) + 1;
+    console.log('past attempts', objective.pastAttempts[activityType]);
+    if (objective.pastAttempts[activityType] === 1) {
+      // first time we failed, don't put on hold yet, let the character try other paths
+      return;
+    }
+  }
+  console.log('putting objective on hold', character.name, objective.type);
   character.onHoldObjectives[objective.type] = true;
   character.objective = null;
   if (isProblem) {

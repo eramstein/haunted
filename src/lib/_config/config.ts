@@ -15,6 +15,7 @@ export const config = {
     play: 100 / 60, // 1 hour to play
     buy: 100 / 15, // 15 minutes to buy
     work: 100 / 240, // 4 hours to work
+    groupMeal: 100 / 60, // 1 hour to eat together
   },
   needs: {
     food: 360, // eat every 6 hours

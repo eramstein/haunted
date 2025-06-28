@@ -54,41 +54,7 @@ export function setHaveMealTask(character: Character) {
   // are there available meals?
   const meals = getItemsByTypeAndOwner(ItemType.Meal, character.id);
   if (meals.length === 0) {
-    // are there ingredients? if yes cook them, else go find some
-    const ingredients = getItemsByTypeAndOwner(ItemType.FoodIngredient, character.id);
-    if (ingredients.length === 0) {
-      const minCost = config.itemsMinCost[ItemType.FoodIngredient];
-      if (character.money < minCost) {
-        changeObjective(
-          character,
-          { type: ObjectiveType.GetMoney },
-          'not enough money to buy ingredients'
-        );
-        return;
-      }
-      character.activities.push({
-        type: ActivityType.Buy,
-        progress: 0,
-        target: ItemType.FoodIngredient,
-      });
-      return;
-    }
-    const ingredientsInPlace = ingredients.filter(
-      (ingredient) => ingredient.location === character.place
-    );
-    if (ingredientsInPlace.length > 0) {
-      character.activities.push({
-        type: ActivityType.Cook,
-        progress: 0,
-        target: [ingredientsInPlace[0].id],
-      });
-    } else {
-      character.activities.push({
-        type: ActivityType.GoTo,
-        progress: 0,
-        target: ingredients[0].location,
-      });
-    }
+    prepareMeal(character);
     return;
   } else {
     // is there a meal in the place?
@@ -109,5 +75,44 @@ export function setHaveMealTask(character: Character) {
         target: meals[0].location,
       });
     }
+  }
+}
+
+// activity chain necessary to prepare a meal
+export function prepareMeal(character: Character) {
+  // are there ingredients? if yes cook them, else go find some
+  const ingredients = getItemsByTypeAndOwner(ItemType.FoodIngredient, character.id);
+  if (ingredients.length === 0) {
+    const minCost = config.itemsMinCost[ItemType.FoodIngredient];
+    if (character.money < minCost) {
+      changeObjective(
+        character,
+        { type: ObjectiveType.GetMoney },
+        'not enough money to buy ingredients'
+      );
+      return;
+    }
+    character.activities.push({
+      type: ActivityType.Buy,
+      progress: 0,
+      target: ItemType.FoodIngredient,
+    });
+    return;
+  }
+  const ingredientsInPlace = ingredients.filter(
+    (ingredient) => ingredient.location === character.place
+  );
+  if (ingredientsInPlace.length > 0) {
+    character.activities.push({
+      type: ActivityType.Cook,
+      progress: 0,
+      target: [ingredientsInPlace[0].id],
+    });
+  } else {
+    character.activities.push({
+      type: ActivityType.GoTo,
+      progress: 0,
+      target: ingredients[0].location,
+    });
   }
 }

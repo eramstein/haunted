@@ -5,7 +5,7 @@ import { proposeActivity } from '../activities-group';
 import { config } from '@/lib/_config/config';
 import { PLACES_IDS_BY_TYPE } from '@/data/world/places';
 import { getCharactersByActivityType } from '../characters';
-import { progressActivity } from '../activities';
+import { moveToActivity } from './move';
 
 export function setPlayTask(character: Character) {
   const availableForPlay = getCharactersByActivityType(gs.characters).filter(
@@ -17,14 +17,7 @@ export function setPlayTask(character: Character) {
 }
 
 export function play(character: Character, activity: Activity<ActivityType.Play>) {
-  // check if character is at the agreed place
-  if (character.place !== activity.target) {
-    character.activities.unshift({
-      type: ActivityType.GoTo,
-      progress: 0,
-      target: activity.target,
-    });
-    progressActivity(character);
+  if (moveToActivity(character, activity)) {
     return;
   }
   activity.progress += config.actionSpeed.play;

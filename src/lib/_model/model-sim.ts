@@ -125,6 +125,8 @@ export type ActivityTargets = {
   [ActivityType.Buy]: ItemType;
   [ActivityType.Work]: number; // Money to make
   [ActivityType.AskForHelp]: number; // Person to ask
+  [ActivityType.GroupMeal]: number; // Place ID
+  [ActivityType.PrepareMeal]: null; // No targets needed
 };
 
 export interface Activity<T extends ActivityType = ActivityType> {
@@ -137,6 +139,7 @@ export interface Activity<T extends ActivityType = ActivityType> {
 export interface Objective {
   type: ObjectiveType;
   target?: any; // can be a place, a character, an item, an amount of money, a problem type...
+  pastAttempts?: Partial<Record<ActivityType, number>>; // some objectives can be attempted with several tasks, remember those which failed already
 }
 
 export interface GroupActivityLog {

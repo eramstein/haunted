@@ -16,7 +16,7 @@ export async function createNewSimState(): Promise<State> {
   // add some initial items
   const kitchenId = PLACES_IDS_BY_TYPE.kitchen;
   if (kitchenId) {
-    initialState.characters.forEach((c, charIndex) => {
+    initialState.characters.slice(0, 4).forEach((c, charIndex) => {
       Array.from({ length: 1 }, () =>
         addItem({
           type: ItemType.Meal,

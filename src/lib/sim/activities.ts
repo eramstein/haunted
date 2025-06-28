@@ -1,6 +1,6 @@
 import { config } from '../_config';
 import type { Activity, Character } from '../_model/model-sim';
-import { ActivityType, ItemType, ObjectiveType } from '../_model/model-sim.enums';
+import { ActivityType, ObjectiveType } from '../_model/model-sim.enums';
 import {
   move,
   cook,
@@ -16,7 +16,9 @@ import {
   setGetMoneyTask,
   work,
   askForHelp,
+  prepareMeal,
 } from './actions';
+import { groupMeal, setGroupMealTask } from './actions/group-meal';
 import { checkIfObjectiveIsSatisfied } from './objectives';
 import { setSolveProblemTask } from './problems';
 import { startScheduledActivity } from './schedule';
@@ -42,13 +44,27 @@ function workOnActivity(character: Character, time: number) {
 function setActivityFromObjective(character: Character) {
   switch (character.objective?.type) {
     case ObjectiveType.HaveMeal:
-      setHaveMealTask(character);
+      if (
+        character.needs.social > config.needs.social / 2 &&
+        !character.objective?.pastAttempts?.[ActivityType.GroupMeal]
+      ) {
+        setGroupMealTask(character);
+      } else {
+        setHaveMealTask(character);
+      }
       break;
     case ObjectiveType.Rest:
       setRestTask(character);
       break;
     case ObjectiveType.Socialize:
-      setSocializeTask(character);
+      if (
+        character.needs.food > config.needs.food / 2 &&
+        !character.objective?.pastAttempts?.[ActivityType.GroupMeal]
+      ) {
+        setGroupMealTask(character);
+      } else {
+        setSocializeTask(character);
+      }
       break;
     case ObjectiveType.HaveFun:
       setPlayTask(character);
@@ -95,15 +111,19 @@ export function progressActivity(character: Character) {
     case ActivityType.AskForHelp:
       askForHelp(character, activity as Activity<ActivityType.AskForHelp>);
       break;
+    case ActivityType.GroupMeal:
+      groupMeal(character, activity as Activity<ActivityType.GroupMeal>);
+      break;
+    case ActivityType.PrepareMeal:
+      prepareMeal(character);
+      break;
     default:
       break;
   }
 }
 
 export function finishActivity(character: Character) {
-  console.log('finishActivity', character);
   character.activities.shift();
-  console.log('character.activities', character.activities);
   if (character.objective) {
     const objectiveCompleted = checkIfObjectiveIsSatisfied(character, character.objective);
     if (objectiveCompleted) {

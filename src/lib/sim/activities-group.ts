@@ -1,4 +1,4 @@
-import type { Character } from '@/lib/_model/model-sim';
+import type { Activity, Character } from '@/lib/_model/model-sim';
 import { ActivityType, RelationshipFeeling } from '@/lib/_model/model-sim.enums';
 import type { ActivityTargets } from '@/lib/_model/model-sim';
 import { gs } from '../_state';
@@ -7,7 +7,7 @@ import { saveChat } from '../llm/index-db';
 import { activityAffinityWeights, config } from '../_config/config';
 import { putObjectiveOnHold } from './objectives';
 import { getActivityTypeDuration } from './activities';
-import { scheduleActivity, willBeAvailableAt } from './schedule';
+import { getNextAvailableScheduleSlot, scheduleActivity, willBeAvailableAt } from './schedule';
 
 export function proposeActivity(
   fromCharacter: Character,
@@ -24,10 +24,11 @@ export function proposeActivity(
     Accepted: ${acceptedCharacters.map((character) => character.name).join(', ')}`
   );
   if (acceptedCharacters.length === 0) {
-    putObjectiveOnHold(fromCharacter);
-    return;
+    console.log('No accepted characters', fromCharacter.name, activityType);
+    putObjectiveOnHold(fromCharacter, false, activityType);
+    return null;
   }
-  const groupActivity = {
+  const groupActivity: Activity<ActivityType> = {
     type: activityType,
     progress: 0,
     target,
@@ -37,10 +38,11 @@ export function proposeActivity(
     if (timestamp > 0) {
       scheduleActivity(character, groupActivity, timestamp);
     } else {
-      character.activities.push(groupActivity);
+      character.activities.unshift(groupActivity);
     }
   });
-  recordGroupActivity(activityType, groupActivity.participants, target as number, timestamp);
+  recordGroupActivity(activityType, groupActivity.participants || [], target as number, timestamp);
+  return groupActivity;
 }
 
 export function recordGroupActivity(
@@ -99,6 +101,11 @@ function scoreNeed(character: Character, activityType: ActivityType) {
       return character.needs.social / config.needs.social;
     case ActivityType.Play:
       return character.needs.fun / config.needs.fun;
+    case ActivityType.GroupMeal:
+      return (
+        (character.needs.food / config.needs.food + character.needs.social / config.needs.social) /
+        2
+      );
   }
   return 0;
 }
@@ -136,6 +143,7 @@ export function getInviteList(character: Character, activityType: ActivityType):
   const partners = others
     .map((c) => ({
       character: c,
+      // affinity score: how likely would I accept if they proposed this activity to me?
       score: scoreAffinity(character, c, activityType),
     }))
     .filter((m) => m.score >= 0)
@@ -154,4 +162,38 @@ export function getInviteList(character: Character, activityType: ActivityType):
 
   // invite based on score probability
   return partners.filter((p) => Math.random() < p.score).map((p) => p.character);
+}
+
+export function inviteOrScheduleGroupActivity(
+  character: Character,
+  invited: Character[],
+  place: number,
+  activityType: ActivityType
+) {
+  if (invited.length === 0) {
+    console.log('No invited characters', character.name);
+    putObjectiveOnHold(character, false, activityType);
+    return null;
+  }
+  let createdActivity: Activity<ActivityType> | null = null;
+  // if top 1 partner is available, propose activity, else schedule it for later
+  if (invited[0].activities.length === 0) {
+    const available = invited.filter((c) => c.activities.length === 0);
+    createdActivity = proposeActivity(character, available, activityType, place);
+  } else {
+    const duration = getActivityTypeDuration(activityType);
+    let nextAvailableSlot = getNextAvailableScheduleSlot(invited[0], duration);
+    if (!nextAvailableSlot) {
+      console.log('No slot for preferred character', character.name, invited[0]);
+      putObjectiveOnHold(character, false, activityType);
+      return null;
+    }
+    if (willBeAvailableAt(character, nextAvailableSlot, duration)) {
+      createdActivity = proposeActivity(character, invited, activityType, place, nextAvailableSlot);
+    } else {
+      console.log('Next slot is not available', character, invited[0]);
+      putObjectiveOnHold(character, false, activityType);
+    }
+  }
+  return createdActivity;
 }

@@ -15,6 +15,7 @@ export const activityTypeToContext: Partial<Record<ActivityType, string>> = {
   [ActivityType.Chat]: 'Casual socializing',
   [ActivityType.Play]: 'Playing a game together',
   [ActivityType.AskForHelp]: 'Your character is asking for help',
+  [ActivityType.GroupMeal]: 'The characters are eating together',
 };
 
 export function getGroupDescription(characters: Character[], includeRelationships = true) {

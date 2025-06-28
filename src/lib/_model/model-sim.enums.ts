@@ -14,6 +14,8 @@ export enum ActivityType {
   Buy = 'buy',
   Work = 'work',
   AskForHelp = 'askForHelp',
+  GroupMeal = 'groupMeal',
+  PrepareMeal = 'prepareMeal',
 }
 
 export enum ObjectiveType {

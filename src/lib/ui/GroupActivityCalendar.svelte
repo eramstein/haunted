@@ -126,13 +126,11 @@
   }
 
   function toggleActivityExpansion(activityId: string) {
-    console.log('toggleActivityExpansion called with:', activityId);
     if (expandedActivityId === activityId) {
       expandedActivityId = null;
     } else {
       expandedActivityId = activityId;
     }
-    console.log('expandedActivityId after toggle:', expandedActivityId);
   }
 
   function isActivityExpanded(activityId: string): boolean {

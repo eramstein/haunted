@@ -81,6 +81,13 @@ export const PLACES: Omit<Place, 'id'>[] = [
     position: { x: 100, y: 20, width: 25, height: 10 },
     outside: true,
   },
+  {
+    name: 'Le Chat Noir',
+    description: 'A cosy French restaurant with a lots of food and drinks.',
+    image: 'restaurant',
+    position: { x: 100, y: 30, width: 25, height: 10 },
+    outside: true,
+  },
 ];
 
 Object.values(NPCS).forEach((npc) => {
@@ -104,4 +111,5 @@ export const PLACES_IDS_BY_TYPE: Record<string, number> = {
   groceryStore: 8,
   office: 9,
   university: 10,
+  restaurant: 11,
 };

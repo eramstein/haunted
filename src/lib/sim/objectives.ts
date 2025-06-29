@@ -34,6 +34,12 @@ function getPriorityObjective(character: Character): Objective | null {
     return { type: ObjectiveType.Rest };
   }
   if (
+    character.needs.intimacy > config.needs.intimacy &&
+    !character.onHoldObjectives[ObjectiveType.Intimacy]
+  ) {
+    return { type: ObjectiveType.Intimacy };
+  }
+  if (
     character.needs.social > config.needs.social &&
     !character.onHoldObjectives[ObjectiveType.Socialize]
   ) {
@@ -62,6 +68,8 @@ export function checkIfObjectiveIsSatisfied(character: Character, objective: Obj
       return character.needs.fun < config.needs.fun / 2;
     case ObjectiveType.Socialize:
       return character.needs.social < config.needs.social / 2;
+    case ObjectiveType.Intimacy:
+      return character.needs.intimacy < config.needs.intimacy / 2;
     case ObjectiveType.GetMoney:
       return character.money >= (objective.target || 0);
     case ObjectiveType.SolveProblem:

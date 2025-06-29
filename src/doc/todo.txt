@@ -1,0 +1,3 @@
+PB: the LLM starts to play all characters after a while
+maybe reset the roles in every user prompt, hiding the extra prompt in the UI ?
+check how it was done in previous project

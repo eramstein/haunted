@@ -11,6 +11,7 @@ export const LABELS_OBJECTIVE_TYPES: Record<ObjectiveType, string> = {
   [ObjectiveType.HaveFun]: 'Have fun',
   [ObjectiveType.Socialize]: 'Socialize',
   [ObjectiveType.GetMoney]: 'Get money',
+  [ObjectiveType.Intimacy]: 'Find some intimacy',
   [ObjectiveType.SolveProblem]: 'Solve problem',
 };
 
@@ -26,6 +27,7 @@ export const LABELS_ACTIVITY_TYPES: Record<ActivityType, string> = {
   [ActivityType.AskForHelp]: 'Ask for help',
   [ActivityType.GroupMeal]: 'Go eat as a group',
   [ActivityType.PrepareMeal]: 'Prepare meal',
+  [ActivityType.Romance]: 'Have intimate time',
 };
 
 export const LABELS_FEELINGS: Record<RelationshipFeeling, string[]> = {

@@ -17,6 +17,8 @@ import {
   work,
   askForHelp,
   prepareMeal,
+  setRomanceTask,
+  romance,
 } from './actions';
 import { groupMeal, setGroupMealTask } from './actions/group-meal';
 import { checkIfObjectiveIsSatisfied } from './objectives';
@@ -69,6 +71,9 @@ function setActivityFromObjective(character: Character) {
     case ObjectiveType.HaveFun:
       setPlayTask(character);
       break;
+    case ObjectiveType.Intimacy:
+      setRomanceTask(character);
+      break;
     case ObjectiveType.GetMoney:
       setGetMoneyTask(character);
       break;
@@ -113,6 +118,9 @@ export function progressActivity(character: Character) {
       break;
     case ActivityType.GroupMeal:
       groupMeal(character, activity as Activity<ActivityType.GroupMeal>);
+      break;
+    case ActivityType.Romance:
+      romance(character, activity as Activity<ActivityType.Romance>);
       break;
     case ActivityType.PrepareMeal:
       prepareMeal(character);

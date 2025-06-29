@@ -92,12 +92,16 @@ export const PLACES: Omit<Place, 'id'>[] = [
 
 Object.values(NPCS).forEach((npc) => {
   PLACES.push({
-    name: `${npc.name}'s room`,
+    name: nameBedroom(npc.name),
     description: `${npc.name}'s room, basic bedroom with a bed, a desk, a chair and a closet.`,
     image: `${npc.name.toLowerCase()}_room`,
     position: roomPositions[npc.name.toLowerCase()],
   });
 });
+
+export function nameBedroom(characterName: string) {
+  return `${characterName}'s room`;
+}
 
 export const PLACES_IDS_BY_TYPE: Record<string, number> = {
   livingRoom: 0,

@@ -42,7 +42,7 @@ export async function groupChat(
     content: `${groupActivityTranscriptSystemPrompt}`,
   };
 
-  const context = activityTypeToContext[activityType] || '';
+  const activity = activityTypeToContext[activityType] || '';
   const locationDescription = place.name + ', ' + place.description || '';
   const detailedRelationships = characters.length === 2;
   const charactersDescription = getGroupDescription(characters, !detailedRelationships);
@@ -55,10 +55,12 @@ export async function groupChat(
   const userPrompt = {
     role: 'user',
     content: `
+      IMPORTANT - this is the scene to write about: the characters are ${activity}.
+
       - Characters:
         ${charactersDescription}
       - Location: ${locationDescription}
-      - Context: ${context}. Time of day ${timeOfDay}.
+      - Context: Time of day ${timeOfDay}.
       ${instructionsPrompt}
 
       ${memoriesPrompt}

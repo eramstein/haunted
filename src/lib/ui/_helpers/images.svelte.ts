@@ -56,6 +56,7 @@ export function getActionIconPosition(type: string, size: number = 32) {
     work: 4,
     buy: 14,
     groupMeal: 8,
+    romance: 12,
   };
 
   if (!typePositions[type]) {

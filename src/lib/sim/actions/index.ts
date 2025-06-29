@@ -8,3 +8,4 @@ export * from './money';
 export * from './work';
 export * from './help';
 export * from './gift';
+export * from './romance';

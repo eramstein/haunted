@@ -6,5 +6,6 @@ export function updateCharactersNeeds() {
     character.needs.sleep += 1;
     character.needs.fun += 1;
     character.needs.social += 1;
+    character.needs.intimacy += 1;
   });
 }

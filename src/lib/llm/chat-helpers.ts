@@ -12,10 +12,11 @@ import { describeEmotion, getItemsByTypeAndOwner, getMoodLabel, stringifyProblem
 import { getChatsByActivityType } from './index-db';
 
 export const activityTypeToContext: Partial<Record<ActivityType, string>> = {
-  [ActivityType.Chat]: 'Casual socializing',
-  [ActivityType.Play]: 'Playing a game together',
-  [ActivityType.AskForHelp]: 'Your character is asking for help',
-  [ActivityType.GroupMeal]: 'The characters are eating together',
+  [ActivityType.Chat]: 'socializing',
+  [ActivityType.Play]: 'playing a game together',
+  [ActivityType.AskForHelp]: 'asking for help',
+  [ActivityType.GroupMeal]: 'eating together',
+  [ActivityType.Romance]: 'having a sexual relation',
 };
 
 export function getGroupDescription(characters: Character[], includeRelationships = true) {

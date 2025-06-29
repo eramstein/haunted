@@ -39,10 +39,11 @@ function initCharacter(character: CharacterBase, index: number): Character {
     activitiesScheduled: {},
     objective: null,
     needs: {
-      food: config.needs.food,
+      food: 0,
       sleep: 0,
-      fun: config.needs.fun - 180,
-      social: config.needs.social,
+      fun: 0,
+      social: config.needs.social - 240,
+      intimacy: config.needs.intimacy,
     },
     relationships: getRelationships(character),
     emotions: {

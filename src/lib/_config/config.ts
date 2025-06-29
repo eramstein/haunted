@@ -16,18 +16,21 @@ export const config = {
     buy: 100 / 15, // 15 minutes to buy
     work: 100 / 240, // 4 hours to work
     groupMeal: 100 / 60, // 1 hour to eat together
+    romance: 100 / 120, // 2 hour to romance
   },
   needs: {
     food: 360, // eat every 6 hours
     sleep: 1080, // get sleepy after 18 hours without sleep
     fun: 720, // get bored after 12 hours without fun
     social: 720, // get lonely after 12 hours without social interaction
+    intimacy: 2880, // get lonely after 48 hours without intimacy
   },
   // how much needs are fullfilled by game tick
   needsRefill: {
     sleep: 3, // 1 hour of sleep keeps you going 3 hours
     chat: 12, // 1 hour of chat keeps you going 12 hours
     play: 12, // 1 hour of play keeps you going 12 hours
+    intimacy: 24, // 1 hour of romance keeps you going 24 hours
   },
   emotionBaseVolatility: {
     [EmotionType.Joy]: 50,
@@ -82,5 +85,10 @@ export const activityAffinityWeights: Partial<
     suspicion: -0.5,
     intimidation: -0.4,
     envy: -0.3,
+  },
+
+  [ActivityType.Romance]: {
+    attraction: 1,
+    love: 1,
   },
 };

@@ -64,10 +64,13 @@ export interface Character extends CharacterBase {
   onHoldObjectives: Partial<Record<ObjectiveType, boolean>>; // don't retry until unlocked
   problems: Problem[]; // issues the character can't solve by themselves using normal activities
   needs: {
+    // roughly modelled on Maslov pyramid
     food: number;
     sleep: number;
     fun: number;
     social: number;
+    intimacy: number;
+    // TODO: safety, love, respect, self-actualization
   };
   relationships: Record<number, Relationship>; // key is character id
   emotions: {
@@ -128,6 +131,7 @@ export type ActivityTargets = {
   [ActivityType.AskForHelp]: number; // Person to ask
   [ActivityType.GroupMeal]: number; // Place ID
   [ActivityType.PrepareMeal]: null; // No targets needed
+  [ActivityType.Romance]: number; // Place ID
 };
 
 export interface Activity<T extends ActivityType = ActivityType> {

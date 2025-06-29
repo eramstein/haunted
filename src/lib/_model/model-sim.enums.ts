@@ -16,6 +16,7 @@ export enum ActivityType {
   AskForHelp = 'askForHelp',
   GroupMeal = 'groupMeal',
   PrepareMeal = 'prepareMeal',
+  Romance = 'romance',
 }
 
 export enum ActivityTag {
@@ -30,6 +31,7 @@ export enum ObjectiveType {
   Rest = 'rest',
   HaveFun = 'haveFun',
   Socialize = 'socialize',
+  Intimacy = 'intimacy',
   GetMoney = 'getMoney',
   SolveProblem = 'solveProblem',
 }

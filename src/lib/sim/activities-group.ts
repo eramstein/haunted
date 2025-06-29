@@ -1,5 +1,10 @@
 import type { Activity, Character } from '@/lib/_model/model-sim';
-import { ActivityTag, ActivityType, RelationshipFeeling } from '@/lib/_model/model-sim.enums';
+import {
+  ActivityTag,
+  ActivityType,
+  RelationshipFeeling,
+  RelationshipStatus,
+} from '@/lib/_model/model-sim.enums';
 import type { ActivityTargets } from '@/lib/_model/model-sim';
 import { gs } from '../_state';
 import { generateUniqueId } from './_utils/random';
@@ -8,6 +13,7 @@ import { activityAffinityWeights, config } from '../_config/config';
 import { putObjectiveOnHold } from './objectives';
 import { getActivityTypeDuration } from './activities';
 import { getNextAvailableScheduleSlot, scheduleActivity, willBeAvailableAt } from './schedule';
+import { clamp } from './_utils/math';
 
 export function proposeActivity(
   fromCharacter: Character,
@@ -103,6 +109,8 @@ function scoreNeed(character: Character, activityType: ActivityType) {
       return character.needs.social / config.needs.social;
     case ActivityType.Play:
       return character.needs.fun / config.needs.fun;
+    case ActivityType.Romance:
+      return character.needs.intimacy / config.needs.intimacy;
     case ActivityType.GroupMeal:
       return (
         (character.needs.food / config.needs.food + character.needs.social / config.needs.social) /
@@ -118,15 +126,29 @@ export function scoreAffinity(
   proposedBy: Character,
   activityType: ActivityType
 ) {
+  // we assume partners are always willing to do anything for each other
+  if (
+    [RelationshipStatus.RomanticPartner, RelationshipStatus.Spouse].includes(
+      character.relationships[proposedBy.id].status
+    )
+  ) {
+    return 1;
+  }
+  // some activities get a modifier as a minimal treshold to accept them
+  let activityTypeBaseline = 0;
+  if (activityType === ActivityType.Romance) {
+    activityTypeBaseline = -0.5;
+  }
+  // compute a -1 to 1 score based on feelings relevant to the activity
   const feelings = character.relationships[proposedBy.id].feelings;
   const feelingWeights = activityAffinityWeights[activityType];
   if (!feelingWeights) {
-    return 0;
+    return activityTypeBaseline;
   }
   const entries = Object.entries(feelingWeights);
   let weightSum = 0;
   if (entries.length === 0) {
-    return 0;
+    return activityTypeBaseline;
   }
   const sum = entries.reduce((acc, [feeling, weight]) => {
     const feelingValue = feelings[feeling as RelationshipFeeling];
@@ -134,12 +156,14 @@ export function scoreAffinity(
     return acc + (feelingValue || 0) * weight;
   }, 0);
   if (sum === 0 || weightSum === 0) {
-    return 0;
+    return activityTypeBaseline;
   }
-  return sum / weightSum / 100;
+  const score = sum / weightSum / 100;
+  return clamp(score + activityTypeBaseline, -1, 1);
 }
 
 export function getInviteList(character: Character, activityType: ActivityType): Character[] {
+  let treshold = 0;
   const others = gs.characters.filter((c) => c.id !== character.id);
   // ranking of other characters by affinity for the activity with them
   const partners = others
@@ -148,7 +172,7 @@ export function getInviteList(character: Character, activityType: ActivityType):
       // affinity score: how likely would I accept if they proposed this activity to me?
       score: scoreAffinity(character, c, activityType),
     }))
-    .filter((m) => m.score >= 0)
+    .filter((m) => m.score >= treshold)
     .sort((a, b) => b.score - a.score);
 
   if (partners.length === 0) {

@@ -18,6 +18,13 @@ export enum ActivityType {
   PrepareMeal = 'prepareMeal',
 }
 
+export enum ActivityTag {
+  AtRestaurant = 'atRestaurant',
+  Delivery = 'delivery',
+  HomeCooking = 'homeCooking',
+  IsDate = 'isDate',
+}
+
 export enum ObjectiveType {
   HaveMeal = 'haveMeal',
   Rest = 'rest',

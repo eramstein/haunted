@@ -7,6 +7,7 @@ import type {
   ProblemType,
   RelationshipFeeling,
   RelationshipStatus,
+  ActivityTag,
 } from './model-sim.enums';
 
 export interface State {
@@ -134,6 +135,7 @@ export interface Activity<T extends ActivityType = ActivityType> {
   progress: number; // 0-100
   target: ActivityTargets[T];
   participants?: number[]; // for group activities, character ids
+  tags?: Partial<Record<ActivityTag, any>>; // any sort of additional qualifier for the activity
 }
 
 export interface Objective {

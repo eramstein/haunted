@@ -1,5 +1,5 @@
 import type { Activity, Character } from '@/lib/_model/model-sim';
-import { ActivityType, RelationshipFeeling } from '@/lib/_model/model-sim.enums';
+import { ActivityTag, ActivityType, RelationshipFeeling } from '@/lib/_model/model-sim.enums';
 import type { ActivityTargets } from '@/lib/_model/model-sim';
 import { gs } from '../_state';
 import { generateUniqueId } from './_utils/random';
@@ -14,7 +14,8 @@ export function proposeActivity(
   characters: Character[],
   activityType: ActivityType,
   target: ActivityTargets[ActivityType] = null,
-  timestamp: number = 0
+  timestamp: number = 0,
+  tags?: Partial<Record<ActivityTag, any>>
 ) {
   const acceptedCharacters = characters.filter((character) =>
     acceptActivity(character, fromCharacter, activityType, target, timestamp)
@@ -33,6 +34,7 @@ export function proposeActivity(
     progress: 0,
     target,
     participants: [fromCharacter.id, ...acceptedCharacters.map((character) => character.id)],
+    tags,
   };
   [fromCharacter, ...acceptedCharacters].forEach((character) => {
     if (timestamp > 0) {
@@ -168,7 +170,8 @@ export function inviteOrScheduleGroupActivity(
   character: Character,
   invited: Character[],
   place: number,
-  activityType: ActivityType
+  activityType: ActivityType,
+  tags?: Partial<Record<ActivityTag, any>>
 ) {
   if (invited.length === 0) {
     console.log('No invited characters', character.name);
@@ -179,7 +182,7 @@ export function inviteOrScheduleGroupActivity(
   // if top 1 partner is available, propose activity, else schedule it for later
   if (invited[0].activities.length === 0) {
     const available = invited.filter((c) => c.activities.length === 0);
-    createdActivity = proposeActivity(character, available, activityType, place);
+    createdActivity = proposeActivity(character, available, activityType, place, 0, tags);
   } else {
     const duration = getActivityTypeDuration(activityType);
     let nextAvailableSlot = getNextAvailableScheduleSlot(invited[0], duration);
@@ -189,7 +192,14 @@ export function inviteOrScheduleGroupActivity(
       return null;
     }
     if (willBeAvailableAt(character, nextAvailableSlot, duration)) {
-      createdActivity = proposeActivity(character, invited, activityType, place, nextAvailableSlot);
+      createdActivity = proposeActivity(
+        character,
+        invited,
+        activityType,
+        place,
+        nextAvailableSlot,
+        tags
+      );
     } else {
       console.log('Next slot is not available', character, invited[0]);
       putObjectiveOnHold(character, false, activityType);

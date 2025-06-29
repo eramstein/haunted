@@ -1,5 +1,5 @@
 import type { Activity, Character } from '@/lib/_model/model-sim';
-import { ActivityType, ItemType } from '@/lib/_model/model-sim.enums';
+import { ActivityTag, ActivityType, ItemType } from '@/lib/_model/model-sim.enums';
 import { getInviteList, inviteOrScheduleGroupActivity } from '../activities-group';
 import { getItemsByTypeAndOwner, removeItem } from '../items';
 import { getRandomItemFromArray } from '../_utils/random';
@@ -7,23 +7,18 @@ import { PLACES_IDS_BY_TYPE } from '@/data/world/places';
 import { moveToActivity } from './move';
 import { config } from '@/lib/_config/config';
 
-enum MealType {
-  Cooked,
-  Delivered,
-  Restaurant,
-}
-
 export function setGroupMealTask(character: Character) {
   const invited = getInviteList(character, ActivityType.GroupMeal);
-  const place = selectPlaceToEat([character, ...invited]);
+  const { place, tags } = selectPlaceToEat([character, ...invited]);
   const createdActivity = inviteOrScheduleGroupActivity(
     character,
     invited,
     place,
-    ActivityType.GroupMeal
+    ActivityType.GroupMeal,
+    tags
   );
   // if cook together, prepare meal
-  if (createdActivity?.target === PLACES_IDS_BY_TYPE.kitchen) {
+  if (createdActivity?.tags?.homeCooking) {
     createdActivity?.participants?.forEach((p) => {
       const meals = getItemsByTypeAndOwner(ItemType.Meal, character.id);
       if (!meals.length) {
@@ -41,7 +36,10 @@ export function setGroupMealTask(character: Character) {
 // - kitchen -> cook together
 // - dininig room -> order delivery
 // - restaurant
-function selectPlaceToEat(characters: Character[]) {
+function selectPlaceToEat(characters: Character[]): {
+  place: number;
+  tags: Partial<Record<ActivityTag, any>>;
+} {
   let charactersWithMeals = 0;
   let charactersWithMoney = 0;
   characters.forEach((c) => {
@@ -53,9 +51,15 @@ function selectPlaceToEat(characters: Character[]) {
     }
   });
   if (charactersWithMoney >= charactersWithMeals) {
-    getRandomItemFromArray<number>([PLACES_IDS_BY_TYPE.restaurant, PLACES_IDS_BY_TYPE.diningRoom]);
+    return getRandomItemFromArray([
+      { place: PLACES_IDS_BY_TYPE.diningRoom, tags: { [ActivityTag.Delivery]: true } },
+      { place: PLACES_IDS_BY_TYPE.restaurant, tags: { [ActivityTag.AtRestaurant]: true } },
+    ]);
   }
-  return PLACES_IDS_BY_TYPE.kitchen;
+  return {
+    place: PLACES_IDS_BY_TYPE.kitchen,
+    tags: { [ActivityTag.HomeCooking]: true },
+  };
 }
 
 export function groupMeal(character: Character, activity: Activity<ActivityType.GroupMeal>) {
@@ -68,7 +72,7 @@ export function groupMeal(character: Character, activity: Activity<ActivityType.
     character.needs.social = 0;
   }
   if (activity.progress >= 100) {
-    if (groupMealType(activity) !== MealType.Cooked) {
+    if (activity.tags?.[ActivityTag.Delivery] || activity.tags?.[ActivityTag.AtRestaurant]) {
       // case: restaurant or delivery -> pay for meal
       character.money -= 100;
       character.needs.food = 0;
@@ -80,15 +84,5 @@ export function groupMeal(character: Character, activity: Activity<ActivityType.
         character.needs.food = 0;
       }
     }
-  }
-}
-
-function groupMealType(activity: Activity<ActivityType.GroupMeal>) {
-  if (activity.target === PLACES_IDS_BY_TYPE.kitchen) {
-    return MealType.Cooked;
-  } else if (activity.target === PLACES_IDS_BY_TYPE.restaurant) {
-    return MealType.Restaurant;
-  } else {
-    return MealType.Delivered;
   }
 }
